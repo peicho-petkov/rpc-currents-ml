@@ -30,13 +30,23 @@ class mysql_dbConnector(dbConnector):
         self._user = user
         self._password = password
         self._database = database
-        self._db = database
+        self._db = None
+        self._cursor = None
 
-    def connect_to_db(self, database=''):
-        assert (database=='' and self._db==''), "Database name not set!"
-        dbname=self._db
-        if database!='':
+    def __del__(self):
+        if self._cursor is not None:
+            self._cursor.close()
+        if self._db is not None:
+            self._db.close()
+
+
+    def connect_to_db(self, database=None):
+        dbname=self._database
+        if database is not None:
             dbname=database
+
+        assert (dbname is None ), "Database name not set!"
+        
         self._db=mysql.connector.connect(
                 host=self._host,
                 user=self._user,
@@ -44,6 +54,13 @@ class mysql_dbConnector(dbConnector):
                 database=dbname
                 )
         return self._db
+
+    def connect_to_db_and_get_cursor(self, database=None):
+        self.connect_to_db(database)      
+        if self._db is not None:
+            self._cursor=self.get_cursor()
+        return self._db
+
 
     def get_cursor(self):
         return self._db.cursor()
@@ -55,3 +72,90 @@ class mysql_dbConnector(dbConnector):
     def fetchall_for_query(self,cursor,query):
         cursor.execute(query)
         return cursor.fetchall()
+    
+    def execute_commit_query(self,query):
+        self.execute_commit_query(self._cursor,query)
+        
+    def fetchall_for_query(self,query):
+        self.fetchall_for_query(self._cursor,query)
+    
+    def execute_query(self,cursor,query):
+        cursor.execute(query)
+    
+    def execute_commit(self,cursor):
+        cursor.commit()
+    
+    def execute_query(self,query):
+        self.execute_query(self._cursor,query)
+    
+    def execute_commit(self):
+        self.execute_commit(self._cursor)
+
+
+import cx_Oracle
+class oracle_dbConnector(dbConnector):
+    ''' Oracle client wrapper '''
+    def __init__(self, host, user, password, database=None, dsn_tns=None):
+        self._host = host
+        self._user = user
+        self._password = password
+        self._database = database
+        self._dsn_tns = dsn_tns
+        self._db = None
+        self._cursor = None
+        
+    def __del__(self):
+        if self._cursor is not None:
+            self._cursor.close()
+        if self._db is not None:
+            self._db.close()
+
+    def get_cursor(self):
+        return self._db.cursor()
+
+    def connect_to_db(self, database=None, dsn_tns=None):
+        dbname=self._database
+        dsn=self._dsn_tns
+        if database!=None:
+            dbname=database
+        if dsn_tns!=None:
+            dsn=dsn_tns
+            
+        assert (dbname is None and dsn is None), "Database name not set!"
+        if dsn is not None:
+            self._db = cx_Oracle.connect (self._user,self._password,dsn=dsn)
+        if dbname is not None:
+            self._db = cx_Oracle.connect (self._user,self._password,dbname)
+        return self._db
+    
+    def connect_to_db_and_get_cursor(self, database=None, dsn_tns=None):
+        self.connect_to_db(database,dsn_tns)      
+        if self._db is not None:
+            self._cursor=self.get_cursor()
+        return self._db
+
+    def execute_commit_query(self,cursor,query):
+        cursor.execute(query)
+        cursor.commit()
+
+    def execute_query(self,cursor,query):
+        cursor.execute(query)
+    
+    def execute_commit(self,cursor):
+        cursor.commit()
+
+    def execute_query(self,query):
+        self.execute_query(self._cursor,query)
+    
+    def execute_commit(self):
+        self.execute_commit(self._cursor)
+
+    def fetchall_for_query(self,cursor,query):
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    def execute_commit_query(self,query):
+        self.execute_commit_query(self._cursor,query)
+        
+    def fetchall_for_query(self,query):
+        self.fetchall_for_query(self._cursor,query)
