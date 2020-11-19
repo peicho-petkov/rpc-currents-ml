@@ -8,6 +8,7 @@ class Currents_Extractor:
     '''
     def __init__(self,tablename,mysql_dbcon=None):
         self.set_mysql_dbcon(mysql_dbcon)
+        self._tablename = tablename
         
     def set_startdate(self, startdate):
         assert(isinstance(startdate, (datetime.datetime, datetime.date))), "startdate has to be of type datetime"
@@ -28,6 +29,13 @@ class Currents_Extractor:
         assert(isinstance(dbcon,mysql_dbConnector))
         self._dbcon = dbcon
         
+    def set_column_name_list(self,cnamelist):
+        self._column_names = cnamelist[:]
+
+    def get_data(self):       
+        query = "SELECT {0} FROM {1}".format(self._tablename, ",".join(self._column_names))
+        print(query)
+         
 if __name__ == "__main__":
     print("stating...")
     ce = Currents_Extractor()
@@ -35,4 +43,6 @@ if __name__ == "__main__":
     ce.set_time_widow(datetime.datetime(2017,10,10),datetime.datetime(2018,1,1))
     print(ce._startdate)
     print(ce._enddate)
+    ce.set_column_name_list(["aaaaa",'kkkkk',"vvvvv"])
+    ce.get_data("RPCCURRTRAINING")
     print("done...")
