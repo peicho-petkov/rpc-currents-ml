@@ -63,6 +63,8 @@ class mysql_dbConnector(dbConnector):
 
 
     def get_cursor(self):
+        if self._cursor is not None:
+            self._cursor.close()
         return self._db.cursor()
 
     def execute_commit_query(self,cursor,query):
@@ -73,10 +75,10 @@ class mysql_dbConnector(dbConnector):
         cursor.execute(query)
         return cursor.fetchall()
     
-    def execute_commit_query(self,query):
+    def execute_commit_query_self(self,query):
         self.execute_commit_query(self._cursor,query)
         
-    def fetchall_for_query(self,query):
+    def fetchall_for_query_self(self,query):
         self.fetchall_for_query(self._cursor,query)
     
     def execute_query(self,cursor,query):
@@ -85,18 +87,17 @@ class mysql_dbConnector(dbConnector):
     def execute_commit(self,cursor):
         cursor.commit()
     
-    def execute_query(self,query):
+    def execute_query_self(self,query):
         self.execute_query(self._cursor,query)
     
-    def execute_commit(self):
+    def execute_commit_self(self):
         self.execute_commit(self._cursor)
 
 
 import cx_Oracle
 class oracle_dbConnector(dbConnector):
     ''' Oracle client wrapper '''
-    def __init__(self, host, user, password, database=None, dsn_tns=None):
-        self._host = host
+    def __init__(self, user, password, database=None, dsn_tns=None):
         self._user = user
         self._password = password
         self._database = database
@@ -111,6 +112,8 @@ class oracle_dbConnector(dbConnector):
             self._db.close()
 
     def get_cursor(self):
+        if self._cursor is not None:
+            self._cursor.close()
         return self._db.cursor()
 
     def connect_to_db(self, database=None, dsn_tns=None):
@@ -144,18 +147,18 @@ class oracle_dbConnector(dbConnector):
     def execute_commit(self,cursor):
         cursor.commit()
 
-    def execute_query(self,query):
+    def execute_query_self(self,query):
         self.execute_query(self._cursor,query)
     
-    def execute_commit(self):
+    def execute_commit_self(self):
         self.execute_commit(self._cursor)
 
     def fetchall_for_query(self,cursor,query):
         cursor.execute(query)
         return cursor.fetchall()
 
-    def execute_commit_query(self,query):
+    def execute_commit_query_self(self,query):
         self.execute_commit_query(self._cursor,query)
         
-    def fetchall_for_query(self,query):
+    def fetchall_for_query_self(self,query):
         self.fetchall_for_query(self._cursor,query)
