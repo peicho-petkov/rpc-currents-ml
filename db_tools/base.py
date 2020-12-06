@@ -124,7 +124,7 @@ class oracle_dbConnector(dbConnector):
         if dsn_tns!=None:
             dsn=dsn_tns
             
-        assert (dbname is None and dsn is None), "Database name not set!"
+        assert (dbname is None or dsn is None), "either database name or dsn has to be set!"
         if dsn is not None:
             self._db = cx_Oracle.connect (self._user,self._password,dsn=dsn)
         if dbname is not None:
