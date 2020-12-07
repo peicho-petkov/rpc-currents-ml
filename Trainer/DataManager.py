@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import relativedelta
 from db_tools.base import mysql_dbConnector
 from db_tools.base import oracle_dbConnector
 class Extractor_MySql:
@@ -46,7 +47,7 @@ class Extractor_Oracle:
     '''
     def __init__(self,oracle_dbcon=None):
         self.set_oracle_dbcon(oracle_dbcon)
-        self._dbcon.get_cursor()
+        self._dbcon.self_cursor_mode()
         pass
     def set_startdate(self, startdate):
         assert(isinstance(startdate, (datetime.datetime, datetime.date))), "startdate has to be of type datetime"
@@ -67,7 +68,7 @@ class Extractor_Oracle:
         self._FLAG=flag
         
     def set_oracle_dbcon(self,dbcon):
-        assert(isinstance(dbcon,oracle_dbConnector,mysql_dbConnector))
+        assert(isinstance(dbcon,(oracle_dbConnector,mysql_dbConnector)))
         self._dbcon = dbcon
 
     def set_tablename(self,tablename):
@@ -96,7 +97,7 @@ class Extractor_Oracle:
             flag_col=self._flag_col_name, flag=self._FLAG,
             ichange=self._ichange_col_name,
             startdate=self._startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=self._enddate.strftime("%Y-%m-%d %H:%M:%S"))
-        print(query)
+        return self._dbcon.fetchall_for_query_self(query)
 
     def get_uxc_env_data(self,tablename,select_col_list):
         self.set_tablename(tablename)
@@ -105,7 +106,7 @@ class Extractor_Oracle:
             table=self._tablename, collist=",t.".join(self._column_names),
             ichange=self._ichange_col_name,
             startdate=self._startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=self._enddate.strftime("%Y-%m-%d %H:%M:%S"))
-        print(query)
+        return self._dbcon.fetchall_for_query_self(query)
 
     def get_inst_lumi_data(self,tablename,lstart_col_name,select_col_list):
         self.set_tablename(tablename)
@@ -114,7 +115,6 @@ class Extractor_Oracle:
             table=self._tablename, collist=",t.".join(self._column_names),
             lstart=lstart_col_name,
             startdate=self._startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=self._enddate.strftime("%Y-%m-%d %H:%M:%S"))
-        print(query)
         return self._dbcon.fetchall_for_query_self(query)
 
     
@@ -122,7 +122,7 @@ class Extractor_Oracle:
 class DataPopulator:
     def __init__(self,mysql_dbcon=None):
         self.set_mysql_dbcon(mysql_dbcon)
-        self._dbcon.get_cursor()
+        self._dbcon.self_cursor_mode()
 
 
     def set_mysql_dbcon(self,dbcon):
@@ -132,33 +132,98 @@ class DataPopulator:
     def commit_inserted_records(self):
         self._dbcon.execute_commit_self()
 
-    def insert_inst_lumi_record(self,instlumi_table,starttime_col_name,stoptime_col_name,intlumi_col_name,inst_lumi_data):
-        query="INSERT INTO {table} ({start_col} {stop_col} {instlumi_col}) VALUES ('{starttime}' '{stoptime}' '{instlumi}')".format(
+    def insert_inst_lumi_record(self,instlumi_table,starttime_col_name,stoptime_col_name,instlumi_col_name,inst_lumi_data):
+        query="INSERT INTO {table} ({start_col}, {stop_col}, {instlumi_col}) VALUES ('{starttime}', '{stoptime}', '{instlumi}')".format(table=instlumi_table,
             start_col=starttime_col_name,stop_col=stoptime_col_name,instlumi_col=instlumi_col_name,
             starttime=inst_lumi_data[0], stoptime=inst_lumi_data[1],instlumi=inst_lumi_data[2]
         )
         self._dbcon.execute_query_self(query)
 
+    def insert_imon_record(self,rpccurr_table,dpid_col_name,ichange_col_name,imon_col_name,vmon_col_name,flag_col_name,rpccurr_data):
+        query="INSERT INTO {table} ({dpid_col}, {ichange_col}, {imon_col}, {vmon_col}, {flag_col}) VALUES ('{dpid}','{ichange}','{imon}','{vmon}','{flag}')".format(table=rpccurr_table,
+            dpid_col=dpid_col_name, ichange_col=ichange_col_name, imon_col=imon_col_name, vmon_col=vmon_col_name,flag_col=flag_col_name,
+            dpid=rpccurr_data[0], ichange=rpccurr_data[1], imon=rpccurr_data[2], vmon=rpccurr_data[3], flag=rpccurr_data[4])
+        self._dbcon.execute_query_self(query)
 
-if __name__ == "__main__":
-    print("stating...")
-    omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
+    def insert_imon_many(self,rpccurr_table,dpid_col_name,ichange_col_name,imon_col_name,vmon_col_name,flag_col_name,rpccurr_data):
+        query="INSERT INTO {table} ({dpid_col}, {ichange_col}, {imon_col}, {vmon_col}, {flag_col}) VALUES (%s,%s,%s,%s,%s)".format(table=rpccurr_table,
+            dpid_col=dpid_col_name, ichange_col=ichange_col_name, imon_col=imon_col_name, vmon_col=vmon_col_name,flag_col=flag_col_name)
+        self._dbcon._cursor.executemany(query,rpccurr_data)
+
+
+def fill_inst_lumi_table():
+    omds = oracle_dbConnector(user='CMS_RPC_R',password='rpcr34d3r')
     omds.connect_to_db('cms_omds_adg')
 
-    rpccurrml = oracle_dbConnector(user='ppetkov',password='Fastunche')
-    omds.connect_to_db('RPCCURRML')
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
 
     ce = Extractor_Oracle(omds)
     
     dp = DataPopulator(rpccurrml)
-
-    ce.set_time_widow(datetime.datetime(2018,10,10),datetime.datetime(2018,11,3))
-
-    for instlumidata in ce.get_inst_lumi_data("cms_runtime_logger.lumi_sections",
-    "STARTTIME",["STARTTIME","STOPTIME","INSTLUMI"]):
-        dp.insert_inst_lumi_record('LUMI_DATA',"STARTTIME","STOPTIME","INSTLUMI",instlumidata)
     
-    dp.commit_inserted_records()
+    sdate=datetime.datetime(2016,1,1)
+    edate=datetime.datetime(2018,12,12)
+
+    fromdate=sdate
+
+    while fromdate<edate: 
+        todate=fromdate+relativedelta(months=1)
+        ce.set_time_widow(fromdate,todate)
+        fromdate=todate
+
+        print(ce._startdate,ce._enddate)
+
+        for instlumidata in ce.get_inst_lumi_data("cms_runtime_logger.lumi_sections",
+                                                  "STARTTIME",["STARTTIME","STOPTIME","INSTLUMI"]):
+            dp.insert_inst_lumi_record('LUMI_DATA',"STARTTIME","STOPTIME","INSTLUMI",instlumidata)
+   
+        dp.commit_inserted_records()
+
+
+if __name__ == "__main__":
+    print("stating...")
+    omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
+    omds.connect_to_db('cman_int2r')
+
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
+
+    ce = Extractor_Oracle(omds)
+
+    ce.set_flag_col_name("FLAG")
+    ce.set_timestamp_col_name("CHANGE_DATE")
+    ce.set_dpid_col_name("DPID")
+
+    
+    dp = DataPopulator(rpccurrml)
+    
+    sdate=datetime.datetime(2016,1,1)
+    edate=datetime.datetime(2018,12,12)
+
+    flag=56
+
+    dpids=open("/afs/cern.ch/user/p/ppetkov/work/public/dpids")
+    
+    for dpid in dpids:
+        dpid=dpid.strip()
+
+        fromdate=sdate
+        while fromdate<edate: 
+            todate=fromdate+relativedelta(months=1)
+            ce.set_time_widow(fromdate,todate)
+            fromdate=todate
+
+            print("dpid ",dpid, "start date ", ce._startdate," enddate ", ce._enddate)
+            
+            # rpcdata = ce.get_rpccurrents_data("cms_rpc_pvss_test.RPCCURRENTS",dpid,flag,["DPID","CHANGE_DATE","IMON","VMON","FLAG"])
+            # dp.insert_imon_many(rpccurr_table="TrainingData",dpid_col_name="DPID",ichange_col_name="CHANGE_DATE", imon_col_name="IMON",vmon_col_name="VMON",flag_col_name="FLAG",rpccurr_data=rpcdata)
+            # dp.commit_inserted_records()
+            
+            for rpc_data in ce.get_rpccurrents_data("cms_rpc_pvss_test.RPCCURRENTS",dpid,flag,["DPID","CHANGE_DATE","IMON","VMON","FLAG"]):
+                dp.insert_imon_record(rpccurr_table="TrainingData",dpid_col_name="DPID",ichange_col_name="CHANGE_DATE", imon_col_name="IMON",vmon_col_name="VMON",flag_col_name="FLAG",rpccurr_data=rpc_data)
+  
+            dp.commit_inserted_records()
 
     # ce.set_time_widow(datetime.datetime(2018,10,10),datetime.datetime(2018,11,3))
     # print(ce._startdate)
