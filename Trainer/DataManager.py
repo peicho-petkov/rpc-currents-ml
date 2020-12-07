@@ -150,6 +150,10 @@ class DataPopulator:
             dpid_col=dpid_col_name, ichange_col=ichange_col_name, imon_col=imon_col_name, vmon_col=vmon_col_name,flag_col=flag_col_name)
         self._dbcon._cursor.executemany(query,rpccurr_data)
 
+    def update_env_parameters(self,rpccurr_table,ichange_col_name,uxc_press_col_name,uxc_temp_col_name,uxc_rh_col_name,uxc_dp_colname,uxc_data):
+        query="UPDATE {table} SET {press_col}={press}, {temp_col}={temp}, {rh_col}={rh}, {dp_col}={dp} WHERE {press_col}==NULL and {temp_col}==NULL and {rh_col}==NULL and {ichagne_col}<={uxc_change_time}".format(table=rpccurr_table, ichange_col=ichange_col_name,press_col=uxc_press_col_name,temp_col=uxc_temp_col_name,rh_col=uxc_rh_col_name,dp_col=uxc_dp_colname,uxc_change_time=uxc_data[0],press=uxc_data[1],temp=uxc_data[2],rh=uxc_data[3],dp=uxc_data[4])
+        self._dbcon.execute_query_self(query)
+
 
 def fill_inst_lumi_table():
     omds = oracle_dbConnector(user='CMS_RPC_R',password='rpcr34d3r')
@@ -180,6 +184,48 @@ def fill_inst_lumi_table():
    
         dp.commit_inserted_records()
 
+def fill_imon_vmon_data():
+    omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
+    omds.connect_to_db('cman_int2r')
+
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
+
+    ce = Extractor_Oracle(omds)
+
+    ce.set_flag_col_name("FLAG")
+    ce.set_timestamp_col_name("CHANGE_DATE")
+    ce.set_dpid_col_name("DPID")
+
+    
+    dp = DataPopulator(rpccurrml)
+    
+    sdate=datetime.datetime(2016,1,1)
+    edate=datetime.datetime(2018,12,12)
+
+    flag=56
+
+    dpids=open("/afs/cern.ch/user/p/ppetkov/work/public/dpids")
+    
+    for dpid in dpids:
+        dpid=dpid.strip()
+
+        fromdate=sdate
+        while fromdate<edate: 
+            todate=fromdate+relativedelta(months=1)
+            ce.set_time_widow(fromdate,todate)
+            fromdate=todate
+
+            print("dpid ",dpid, "start date ", ce._startdate," enddate ", ce._enddate)
+            
+            # rpcdata = ce.get_rpccurrents_data("cms_rpc_pvss_test.RPCCURRENTS",dpid,flag,["DPID","CHANGE_DATE","IMON","VMON","FLAG"])
+            # dp.insert_imon_many(rpccurr_table="TrainingData",dpid_col_name="DPID",ichange_col_name="CHANGE_DATE", imon_col_name="IMON",vmon_col_name="VMON",flag_col_name="FLAG",rpccurr_data=rpcdata)
+            # dp.commit_inserted_records()
+            
+            for rpc_data in ce.get_rpccurrents_data("cms_rpc_pvss_test.RPCCURRENTS",dpid,flag,["DPID","CHANGE_DATE","IMON","VMON","FLAG"]):
+                dp.insert_imon_record(rpccurr_table="TrainingData",dpid_col_name="DPID",ichange_col_name="CHANGE_DATE", imon_col_name="IMON",vmon_col_name="VMON",flag_col_name="FLAG",rpccurr_data=rpc_data)
+  
+            dp.commit_inserted_records()
 
 if __name__ == "__main__":
     print("stating...")
@@ -220,8 +266,8 @@ if __name__ == "__main__":
             # dp.insert_imon_many(rpccurr_table="TrainingData",dpid_col_name="DPID",ichange_col_name="CHANGE_DATE", imon_col_name="IMON",vmon_col_name="VMON",flag_col_name="FLAG",rpccurr_data=rpcdata)
             # dp.commit_inserted_records()
             
-            for rpc_data in ce.get_rpccurrents_data("cms_rpc_pvss_test.RPCCURRENTS",dpid,flag,["DPID","CHANGE_DATE","IMON","VMON","FLAG"]):
-                dp.insert_imon_record(rpccurr_table="TrainingData",dpid_col_name="DPID",ichange_col_name="CHANGE_DATE", imon_col_name="IMON",vmon_col_name="VMON",flag_col_name="FLAG",rpccurr_data=rpc_data)
+            for uxc_data in ce.get_uxc_env_data("cms_rpc_pvss_test.UXC_ENVIRONMENT",["CHANGE_DATE","PRESSURE","TEMPERATURE","RELATIVE_HUMIDITY","DEWPOINT"]):
+                dp.insert_imon_record(rpccurr_table="TrainingData",ichange_col_name='CHANGE_DATE',uxc_press_col_name='uxcPressure',uxc_temp_col_name='uxcTemperature',uxc_rh_col_name='uxcRH',uxc_dp_colname='uxcDPoint',uxc_data)
   
             dp.commit_inserted_records()
 
