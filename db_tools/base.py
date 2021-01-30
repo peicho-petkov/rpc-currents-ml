@@ -81,7 +81,7 @@ class mysql_dbConnector(dbConnector):
         self.execute_commit_query(self._cursor,query)
         
     def fetchall_for_query_self(self,query):
-        self.fetchall_for_query(self._cursor,query)
+        return self.fetchall_for_query(self._cursor,query)
     
     def execute_query(self,cursor,query):
         cursor.execute(query)

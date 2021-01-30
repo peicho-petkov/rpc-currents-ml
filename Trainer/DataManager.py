@@ -269,3 +269,19 @@ def update_uxc_data():
 if __name__=='__main__':
 #    fill_imon_vmon_data()
 #    update_uxc_data()
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
+
+    rpccurrml.self_cursor_mode()
+
+    uxc_data = rpccurrml.fetchall_for_query_self("select CHANGE_DATE,NEXT_CHANGE_DATE,uxcPressure,uxcTemperature,uxcRH from UXC_ENV")
+
+    for rr in uxc_data[1500:]:
+ #       uxc_rec = rpccurrml.fetchall_for_query_self("select  from UXC_ENV")
+        print(rr)
+        recids = rpccurrml.fetchall_for_query_self("select rec_id from TrainingData where CHANGE_DATE between '{start_date}' and '{stop_date}'".format(start_date=rr[0],stop_date=rr[1]))
+        print(recids)
+        for trec in recids:
+            rpccurrml.execute_query_self("UPDATE TrainingData SET uxcPressure={press}, uxcTemperature={temp}, uxcRH={rh}  WHERE rec_id={rec}".format(press=rr[2],temp=rr[3],rh=rr[4],rec=trec[0]))
+        rpccurrml.execute_commit_self()
+        
