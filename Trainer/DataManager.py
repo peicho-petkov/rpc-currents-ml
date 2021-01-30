@@ -40,6 +40,7 @@ class Extractor_MySql:
         query = "SELECT {0} FROM {1}".format(self._tablename, ",".join(self._column_names))
         print(query)
 
+
 class Extractor_Oracle:
     ''' Selects and gets the RPC imon and vmon datapoints
         for a given time window with a given flag
@@ -139,6 +140,27 @@ class DataPopulator:
         )
         self._dbcon.execute_query_self(query)
 
+    def get_max_colname(self,tablename,col_name):
+        query="SELECT MAX({col}) from {table}".format(lumi_col=col_name,table=tablename)
+        intlumi=self._dbcon.fetchall_for_query_self(query)
+        return intlumi[0][0]
+
+    def get_min_colname_cond(self,tablename,col_name, condition):
+        query="SELECT min({col}) from {table} {where}".format(col=col_name,table=tablename,where=condition)
+        intlumi=self._dbcon.fetchall_for_query_self(query)
+        return intlumi[0][0]
+
+    def update_integrated_lumi_record(self,instlumi_table,integrated_lumi_col_name,rec_id,integrated_lumi):
+        query="UPDATE {table_name} SET {set_colname}={set_data} WHERE rec_id={rec}".format(table_name=instlumi_table,set_colname=integrated_lumi_col_name,set_data=integrated_lumi,rec=rec_id)
+        self._dbcon.execute_query_self(query)
+
+    def get_inst_lumi_data(self,tablename,lstart_col_name,select_col_list,startdate,enddate):
+        query = "SELECT {collist} FROM {table} where {lstart} BETWEEN {startdate} and {enddate} order by {lstart} asc".format(
+            table=tablename, collist=",".join(select_col_list),
+            lstart=lstart_col_name,
+            startdate=startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=enddate.strftime("%Y-%m-%d %H:%M:%S"))
+        return self._dbcon.fetchall_for_query_self(query)
+
     def insert_imon_record(self,rpccurr_table,dpid_col_name,ichange_col_name,imon_col_name,vmon_col_name,flag_col_name,rpccurr_data):
         query="INSERT INTO {table} ({dpid_col}, {ichange_col}, {imon_col}, {vmon_col}, {flag_col}) VALUES ('{dpid}','{ichange}','{imon}','{vmon}','{flag}')".format(table=rpccurr_table,
             dpid_col=dpid_col_name, ichange_col=ichange_col_name, imon_col=imon_col_name, vmon_col=vmon_col_name,flag_col=flag_col_name,
@@ -155,6 +177,23 @@ class DataPopulator:
         query="INSERT INTO {table} ({press_col}, {temp_col}, {rh_col}, {change_date_col}, {until_col}) VALUES ('{press}', '{temp}', '{rh}', '{change_date}','{until}')".format(table=uxc_table, change_date_col=change_date_col,press_col=uxc_press_col_name,temp_col=uxc_temp_col_name,rh_col=uxc_rh_col_name,until_col=until_col_name,change_date=uxc_data[0],press=uxc_data[1],temp=uxc_data[2],rh=uxc_data[3],until=until_timestamp)
         self._dbcon.execute_query_self(query)
 
+def insert_integrated_lumi():
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
+    dp = DataPopulator(rpccurrml)
+    
+    sdate=dp.get_min_colname_cond(tablename='LUMI_DATA',col_name="STARTTIME",cond="where INSTLUMI NOT NULL")
+    edate=datetime.datetime(2018,12,12)
+    fromdate=sdate
+    intlumi = dp.get_max_colname(tablename='LUMI_DATA',col_name="INTEGRATED")
+    while fromdate<edate: 
+        todate=fromdate+relativedelta(months=1)
+        print(fromdate,todate,intlumi)
+        for lumirecid,instlumi in dp.get_inst_lumi_data('LUMI_DATA',lstart_col_name="STARTTIME",select_col_list=['rec_id','INSTLUMI'],startdate=fromdate,enddate=todate)
+            intlumi = intlumi + instlumi
+            dp.update_integrated_lumi_record('LUMI_DATA',"INTEGRATED",lumirecid,intlumi)
+            print("recid",lumirecid,"inst lumi",instlumi,"integr",intlumi)
+        dp.commit_inserted_records()
 
 def fill_inst_lumi_table():
     omds = oracle_dbConnector(user='CMS_RPC_R',password='rpcr34d3r')
@@ -183,7 +222,7 @@ def fill_inst_lumi_table():
                                                   "STARTTIME",["STARTTIME","STOPTIME","INSTLUMI"]):
             dp.insert_inst_lumi_record('LUMI_DATA',"STARTTIME","STOPTIME","INSTLUMI",instlumidata)
    
-        dp.commit_inserted_records()
+        dp.mmit_inserted_records()
 
 def fill_imon_vmon_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
@@ -266,9 +305,7 @@ def update_uxc_data():
 
     print("done...")
 
-if __name__=='__main__':
-#    fill_imon_vmon_data()
-#    update_uxc_data()
+def test():
     rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
     rpccurrml.connect_to_db('RPCCURRML')
 
@@ -284,4 +321,8 @@ if __name__=='__main__':
         for trec in recids:
             rpccurrml.execute_query_self("UPDATE TrainingData SET uxcPressure={press}, uxcTemperature={temp}, uxcRH={rh}  WHERE rec_id={rec}".format(press=rr[2],temp=rr[3],rh=rr[4],rec=trec[0]))
         rpccurrml.execute_commit_self()
-        
+
+if __name__=='__main__':
+#    fill_imon_vmon_data()
+#    update_uxc_data()
+    insert_integrated_lumi()
