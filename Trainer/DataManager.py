@@ -189,7 +189,7 @@ def insert_integrated_lumi():
     while fromdate<edate: 
         todate=fromdate+relativedelta(months=1)
         print(fromdate,todate,intlumi)
-        for lumirecid,instlumi in dp.get_inst_lumi_data('LUMI_DATA',lstart_col_name="STARTTIME",select_col_list=['rec_id','INSTLUMI'],startdate=fromdate,enddate=todate)
+        for lumirecid,instlumi in dp.get_inst_lumi_data('LUMI_DATA',lstart_col_name="STARTTIME",select_col_list=['rec_id','INSTLUMI'],startdate=fromdate,enddate=todate):
             intlumi = intlumi + instlumi
             dp.update_integrated_lumi_record('LUMI_DATA',"INTEGRATED",lumirecid,intlumi)
             print("recid",lumirecid,"inst lumi",instlumi,"integr",intlumi)
