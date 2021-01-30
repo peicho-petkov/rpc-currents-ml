@@ -141,21 +141,24 @@ class DataPopulator:
         self._dbcon.execute_query_self(query)
 
     def get_max_colname(self,tablename,col_name):
-        query="SELECT MAX({col}) from {table}".format(lumi_col=col_name,table=tablename)
+        query="SELECT MAX({col}) from {table}".format(col=col_name,table=tablename)
         intlumi=self._dbcon.fetchall_for_query_self(query)
+#        print(query)
         return intlumi[0][0]
 
     def get_min_colname_cond(self,tablename,col_name, condition):
         query="SELECT min({col}) from {table} {where}".format(col=col_name,table=tablename,where=condition)
+#        print(query)
         intlumi=self._dbcon.fetchall_for_query_self(query)
         return intlumi[0][0]
 
     def update_integrated_lumi_record(self,instlumi_table,integrated_lumi_col_name,rec_id,integrated_lumi):
         query="UPDATE {table_name} SET {set_colname}={set_data} WHERE rec_id={rec}".format(table_name=instlumi_table,set_colname=integrated_lumi_col_name,set_data=integrated_lumi,rec=rec_id)
+        #print(query)
         self._dbcon.execute_query_self(query)
 
     def get_inst_lumi_data(self,tablename,lstart_col_name,select_col_list,startdate,enddate):
-        query = "SELECT {collist} FROM {table} where {lstart} BETWEEN {startdate} and {enddate} order by {lstart} asc".format(
+        query = "SELECT {collist} FROM {table} where {lstart} BETWEEN '{startdate}' and '{enddate}' order by {lstart} asc".format(
             table=tablename, collist=",".join(select_col_list),
             lstart=lstart_col_name,
             startdate=startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=enddate.strftime("%Y-%m-%d %H:%M:%S"))
@@ -182,18 +185,21 @@ def insert_integrated_lumi():
     rpccurrml.connect_to_db('RPCCURRML')
     dp = DataPopulator(rpccurrml)
     
-    sdate=dp.get_min_colname_cond(tablename='LUMI_DATA',col_name="STARTTIME",cond="where INSTLUMI NOT NULL")
+    sdate=dp.get_min_colname_cond(tablename='LUMI_DATA',col_name="STARTTIME",condition="where INTEGRATED IS NULL")
     edate=datetime.datetime(2018,12,12)
     fromdate=sdate
     intlumi = dp.get_max_colname(tablename='LUMI_DATA',col_name="INTEGRATED")
+    if intlumi is None:
+        intlumi=0.0
     while fromdate<edate: 
         todate=fromdate+relativedelta(months=1)
         print(fromdate,todate,intlumi)
         for lumirecid,instlumi in dp.get_inst_lumi_data('LUMI_DATA',lstart_col_name="STARTTIME",select_col_list=['rec_id','INSTLUMI'],startdate=fromdate,enddate=todate):
-            intlumi = intlumi + instlumi
+            intlumi = float(intlumi) + float(instlumi)
             dp.update_integrated_lumi_record('LUMI_DATA',"INTEGRATED",lumirecid,intlumi)
-            print("recid",lumirecid,"inst lumi",instlumi,"integr",intlumi)
+            #print("recid",lumirecid,"inst lumi",instlumi,"integr",intlumi)
         dp.commit_inserted_records()
+        fromdate=todate
 
 def fill_inst_lumi_table():
     omds = oracle_dbConnector(user='CMS_RPC_R',password='rpcr34d3r')
