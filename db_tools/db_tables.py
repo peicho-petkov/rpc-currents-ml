@@ -132,11 +132,11 @@ class UxcEnvTable(dbTable):
         self.set_temperature()
         self.set_relative_humidity()
 
-   def set_change_date_col(self,name="CHANGE_DATE",type="timestamp not null"):
+    def set_change_date_col(self,name="CHANGE_DATE",type="timestamp not null"):
         self.change_date=name
         self.add_coll(name,type)
 
-   def set_next_change_date_col(self,name="NEXT_CHANGE_DATE",type="timestamp not null"):
+    def set_next_change_date_col(self,name="NEXT_CHANGE_DATE",type="timestamp not null"):
         self.next_change_date=name
         self.add_coll(name,type)
 
