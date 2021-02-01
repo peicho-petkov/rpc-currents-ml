@@ -2,6 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from db_tools.base import mysql_dbConnector
 from db_tools.base import oracle_dbConnector
+import db_tool.db_tables
 class Extractor_MySql:
     ''' Selects and gets the RPC imon and vmon datapoints
         for a given time window with a given flag
@@ -96,6 +97,18 @@ class Extractor_Oracle:
             table=self._tablename, collist=",t.".join(self._column_names),
             dpid_col=self._dpid_col_name, dpid=self._DPID,
             flag_col=self._flag_col_name, flag=self._FLAG,
+            ichange=self._ichange_col_name,
+            startdate=self._startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=self._enddate.strftime("%Y-%m-%d %H:%M:%S"))
+        return self._dbcon.fetchall_for_query_self(query)
+
+    def get_rpccurrents_data_anyflag(self,tablename,dpid,select_col_list):
+        self.set_DPID(dpid)
+        self.set_tablename(tablename)
+        self.set_select_column_name_list(select_col_list)
+        query = "SELECT t.{collist} FROM {table} t where t.{dpid_col}={dpid} and t.{ichange} BETWEEN TO_TIMESTAMP('{startdate}', 'YYYY-MM-DD HH24:MI:SS') and TO_TIMESTAMP('{enddate}', 'YYYY-MM-DD HH24:MI:SS') order by t.{ichange} asc".format(
+            table=self._tablename, collist=",t.".join(self._column_names),
+            dpid_col=self._dpid_col_name, dpid=self._DPID,
+            flag_col=self._flag_col_name,
             ichange=self._ichange_col_name,
             startdate=self._startdate.strftime("%Y-%m-%d %H:%M:%S"),enddate=self._enddate.strftime("%Y-%m-%d %H:%M:%S"))
         return self._dbcon.fetchall_for_query_self(query)
@@ -328,7 +341,53 @@ def test():
             rpccurrml.execute_query_self("UPDATE TrainingData SET uxcPressure={press}, uxcTemperature={temp}, uxcRH={rh}  WHERE rec_id={rec}".format(press=rr[2],temp=rr[3],rh=rr[4],rec=trec[0]))
         rpccurrml.execute_commit_self()
 
+def fill_imon_vmon_uxc_data():
+    omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
+    omds.connect_to_db('cman_int2r')
+
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
+
+    ce = Extractor_Oracle(omds)
+
+    ce.set_flag_col_name("FLAG")
+    ce.set_timestamp_col_name("CHANGE_DATE")
+    ce.set_dpid_col_name("DPID")
+
+    
+    dp = DataPopulator(rpccurrml)
+    
+    table_training = db_tool.db_tables.TrainingDataTable()
+    table_uxcenv = db_tool.db_tables.UxcEnvTable()
+    table_lumi = db_tool.db_tables.LumiDataTable()
+    
+    sdate=datetime.datetime(2016,1,1)
+    edate=datetime.datetime(2018,12,12)
+
+    dpids=open("/afs/cern.ch/user/p/ppetkov/work/public/dpids-sample")
+    
+    for dpid in dpids:
+        dpid=dpid.strip()
+
+        fromdate=sdate
+        while fromdate<edate: 
+            todate=fromdate+relativedelta(months=1)
+            ce.set_time_widow(fromdate,todate)
+            fromdate=todate
+
+            print("dpid ",dpid, "start date ", ce._startdate," enddate ", ce._enddate)
+            
+            for rpc_data in ce.get_rpccurrents_data_anyflag("cms_rpc_pvss_test.RPCCURRENTS",dpid,["DPID","CHANGE_DATE","IMON","VMON","FLAG"]):
+                _dpid=rpc_data[0]
+                ch_date=rpc_data[1]
+                imon=rpc_data[2]
+                vmon=rpc_data[3]
+                flag=rpc_data[4]
+                print("_dpid,ch_date,imon,vmon,flag ", _dpid,ch_date,imon,vmon,flag)
+                
+
+
 if __name__=='__main__':
 #    fill_imon_vmon_data()
 #    update_uxc_data()
-    insert_integrated_lumi()
+#    insert_integrated_lumi()

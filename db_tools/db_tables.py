@@ -28,14 +28,14 @@ class dbTable:
                 collnames.append(conname)
         return collnames
 
-class TrainigDataTable(dbTable):
-    def __init__(self,tablename='TrainigData'):
+class TrainingDataTable(dbTable):
+    def __init__(self,tablename='TrainingData'):
         super().__init__(tablename)
         self.add_call("rec_id","bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE","timestamp not null")
         self.set_change_date_col()
-        self.set_iom_col()
-        self.set_vom_col()
+        self.set_imon_col()
+        self.set_vmon_col()
         self.set_pdid_col()
         self.set_flag_col()
         self.set_inst_lumi_col()
@@ -46,12 +46,17 @@ class TrainigDataTable(dbTable):
         self.set_integrated_lumi()
         self.set_hours_without_lumi()
         
+    def get_insert_data_query(self,chdate,imon,vmon,dpid,flag,inst_lumi,p,t,rh,int_lumi,hrs_wo_lumi):
+        query="INSERT INTO {table} ({dpid_col}, {ichange_col}, {imon_col}, {vmon_col}, {flag_col}, {p_col}, {t_col}, {rh_col}, {inst_col}, {integrated_col}, {h_wo_lumi}) VALUES ('{dpid}','{ichange}','{imon}','{vmon}','{flag}','{p}','{t}','{rh}','{instl}','{intl}','{hwol}')".format(table=self.tablename,
+            dpid_col=self.dpid, ichange_col=self.change_date, imon_col=self.imon, vmon_col=self.vmon,flag_col=self.flag, p_col=self.uxcP, t_col=self.uxcT, rh_col=self.uxcRH, inst_col=self.instant_lumi, integrated_col=self.integrated_lumi, h_wo_lumi=self.hours_without_lumi,
+            dpid=dpid, ichange=chdate, imon=imon, vmon=vmon, flag=flag, p=p, t=t, rh=rh, instl=inst_lumi, intl=int_lumi,hwol=hrs_wo_lumi)
+        return query
         
-    def set_iom_col(self,name='IMON',type="float not null"):
+    def set_imon_col(self,name='IMON',type="float not null"):
         self.imon=name
         self.add_coll(name,type)
 
-    def set_vom_col(self,name='VMON',type="float not null"):
+    def set_vmon_col(self,name='VMON',type="float not null"):
         self.vmon=name
         self.add_coll(name,type)
     
@@ -88,7 +93,7 @@ class TrainigDataTable(dbTable):
         self.add_coll(name,type)
 
     def set_integrated_lumi(self,name="IntegratedLumi",type="float default null"):
-        self.interated_lumi=name
+        self.integrated_lumi=name
         self.add_coll(name,type)
 
     def set_hours_without_lumi(self,name="HoursWithoutLumi",type="float default null"):
@@ -105,22 +110,25 @@ class LumiDataTable(dbTable):
         self.set_inst_lumi()
         self.set_integrated_lumi()
 
-    def set_ls_start_col(name="STARTTIME",type="TIMESTAMP not null"):
+    def set_ls_start_col(self,name="STARTTIME",type="TIMESTAMP not null"):
         self.ls_start=name
         self.add_coll(name,type)
 
-    def set_ls_stop_col(name="STOPTIME",type="TIMESTAMP not null"):
+    def set_ls_stop_col(self,name="STOPTIME",type="TIMESTAMP not null"):
         self.ls_stop=name
         self.add_coll(name,type) 
 
-    def set_inst_lumi(name="INSTLUMI",type="FLOAT not null"):
+    def set_inst_lumi(self,name="INSTLUMI",type="FLOAT not null"):
         self.inst_lumi=name
         self.add_coll(name,type)
 
-    def set_integrated_lumi(name="INTEGRATED",type="FLOAT default null"):
+    def set_integrated_lumi(self,name="INTEGRATED",type="FLOAT default null"):
         self.integrate_lumi=name
         self.add_coll(name,type)
-
+        
+    def get_inst_int_lumi_query(self,timestamp):
+        query = "select {inst_col}, {integrated_col} from {table} where '{timest}' between {st_col} and {end_col}".format(table=self.tablename,inst_col=self.inst_lumi,integrated_col=self.integrate_lumi,timest=timestamp.strftime("%Y-%m-%d %H:%M:%S"),st_col=self.ls_start,end_col=self.ls_stop)
+        return query
 class UxcEnvTable(dbTable):
     def __init__(self, tablename):
         super().__init__(tablename) 
@@ -151,6 +159,10 @@ class UxcEnvTable(dbTable):
     def set_relative_humidity(self,name="uxcRH",type="float default null"):
         self.relative_humidity=name
         self.add_coll(name,type) 
+        
+    def get_date_query(self,timestamp):
+        query = "select {p_col}, {t_col}, {rh_col} from {table} where '{timest}' between {lastch_col} and {nextch_col}".format(table=self.tablename,p_col=self.pressure,t_col=self.temperature,rh_col=self.relative_humidity,timest=timestamp.strftime("%Y-%m-%d %H:%M:%S"),lastch_col=self.change_date,nextch_col=self.next_change_date)
+        return query
 
 from base import mysql_dbConnector
 
