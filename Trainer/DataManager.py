@@ -2,7 +2,8 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from db_tools.base import mysql_dbConnector
 from db_tools.base import oracle_dbConnector
-import db_tool.db_tables
+import db_tools.db_tables
+
 class Extractor_MySql:
     ''' Selects and gets the RPC imon and vmon datapoints
         for a given time window with a given flag
@@ -347,6 +348,7 @@ def fill_imon_vmon_uxc_data():
 
     rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
     rpccurrml.connect_to_db('RPCCURRML')
+    rpccurrml.self_cursor_mode()
 
     ce = Extractor_Oracle(omds)
 
@@ -357,37 +359,110 @@ def fill_imon_vmon_uxc_data():
     
     dp = DataPopulator(rpccurrml)
     
-    table_training = db_tool.db_tables.TrainingDataTable()
-    table_uxcenv = db_tool.db_tables.UxcEnvTable()
-    table_lumi = db_tool.db_tables.LumiDataTable()
+    table_training = db_tools.db_tables.TrainingDataTable()
+    table_uxcenv = db_tools.db_tables.UxcEnvTable()
+    table_lumi = db_tools.db_tables.LumiDataTable()
     
-    sdate=datetime.datetime(2016,1,1)
+    sdate=datetime.datetime(2016,5,1)
     edate=datetime.datetime(2018,12,12)
 
     dpids=open("/afs/cern.ch/user/p/ppetkov/work/public/dpids-sample")
     
     for dpid in dpids:
         dpid=dpid.strip()
-
+        VmonLast=0.0
         fromdate=sdate
+        VmonXt=0.0
+        dt_last=0
+        VmonAvg=0.0
+        R=0.0
+        T=0.0
+        RH=0.0
         while fromdate<edate: 
-            todate=fromdate+relativedelta(months=1)
+            todate=fromdate+relativedelta(days=1)
             ce.set_time_widow(fromdate,todate)
-            fromdate=todate
-
             print("dpid ",dpid, "start date ", ce._startdate," enddate ", ce._enddate)
+            ll = 0
+            hvidata=ce.get_rpccurrents_data_anyflag("cms_rpc_pvss_test.RPCCURRENTS",dpid,["DPID","CHANGE_DATE","IMON","VMON","FLAG"])
+            uxcdata=dp.get_inst_lumi_data(table_uxcenv.tablename,lstart_col_name=table_uxcenv.change_date,select_col_list=[table_uxcenv.change_date,table_uxcenv.next_change_date,table_uxcenv.pressure,table_uxcenv.temperature,table_uxcenv.relative_humidity],startdate=fromdate,enddate=todate)
+            lumidata = []
+            if len(hvidata)>0:
+                lumidata=dp.get_inst_lumi_data(table_lumi.tablename,lstart_col_name=table_lumi.ls_start,select_col_list=[table_lumi.ls_start,table_lumi.ls_stop,table_lumi.inst_lumi,table_lumi.integrated_lumi],startdate=fromdate,enddate=todate)
             
-            for rpc_data in ce.get_rpccurrents_data_anyflag("cms_rpc_pvss_test.RPCCURRENTS",dpid,["DPID","CHANGE_DATE","IMON","VMON","FLAG"]):
+            for rpc_data in hvidata:
                 _dpid=rpc_data[0]
                 ch_date=rpc_data[1]
                 imon=rpc_data[2]
                 vmon=rpc_data[3]
                 flag=rpc_data[4]
-                print("_dpid,ch_date,imon,vmon,flag ", _dpid,ch_date,imon,vmon,flag)
+                dt = ch_date-fromdate
+                dt = dt.total_seconds()
+
+                for uxcrec in uxcdata:
+                    uxc_ch_date = uxcrec[0]
+                    uxc_next_ch_date = uxcrec[1]
+                    if (uxc_ch_date < ch_date or uxc_ch_date == ch_date) and ( ch_date == uxc_next_ch_date or ch_date < uxc_next_ch_date):
+                        P = uxcrec[2]
+                        T = uxcrec[3]
+                        RH = uxcrec[4]
+                    elif uxc_next_ch_date > ch_date:
+                        break
+                # print("============")
+                # print("P T RH",P , T, RH)
+                # print(rpccurrml.fetchall_for_query_self(table_uxcenv.get_data_query(ch_date)))
+                # print("============")
+                if not flag==56:
+                    VmonXt = VmonXt + VmonLast*dt
                 
+                VmonLast = vmon 
 
+#                table_lumi.get_inst_int_lumi_query(ch_date)
 
+                if (vmon<6400):
+                    continue
+                if not flag==56:
+                    continue
+
+                print("", _dpid,ch_date,imon,vmon,flag,dt,VmonAvg )
+                
+                InstLumi=0
+
+                print('______________________')
+                #                   print(table_lumi.get_inst_int_lumi_query(ch_date))
+                #                   print(rpccurrml.fetchall_for_query_self(table_lumi.get_inst_int_lumi_query(ch_date)))
+                instbuf=0.0
+                intebuf=0.0
+                nbuf=0
+                for lumirec in lumidata:
+                    lb = lumirec[0]
+                    le = lumirec[1]
+                    inst = lumirec[2]
+                    inte = lumirec[3]
+                    if (lb < ch_date or lb == ch_date) and ( ch_date == le or ch_date < le):
+                        #                            print("chdate lb le",ch_date,lb,le)
+                        instbuf = inst
+                        intebuf = inte
+                        nbuf = nbuf + 1
+                    elif le > ch_date:
+                        break
+
+                        
+                if nbuf > 0:
+                    instbuf=instbuf/nbuf
+                    intebuf=intebuf/nbuf
+                print(table_training.get_insert_data_query(ch_date,imon,vmon,dpid,flag,instbuf,P,T,RH,intebuf,VmonAvg))
+                rpccurrml.execute_query_self(table_training.get_insert_data_query(ch_date,imon,vmon,dpid,flag,instbuf,P,T,RH,intebuf,VmonAvg))
+                print('^^^^^^^^^^^^^^^^^^^^^^')
+            
+            rpccurrml.execute_commit_self()
+            dt = todate-fromdate
+            dt = dt.total_seconds()
+            VmonAvg= VmonAvg + VmonXt / dt / 1000.0
+            VmonXt = 0.0
+            fromdate=todate
+         
 if __name__=='__main__':
 #    fill_imon_vmon_data()
 #    update_uxc_data()
 #    insert_integrated_lumi()
+    fill_imon_vmon_uxc_data()

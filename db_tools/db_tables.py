@@ -1,3 +1,4 @@
+
 class dbTable:
     def __init__(self,tablename):
         self.tablename=str(tablename)
@@ -31,7 +32,7 @@ class dbTable:
 class TrainingDataTable(dbTable):
     def __init__(self,tablename='TrainingData'):
         super().__init__(tablename)
-        self.add_call("rec_id","bigint auto_increment primary key")
+        self.add_coll("rec_id","bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE","timestamp not null")
         self.set_change_date_col()
         self.set_imon_col()
@@ -101,9 +102,9 @@ class TrainingDataTable(dbTable):
         self.add_coll(name,type)
 
 class LumiDataTable(dbTable):
-    def __init__(self, tablename):
+    def __init__(self, tablename='LUMI_DATA'):
         super().__init__(tablename)
-        self.add_call("rec_id","bigint auto_increment primary key")
+        self.add_coll("rec_id","bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE","timestamp not null")
         self.set_ls_start_col()
         self.set_ls_stop_col()
@@ -123,16 +124,16 @@ class LumiDataTable(dbTable):
         self.add_coll(name,type)
 
     def set_integrated_lumi(self,name="INTEGRATED",type="FLOAT default null"):
-        self.integrate_lumi=name
+        self.integrated_lumi=name
         self.add_coll(name,type)
         
     def get_inst_int_lumi_query(self,timestamp):
-        query = "select {inst_col}, {integrated_col} from {table} where '{timest}' between {st_col} and {end_col}".format(table=self.tablename,inst_col=self.inst_lumi,integrated_col=self.integrate_lumi,timest=timestamp.strftime("%Y-%m-%d %H:%M:%S"),st_col=self.ls_start,end_col=self.ls_stop)
+        query = "select {inst_col}, {integrated_col} from {table} where '{timest}' between {st_col} and {end_col}".format(table=self.tablename,inst_col=self.inst_lumi,integrated_col=self.integrated_lumi,timest=timestamp.strftime("%Y-%m-%d %H:%M:%S"),st_col=self.ls_start,end_col=self.ls_stop)
         return query
 class UxcEnvTable(dbTable):
-    def __init__(self, tablename):
+    def __init__(self, tablename='UXC_ENV'):
         super().__init__(tablename) 
-        self.add_call("rec_id","bigint auto_increment primary key")
+        self.add_coll("rec_id","bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE","timestamp not null")  
         self.set_change_date_col()
         self.set_next_change_date_col()
@@ -160,7 +161,7 @@ class UxcEnvTable(dbTable):
         self.relative_humidity=name
         self.add_coll(name,type) 
         
-    def get_date_query(self,timestamp):
+    def get_data_query(self,timestamp):
         query = "select {p_col}, {t_col}, {rh_col} from {table} where '{timest}' between {lastch_col} and {nextch_col}".format(table=self.tablename,p_col=self.pressure,t_col=self.temperature,rh_col=self.relative_humidity,timest=timestamp.strftime("%Y-%m-%d %H:%M:%S"),lastch_col=self.change_date,nextch_col=self.next_change_date)
         return query
 
