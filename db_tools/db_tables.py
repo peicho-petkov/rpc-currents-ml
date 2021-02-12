@@ -26,8 +26,11 @@ class dbTable:
         collnames=[]
         for colname, coltype in self.colls.items():
             if "not null" in str(coltype).to_lower():
-                collnames.append(conname)
+                collnames.append(collnames)
         return collnames
+    
+    def get_col_names(self):
+        return list(self.colls)
 
 class TrainingDataTable(dbTable):
     def __init__(self,tablename='TrainingData'):
@@ -104,7 +107,7 @@ class TrainingDataTable(dbTable):
 class LumiDataTable(dbTable):
     def __init__(self, tablename='LUMI_DATA'):
         super().__init__(tablename)
-        self.add_coll("rec_id","bigint auto_increment primary key")
+        self.add_coll("modelconf_id","bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE","timestamp not null")
         self.set_ls_start_col()
         self.set_ls_stop_col()
@@ -165,40 +168,128 @@ class UxcEnvTable(dbTable):
         query = "select {p_col}, {t_col}, {rh_col} from {table} where '{timest}' between {lastch_col} and {nextch_col}".format(table=self.tablename,p_col=self.pressure,t_col=self.temperature,rh_col=self.relative_humidity,timest=timestamp.strftime("%Y-%m-%d %H:%M:%S"),lastch_col=self.change_date,nextch_col=self.next_change_date)
         return query
 
-from base import mysql_dbConnector
+class MLModels(dbTable):
+    def __init__(self, tablename='MLModels'):
+        super().__init__(tablename)
+        self.add_coll("model_id","bigint auto_increment primary key")
+        self.model_id = 'model_id'
+        self.add_coll("LAST_UPDATE","timestamp not null")
+        self.set_modelconf_id()
+        self.set_dpid()
+        self.set_r2()
+        self.set_mse()
+        self.set_model_path()
+        self.set_mojo_path()
+
+    def set_modelconf_id(self,name="MODELCONF_ID",type="int not null"):
+        self.modelconf_id=name
+        self.add_coll(name,type)
+        
+    def set_dpid(self,name="DPID",type="int not null"):
+        self.dpid=name
+        self.add_coll(name,type)
+        
+    def set_r2(self,name="R2",type="float default null"):
+        self.r2=name
+        self.add_coll(name,type)
+
+    def set_mse(self,name="MSE",type="float default null"):
+        self.mse=name
+        self.add_coll(name,type)
+        
+    def set_model_path(self,name="MODEL_PATH",type="VARCHAR(4096) not null"):
+        self.model_path=name
+        self.add_coll(name,type)
+
+    def set_mojo_path(self,name="MOJO_PATH",type="VARCHAR(4096) not null"):
+        self.mojo_path=name
+        self.add_coll(name,type)
+
+    def get_insert_query(self,modelconf_id,dpid,r2,mse,model_path,mojo_path):
+        query=f"INSERT INTO {self.tablename} ({self.modelconf_id}, {self.dpid}, {self.r2}, {self.mse}, {self.model_path}, {self.mojo_path}) VALUES ('{modelconf_id}','{dpid}','{r2}','{mse}','{model_path}','{mojo_path}')"
+        return query
+    
+    def get_update_model_query(self, model_id, modelconf_id, dpid, r2, mse, model_path, mojo_path):
+        query = f"UPDATE {self.tablename} SET {self.modelconf_id} = '{modelconf_id}', {self.dpid} = '{dpid}', {self.r2} = '{r2}', {self.mse} = '{mse}, {self.model_path} = '{model_path}', {self.mojo_path} = '{mojo_path}' WHERE {self.model_id} = '{model_id}'"
+        return query
+    
+    def get_model_query(self,modelconf_id,dpid):
+        query=f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
+        return query
+
+class MLModelsConf(dbTable):
+    def __init__(self, tablename='MLModelsConf'):
+        super().__init__(tablename)
+        self.add_coll("modelconf_id","bigint auto_increment primary key")
+        self.modelconf_id = 'modelconf_id'
+        self.add_coll("LAST_UPDATE","timestamp not null")
+        self.last_update = "LAST_UPDATE"
+        self.set_name()
+        self.set_mlclass()
+        self.set_input_cols()
+        self.set_output_cols()
+        self.set_train_from()
+        self.set_train_to()
+        self.set_test_from()
+        self.set_test_to()
+    
+    def set_name(self,name="NAME",type="VARCHAR(4096) not null"):
+        self.name=name
+        self.add_coll(name,type)
+        
+    def set_mlclass(self,name="mlclass",type="VARCHAR(4096) not null"):
+        self.mlclass=name
+        self.add_coll(name,type)
+        
+    def set_input_cols(self,name="INPUT_COLS",type="VARCHAR(4096) not null"):
+        self.input_cols=name
+        self.add_coll(name,type)
+    
+    def set_output_cols(self,name="OUTPUT_COLS",type="VARCHAR(4096) not null"):
+        self.output_cols=name
+        self.add_coll(name,type)
+    
+    def set_train_from(self,name="train_from",type="timestamp not null"):
+        self.train_from=name
+        self.add_coll(name,type)
+
+    def set_train_to(self,name="train_to",type="timestamp not null"):
+        self.train_to=name
+        self.add_coll(name,type)
+    
+    def set_test_from(self,name="test_from",type="timestamp not null"):
+        self.test_from=name
+        self.add_coll(name,type)
+
+    def set_test_to(self,name="test_to",type="timestamp not null"):
+        self.test_to=name
+        self.add_coll(name,type)
+
+    def get_insert_query(self,name, mlclass,input_cols,output_cols,train_from,train_to,test_from,test_to):
+        query = f"INSERT INTO {self.tablename} ({self.name}, {self.mlclass}, {self.input_cols}, {self.output_cols}, {self.train_from}, {self.train_to}, {self.test_from}, {self.train_to}) VALUES ('{name}', '{mlclass}', '{input_cols}', '{output_cols}', '{train_from}', '{train_to}', '{test_from}', '{test_to}')"
+        return query
+    
+    def update_by_name_query(self,name, mlclass,input_cols,output_cols,train_from,train_to,test_from,test_to):
+        query = f"UPDATE {self.tablename} SET {self.mlclass} = '{mlclass}', {self.input_cols} = '{input_cols}', {self.output_cols} = '{output_cols}', {self.train_from} = '{train_from}, {self.train_to} = '{train_to}', {self.test_from} = '{test_from}', {self.test_to} = '{test_to}' WHERE {self.name} = '{name}'"
+        return query
+    
+    def update_by_modelconf_id_query(self,modelconf_id,name, mlclass,input_cols,output_cols,train_from,train_to,test_from,test_to):
+        query = f"UPDATE {self.tablename} SET {self.name} = '{name}', {self.mlclass} = '{mlclass}', {self.input_cols} = '{input_cols}', {self.output_cols} = '{output_cols}', {self.train_from} = '{train_from}, {self.train_to} = '{train_to}', {self.test_from} = '{test_from}', {self.test_to} = '{test_to}' WHERE {self.modelconf_id} = '{modelconf_id}'"
+        return query
+    
+    def get_select_query_by_model_name(self,name):
+        query=f"select * from {self.tablename} where {self.name} = '{name}'"
+        return query
+
+    def get_select_query_by_modelconf_id(self,modelconf_id):
+        query=f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
+        return query
 
 if __name__ == "__main__":
     print("creating...")
-
-    TrainingData = dbTable("TrainingData")
-    TrainingData.add_coll("rec_id","bigint auto_increment primary key")
+    model_table_conf = MLModelsConf()
+    print(model_table_conf.get_col_names(),'\n',
+    model_table_conf.get_select_query_by_modelconf_id(5),'\n',
+    model_table_conf.get_select_query_by_model_name("ha taka"))
     
-    TrainingData.add_coll("DPID","mediumint not null")
-    TrainingData.add_coll("CHANGE_DATE","timestamp not null")
-    TrainingData.add_coll("IMON","float not null")
-    TrainingData.add_coll("VMON","float not null")
-    TrainingData.add_coll("FLAG","smallint not null")
-
-    TrainingData.add_coll("InstLumi","float default null")
-
-    TrainingData.add_coll("uxcPressure","float default null")
-    TrainingData.add_coll("uxcTemperature","float default null")
-    TrainingData.add_coll("uxcRH","float default null")
-    TrainingData.add_coll("uxcDPoint","float default null")
-
-    TrainingData.add_coll("IntegratedLumi","float default null")
-
-    TrainingData.add_coll("HoursWithoutLumi","int default null")
-
-    Lumidata = dbTable("LUMI_DATA")
-    Lumidata.add_coll("rec_id","bigint auto_increment primary key")
-    Lumidata.add_coll("lastupdate","TIMESTAMP default CURRENT_TIMESTAMP")
-    Lumidata.add_coll("STARTTIME","TIMESTAMP not null")
-    Lumidata.add_coll("STOPTIME","TIMESTAMP not null")
-    Lumidata.add_coll("INSTLUMI","FLOAT not null")
-    Lumidata.add_coll("INTEGRATED","FLOAT default null")
-
-    print(TrainingData.get_myqsl_create_query())
-    print(Lumidata.get_myqsl_create_query())
-
 #CREATE TABLE UXC_ENV ( rec_id bigint auto_increment primary key, LAST_UPDATE timestamp not null, CHANGE_DATE timestamp not null, NEXT_CHANGE_DATE timestamp not null, uxcPressure float default null, uxcTemperature float default null, uxcRH float default null);

@@ -12,7 +12,11 @@ class Extractor_MySql:
     def __init__(self,tablename,mysql_dbcon=None):
         self.set_mysql_dbcon(mysql_dbcon)
         self._tablename = tablename
-        
+        self.set_flag_col_name()
+        self.set_dpid_col_name()
+        self.set_flag_col_name()
+        self.set_timestamp_col()
+
     def set_startdate(self, startdate):
         assert(isinstance(startdate, (datetime.datetime, datetime.date))), "startdate has to be of type datetime"
         self._startdate = startdate
@@ -25,6 +29,15 @@ class Extractor_MySql:
         self.set_startdate(startdate)
         self.set_enddate(enddate)
         
+    def set_timestamp_col(self,col_name='CHANGE_DATE'):
+        self._timestamp_col=col_name
+    
+    def set_flag_col_name(self,flagcolname='FLAG'):
+        self._flag_col_name = flagcolname
+
+    def set_dpid_col_name(self,dpidcolname='DPID'):
+        self._dpid_col_name = dpidcolname
+                
     def set_DPID(self,dpid):
         self._DPID = dpid
 
@@ -38,9 +51,12 @@ class Extractor_MySql:
     def set_column_name_list(self,cnamelist):
         self._column_names = cnamelist[:]
 
-    def get_data(self):       
-        query = "SELECT {0} FROM {1}".format(self._tablename, ",".join(self._column_names))
-        print(query)
+    def get_data(self):
+        collist = ",".join(self._column_names)
+        startdate_str = self._startdate.strftime("%Y-%m-%d %H:%M:%S")
+        enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
+        query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}'"
+        return query
 
 
 class Extractor_Oracle:
@@ -460,9 +476,29 @@ def fill_imon_vmon_uxc_data():
             VmonAvg= VmonAvg + VmonXt / dt / 1000.0
             VmonXt = 0.0
             fromdate=todate
-         
+ 
+def test_mysql_extractor():
+    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+#    rpccurrml.connect_to_db('RPCCURRML')
+#    rpccurrml.self_cursor_mode()
+
+    train_data_table = db_tools.db_tables.TrainingDataTable()
+
+    TrainingTable_extractor = Extractor_MySql(train_data_table.tablename,rpccurrml)
+    
+    TrainingTable_extractor.set_startdate(datetime.datetime(2016,5,29))
+    TrainingTable_extractor.set_enddate(datetime.datetime(2016,5,31))
+    
+    TrainingTable_extractor.set_column_name_list([train_data_table.imon,train_data_table.vmon])
+    
+    TrainingTable_extractor.set_FLAG(56)
+    TrainingTable_extractor.set_DPID(315)
+    
+    print(TrainingTable_extractor.get_data())
+            
 if __name__=='__main__':
 #    fill_imon_vmon_data()
 #    update_uxc_data()
 #    insert_integrated_lumi()
-    fill_imon_vmon_uxc_data()
+#    fill_imon_vmon_uxc_data()
+    test_mysql_extractor()
