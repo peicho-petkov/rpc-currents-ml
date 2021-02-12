@@ -266,15 +266,15 @@ class MLModelsConf(dbTable):
         self.add_coll(name,type)
 
     def get_insert_query(self,name, mlclass,input_cols,output_cols,train_from,train_to,test_from,test_to):
-        query = f"INSERT INTO {self.tablename} ({self.name}, {self.mlclass}, {self.input_cols}, {self.output_cols}, {self.train_from}, {self.train_to}, {self.test_from}, {self.train_to}) VALUES ('{name}', '{mlclass}', '{input_cols}', '{output_cols}', '{train_from}', '{train_to}', '{test_from}', '{test_to}')"
+        query = f"INSERT INTO {self.tablename} ({self.name}, {self.mlclass}, {self.input_cols}, {self.output_cols}, {self.train_from}, {self.train_to}, {self.test_from}, {self.test_to}) VALUES ('{name}', '{mlclass}', '{input_cols}', '{output_cols}', '{train_from}', '{train_to}', '{test_from}', '{test_to}')"
         return query
     
     def update_by_name_query(self,name, mlclass,input_cols,output_cols,train_from,train_to,test_from,test_to):
-        query = f"UPDATE {self.tablename} SET {self.mlclass} = '{mlclass}', {self.input_cols} = '{input_cols}', {self.output_cols} = '{output_cols}', {self.train_from} = '{train_from}, {self.train_to} = '{train_to}', {self.test_from} = '{test_from}', {self.test_to} = '{test_to}' WHERE {self.name} = '{name}'"
+        query = f"UPDATE {self.tablename} SET {self.mlclass} = '{mlclass}', {self.input_cols} = '{input_cols}', {self.output_cols} = '{output_cols}', {self.train_from} = '{train_from}', {self.train_to} = '{train_to}', {self.test_from} = '{test_from}', {self.test_to} = '{test_to}' WHERE {self.name} = '{name}'"
         return query
     
     def update_by_modelconf_id_query(self,modelconf_id,name, mlclass,input_cols,output_cols,train_from,train_to,test_from,test_to):
-        query = f"UPDATE {self.tablename} SET {self.name} = '{name}', {self.mlclass} = '{mlclass}', {self.input_cols} = '{input_cols}', {self.output_cols} = '{output_cols}', {self.train_from} = '{train_from}, {self.train_to} = '{train_to}', {self.test_from} = '{test_from}', {self.test_to} = '{test_to}' WHERE {self.modelconf_id} = '{modelconf_id}'"
+        query = f"UPDATE {self.tablename} SET {self.name} = '{name}', {self.mlclass} = '{mlclass}', {self.input_cols} = '{input_cols}', {self.output_cols} = '{output_cols}', {self.train_from} = '{train_from}', {self.train_to} = '{train_to}', {self.test_from} = '{test_from}', {self.test_to} = '{test_to}' WHERE {self.modelconf_id} = '{modelconf_id}'"
         return query
     
     def get_select_query_by_model_name(self,name):

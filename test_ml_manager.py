@@ -3,7 +3,8 @@ import db_tools.db_tables as tables
 import Trainer.MLModelManager as ml_mod_manager
 if __name__ == '__main__':
     rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    
+    rpccurrml.connect_to_db('RPCCURRML')
+
     training_table = tables.TrainingDataTable()
     mlconf = tables.MLModelsConf()
     mlmods = tables.MLModels()
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     print(query)
     
     mc = ml_mod_manager.MLModelConf()
-    mcm = ml_mod_manager.MLModelsConfManager()
+    mcm = ml_mod_manager.MLModelsConfManager(rpccurrml,mlconf)
     
     mc.name = "test1"
     mc.mlclass = "GLM"
@@ -28,5 +29,7 @@ if __name__ == '__main__':
     
     mc_id = mcm.RegisterMLModelConf(mc)
     print ("mc_id", mc_id)
-    
-    
+    mc = mcm.get_by_name(mc.name)
+    mc.mlclass = "NN"
+    mc_id = mcm.UpdateRegisteredMLModelConf(mc)
+    print ("mc_id", mc_id)
