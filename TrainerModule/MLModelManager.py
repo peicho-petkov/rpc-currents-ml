@@ -148,7 +148,7 @@ class MLModelsManager:
         res_dict = dict(zip(col_names,col_values))
         return res_dict[self._mlmodelstab.model_id]
     
-    def UpdateRegistedMLModelConf(self, ml_model):
+    def UpdateRegistedMLModel(self, ml_model):
         #check it a model with the same name exists
         query = self._mlmodelstab.get_model_query(ml_model.modelconf_id,ml_model.dpid)
         res = self._connector.fetchall_for_query_self(query)
@@ -181,8 +181,4 @@ class MLModelsManager:
         ml_model.mojo_path = res_dict[self._mlmodelstab.mojo_path]
         
         return ml_model
-        
-        
-        
-        
         

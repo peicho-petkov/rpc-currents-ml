@@ -285,6 +285,46 @@ class MLModelsConf(dbTable):
         query=f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
         return query
 
+class PredictedCurrentsTable(dbTable):
+    def __init__(self, tablename='PredictedCurrent'):
+        super().__init__(tablename)
+        self.add_coll("rec_id","bigint auto_increment primary key")
+        self.add_coll("LAST_UPDATE","timestamp not null")
+        self.set_dpid()
+        self.set_model_id()
+        self.set_predicted_value()
+        self.set_predicted_for()
+        self.set_measured_value()
+    
+    def set_dpid(self,name="dpid",type="int not null"):
+        self.dpid=name
+        self.add_coll(name,type)
+    
+    def set_predicted_for(self,name="predicted_for",type="timestamp not null"):
+        self.predicted_for=name
+        self.add_coll(name,type)
+    
+    def set_model_id(self,name="model_id",type="int not null"):
+        self.model_id=name
+        self.add_coll(name,type)
+    
+    def set_predicted_value(self,name="predicted_value",type="float not null"):
+        self.predicted_value=name
+        self.add_coll(name,type)
+        
+    def set_measured_value(self,name="measured_value",type="float"):
+        self.measured_value=name
+        self.add_coll(name,type)
+    
+    def get_insert_query(self, model_id, dpid, predicted_for,predicted_value,measured_value):
+        query = f"INSERT INTO {self.tablename} ({self.model_id}, {self.dpid}, {self.predicted_for}, {self.predicted_value}, {self.measured_value}) VALUES ('{model_id}', '{dpid}', '{predicted_for}', '{predicted_value}', '{measured_value}')"
+        return query
+    
+    def get_select_by_dpid_model_id_dpid_timewindow_query(self, dpid, model_id, begw, endw):
+        query = f"select * from {self.tablename} where {self.model_id} = '{model_id}' and {self.dpid} = '{dpid}' and {self.predicted_for} between '{begw}' and '{endw}' order by {self.predicted_for} asc"
+        return query
+    
+
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()

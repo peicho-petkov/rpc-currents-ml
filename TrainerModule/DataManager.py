@@ -51,11 +51,18 @@ class Extractor_MySql:
     def set_column_name_list(self,cnamelist):
         self._column_names = cnamelist[:]
 
-    def get_data(self):
+    def get_data_query(self):
         collist = ",".join(self._column_names)
         startdate_str = self._startdate.strftime("%Y-%m-%d %H:%M:%S")
         enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
         query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}'"
+        return query
+
+    def get_data_by_dpid_flag_query(self):
+        collist = ",".join(self._column_names)
+        startdate_str = self._startdate.strftime("%Y-%m-%d %H:%M:%S")
+        enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
+        query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}' and '{self._flag_col_name}' = '{self._FLAG}' and '{self._dpid_col_name}' = '{self._DPID}'"
         return query
 
 
@@ -173,12 +180,10 @@ class DataPopulator:
     def get_max_colname(self,tablename,col_name):
         query="SELECT MAX({col}) from {table}".format(col=col_name,table=tablename)
         intlumi=self._dbcon.fetchall_for_query_self(query)
-#        print(query)
         return intlumi[0][0]
 
     def get_min_colname_cond(self,tablename,col_name, condition):
         query="SELECT min({col}) from {table} {where}".format(col=col_name,table=tablename,where=condition)
-#        print(query)
         intlumi=self._dbcon.fetchall_for_query_self(query)
         return intlumi[0][0]
 
@@ -206,7 +211,7 @@ class DataPopulator:
         self._dbcon._cursor.executemany(query,rpccurr_data)
 
     def update_env_parameters(self, uxc_table, uxc_press_col_name,uxc_temp_col_name,uxc_rh_col_name,change_date_col,until_col_name,uxc_data,until_timestamp):
-#        query="UPDATE {table} SET {press_col}={press}, {temp_col}={temp}, {rh_col}={rh}, {dp_col}={dp} WHERE {press_col} is NULL and {temp_col} is NULL and {rh_col} is NULL and {ichange_col} BETWEEN '{uxc_change_time}' and '{intil}'".format(table=rpccurr_table, ichange_col=ichange_col_name,press_col=uxc_press_col_name,temp_col=uxc_temp_col_name,rh_col=uxc_rh_col_name,dp_col=uxc_dp_colname,uxc_change_time=uxc_data[0],press=uxc_data[1],temp=uxc_data[2],rh=uxc_data[3],dp=uxc_data[4])
+
         query="INSERT INTO {table} ({press_col}, {temp_col}, {rh_col}, {change_date_col}, {until_col}) VALUES ('{press}', '{temp}', '{rh}', '{change_date}','{until}')".format(table=uxc_table, change_date_col=change_date_col,press_col=uxc_press_col_name,temp_col=uxc_temp_col_name,rh_col=uxc_rh_col_name,until_col=until_col_name,change_date=uxc_data[0],press=uxc_data[1],temp=uxc_data[2],rh=uxc_data[3],until=until_timestamp)
         self._dbcon.execute_query_self(query)
 
