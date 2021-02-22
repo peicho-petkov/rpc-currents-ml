@@ -210,7 +210,7 @@ class MLModels(dbTable):
         return query
     
     def get_update_model_query(self, model_id, modelconf_id, dpid, r2, mse, model_path, mojo_path):
-        query = f"UPDATE {self.tablename} SET {self.modelconf_id} = '{modelconf_id}', {self.dpid} = '{dpid}', {self.r2} = '{r2}', {self.mse} = '{mse}, {self.model_path} = '{model_path}', {self.mojo_path} = '{mojo_path}' WHERE {self.model_id} = '{model_id}'"
+        query = f"UPDATE {self.tablename} SET {self.modelconf_id} = '{modelconf_id}', {self.dpid} = '{dpid}', {self.r2} = '{r2}', {self.mse} = '{mse}', {self.model_path} = '{model_path}', {self.mojo_path} = '{mojo_path}' WHERE {self.model_id} = '{model_id}'"
         return query
     
     def get_model_query(self,modelconf_id,dpid):

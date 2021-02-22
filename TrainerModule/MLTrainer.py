@@ -37,4 +37,6 @@ class MLTrainer:
         h2o.remove(glm)                                                             
         h2o.remove(trainig_dataset) 
         
+        return themodel
+        
         
