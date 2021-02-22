@@ -1,8 +1,8 @@
-import TrainerModule.MLModelManager as MLModelManager
-import TrainerModule.MLModelInput as MLModelInput
 import h2o
+from . import MLModelInput
+from . import MLModelManager
 
-class Trainer:
+class MLTrainer:
     def __init__(self, model_conf, model_files_path, mojo_files_path):
         self.model_conf = model_conf
         self.model_files_path = model_files_path
@@ -11,7 +11,7 @@ class Trainer:
     def train_model_for_dpid(self,dpid, in_dataset):
         themodel = MLModelManager.MLModel()
         themodel.dpid = dpid
-        themodel.modelconf_id = self.model_conf.model_conf_id
+        themodel.modelconf_id = self.model_conf.modelconf_id
 
         model_name = f'{self.model_conf.modelconf_id}_{dpid}'
 
@@ -29,7 +29,12 @@ class Trainer:
         themodel.model_path = h2o.save_model(glm, self.model_files_path, force=True)               
         themodel.mojo_path = glm.download_mojo(path=self.mojo_files_path, get_genmodel_jar=True)
         
+        print(glm._model_json['output']['coefficients_table'])
+        themodel.mse = glm.mse()
+        themodel.r2 = glm.r2()
+
+        
         h2o.remove(glm)                                                             
-        h2o.remove(mlinput) 
+        h2o.remove(trainig_dataset) 
         
         

@@ -2,7 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from db_tools.base import mysql_dbConnector
 from db_tools.base import oracle_dbConnector
-import db_tools.db_tables
+from db_tools import table_training, table_uxcenv, table_lumi
 
 class Extractor_MySql:
     ''' Selects and gets the RPC imon and vmon datapoints
@@ -62,7 +62,7 @@ class Extractor_MySql:
         collist = ",".join(self._column_names)
         startdate_str = self._startdate.strftime("%Y-%m-%d %H:%M:%S")
         enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
-        query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}' and '{self._flag_col_name}' = '{self._FLAG}' and '{self._dpid_col_name}' = '{self._DPID}'"
+        query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}' and {self._flag_col_name} = '{self._FLAG}' and {self._dpid_col_name} = '{self._DPID}'"
         return query
 
 
@@ -380,10 +380,6 @@ def fill_imon_vmon_uxc_data():
     
     dp = DataPopulator(rpccurrml)
     
-    table_training = db_tools.db_tables.TrainingDataTable()
-    table_uxcenv = db_tools.db_tables.UxcEnvTable()
-    table_lumi = db_tools.db_tables.LumiDataTable()
-    
     sdate=datetime.datetime(2016,5,1)
     edate=datetime.datetime(2018,12,12)
 
@@ -487,14 +483,12 @@ def test_mysql_extractor():
 #    rpccurrml.connect_to_db('RPCCURRML')
 #    rpccurrml.self_cursor_mode()
 
-    train_data_table = db_tools.db_tables.TrainingDataTable()
-
-    TrainingTable_extractor = Extractor_MySql(train_data_table.tablename,rpccurrml)
+    TrainingTable_extractor = Extractor_MySql(table_training.tablename,rpccurrml)
     
     TrainingTable_extractor.set_startdate(datetime.datetime(2016,5,29))
     TrainingTable_extractor.set_enddate(datetime.datetime(2016,5,31))
     
-    TrainingTable_extractor.set_column_name_list([train_data_table.imon,train_data_table.vmon])
+    TrainingTable_extractor.set_column_name_list([table_training.imon,table_training.vmon])
     
     TrainingTable_extractor.set_FLAG(56)
     TrainingTable_extractor.set_DPID(315)

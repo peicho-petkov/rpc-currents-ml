@@ -1,6 +1,6 @@
-import TrainerModule.MLModelManager as MLModelManager
+from . import MLModelManager
 import h2o
-import db_tools.db_tables as db_tables
+from db_tools import table_training
 
 class ModelInput:
     def __init__(self,model_conf = None):
@@ -27,18 +27,21 @@ class ModelInput:
         return incols,outcols,input_ds
         
     def glm_v2(self,dataset):
-
         incols = self.model_conf.input_cols.split(',')
-        outcols = self.model_conf.output_cols.split(',')[0]
+        outcols = self.model_conf.output_cols.split(',')
+        colnames = incols+outcols
+        outcols = outcols[0]
+        print("intcols ",incols)
+        print("outcols ",outcols)
         
-        trng_tbl = db_tables.TrainingDataTable()
+        input_ds = h2o.H2OFrame.from_python(dataset,column_names=colnames)
         
-        input_ds = h2o.H2OFrame.from_python(dataset,column_names=incols)
+        print(input_ds)
         
-        input_ds['WHV'] = input_ds[trng_tbl.vmon]/input_ds[trng_tbl.uxcP]                                    
-        input_ds['LexpWHV'] = input_ds[trng_tbl.instant_lumi]*input_ds['WHV'].exp()                              
-        input_ds[trng_tbl.uxcRH] = input_ds[trng_tbl.uxcRH]*1000
-        input_ds[trng_tbl.uxcT] = input_ds[trng_tbl.uxcT]*1000    
+        input_ds['WHV'] = input_ds[table_training.vmon]/input_ds[table_training.uxcP]                                    
+        input_ds['LexpWHV'] = input_ds[table_training.instant_lumi]*input_ds['WHV'].exp()                              
+        input_ds[table_training.uxcRH] = input_ds[table_training.uxcRH]*1000
+        input_ds[table_training.uxcT] = input_ds[table_training.uxcT]*1000    
         
         incols.append('LexpWHV')                                                         
         

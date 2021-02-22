@@ -1,57 +1,53 @@
-import db_tools.base as dbase
-import db_tools.db_tables as tables
-import TrainerModule.MLModelManager as ml_mod_manager
-import TrainerModule.DataManager as data_manager
-import TrainerModule.Trainer as trainer
-import TrainerModule.MLModelInput as ml_input
+from .db_tools import table_training, table_mlmodelsconf, table_mlmodels
+from .db_tools import base as dbase
+
+from TrainerModule import MLTrainer, DataManager, MLModel, MLModelConf, MLModelManager, MLModelsConfManager
 
 if __name__ == '__main__':
     rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
     rpccurrml.connect_to_db('RPCCURRML')
+    
+    
+    extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
+    extractor_table_training.set_FLAG(56)
 
-    training_table = tables.TrainingDataTable()
     
-    trng_manager = data_manager.Extractor_MySql(training_table.tablename,rpccurrml)
-    trng_manager.set_FLAG(56)
-    
-    mlconf = tables.MLModelsConf()
-    mlmods = tables.MLModels()
-    
-    query = mlconf.get_myqsl_create_query()
+    query = table_mlmodelsconf.get_myqsl_create_query()
     print(query)
     
-    query = mlmods.get_myqsl_create_query()
+    query = table_mlmodels.get_myqsl_create_query()
     print(query)
     
-    mconf = ml_mod_manager.MLModelConf()
-    mconf_manager = ml_mod_manager.MLModelsConfManager(rpccurrml,mlconf)
-    model1 = ml_mod_manager.MLModel()
+    mconf = MLModelConf()
+    mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    model1 = MLModel()
     
-  
     mconf.name = "initial_test"
     mconf.mlclass = "GLM_V2"
-    mconf.input_cols = ",".join([training_table.vmon,training_table.uxcP,training_table.uxcT,training_table.instant_lumi,training_table.integrated_lumi,training_table.hours_without_lumi])
-    mconf.output_cols = training_table.imon
+    mconf.input_cols = ",".join([table_training.vmon,table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+    mconf.output_cols = table_training.imon
     mconf.train_from = "2016-05-01"
     mconf.train_to = "2016-06-01"
     mconf.test_from = "2017-06-01"
     mconf.test_to = "2017-07-01"
     
     mconf_id = mconf_manager.RegisterMLModelConf(mconf)
-    print ("mc_id", mconf_id)
-    mconf = mconf_manager.get_by_name(mconf.name)
+    if mconf_id < 0:
+        mconf = mconf_manager.get_by_name(mconf.name)
 
     dpid = 315
-    trng_manager.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(','))
-    trng_manager.set_time_widow(mconf.train_from,mconf.train_to)
-    trng_manager.set_DPID(dpid)
+    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(','))
+    extractor_table_training.set_time_widow(mconf.train_from,mconf.train_to)
+    extractor_table_training.set_DPID(dpid)
     
-    trnr = trainer.Trainer(mconf)
+    trainer = MLTrainer(mconf)
     
-    query = trng_manager.get_data_by_dpid_flag_query()
+    query = extractor_table_training.get_data_by_dpid_flag_query()
 
     data = rpccurrml.fetchall_for_query_self(query)
 
-    model_315 = trnr.train_model_for_dpid(trng_manager._DPID,data)    
+    model_315 = trainer.train_model_for_dpid(extractor_table_training._DPID,data)
+    
+    
     
     

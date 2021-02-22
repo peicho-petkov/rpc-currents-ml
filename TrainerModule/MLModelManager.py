@@ -1,4 +1,4 @@
-import db_tools.db_tables
+from db_tools import db_tables
 
 class MLModelConf:
     def __init__(self):
