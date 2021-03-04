@@ -312,12 +312,16 @@ class PredictedCurrentsTable(dbTable):
         self.predicted_value=name
         self.add_coll(name,type)
         
+    def set_predicted_value(self,name="predicted_value_error",type="float not null"):
+        self.predicted_value_error=name
+        self.add_coll(name,type)
+        
     def set_measured_value(self,name="measured_value",type="float"):
         self.measured_value=name
         self.add_coll(name,type)
     
-    def get_insert_query(self, model_id, dpid, predicted_for,predicted_value,measured_value):
-        query = f"INSERT INTO {self.tablename} ({self.model_id}, {self.dpid}, {self.predicted_for}, {self.predicted_value}, {self.measured_value}) VALUES ('{model_id}', '{dpid}', '{predicted_for}', '{predicted_value}', '{measured_value}')"
+    def get_insert_query(self, model_id, dpid, predicted_for, predicted_value, predicted_value_error, measured_value):
+        query = f"INSERT INTO {self.tablename} ({self.model_id}, {self.dpid}, {self.predicted_for}, {self.predicted_value}, {self.predicted_value_error}, {self.measured_value}) VALUES ('{model_id}', '{dpid}', '{predicted_for}', '{predicted_value}', '{predicted_value_error}', '{measured_value}')"
         return query
     
     def get_select_by_dpid_model_id_dpid_timewindow_query(self, dpid, model_id, begw, endw):

@@ -44,6 +44,6 @@ if __name__ == '__main__':
     dpid = 315
     flag = 56
     model_id = train_and_register_for_dpid(dpid,flag,True)
-    while model_id < 0:
+    if model_id < 0:
         print(f"a model configuration with name {mconf.name} already registered for DPID {dpid}...")
 
