@@ -329,9 +329,39 @@ class PredictedCurrentsTable(dbTable):
         query = f"select * from {self.tablename} where {self.model_id} = '{model_id}' and {self.dpid} = '{dpid}' and {self.predicted_for} between '{begw}' and '{endw}' order by {self.predicted_for} asc"
         return query
     
+class ConfigurationTable(dbTable):
+    def __init__(self, tablename='Configuration'):
+        super().__init__(tablename)
+        self.add_coll("rec_id","bigint auto_increment primary key")
+        self.add_coll("LAST_UPDATE","timestamp not null")
+        self.set_parameter_name_cols()
+        self.set_parameter_value_cols()
+        self.set_parameter_value_type_cols()
 
-
-
+    def set_parameter_name_cols(self,name="PARAMETER_NAME",type="VARCHAR(4096) not null"):
+        self.parameter_name=name
+        self.add_coll(name,type)
+        
+    def set_parameter_value_cols(self,name="PARAMETER_VALUE",type="VARCHAR(4096) not null"):
+        self.parameter_value=name
+        self.add_coll(name,type)
+    
+    def set_parameter_value_type_cols(self,name="PARAMETER_TYPE",type="VARCHAR(4096) not null"):
+        self.parameter_value_type=name
+        self.add_coll(name,type)
+    
+    def get_add_parameter_query(self,parameter_name,parameter_value,parameter_type='string'):
+        query=f"INSERT INTO {self.tablename} ({self.parameter_name}, {self.parameter_value}, {self.parameter_value_type}) VALUES ('{parameter_name}', '{parameter_value}', '{parameter_type}')"
+        return query
+    
+    def get_set_parameter_value_query(self,parameter_name,parameter_value):
+        query=f"UPDATE {self.tablename} SET {self.parameter_value} = '{parameter_value}' WHERE {self.parameter_name}='{parameter_name}'"
+        return query
+    
+    def get_get_parameter_value_query(self,parameter_name):
+        query=f"SELECT {self.parameter_value},{self.parameter_value_type} from {self.tablename} WHERE {self.parameter_name}='{parameter_name}'"
+        return query
+    
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()
@@ -343,3 +373,10 @@ if __name__ == "__main__":
     pred_vals_table = PredictedCurrentsTable()
     q = pred_vals_table.get_myqsl_create_query()
     print(q)
+
+
+    conftable = ConfigurationTable()
+    print(conftable.get_myqsl_create_query())
+    print(conftable.get_add_parameter_query("Pers_time","5","float"))
+    print(conftable.get_set_parameter_value_query("Pers_time","10.0"))
+    
