@@ -330,6 +330,8 @@ class PredictedCurrentsTable(dbTable):
         return query
     
 
+
+
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()
