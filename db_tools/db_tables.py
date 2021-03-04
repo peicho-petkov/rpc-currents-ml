@@ -292,8 +292,9 @@ class PredictedCurrentsTable(dbTable):
         self.add_coll("LAST_UPDATE","timestamp not null")
         self.set_dpid()
         self.set_model_id()
-        self.set_predicted_value()
         self.set_predicted_for()
+        self.set_predicted_value()
+        self.set_predicted_value_error()
         self.set_measured_value()
     
     def set_dpid(self,name="dpid",type="int not null"):
@@ -309,10 +310,11 @@ class PredictedCurrentsTable(dbTable):
         self.add_coll(name,type)
     
     def set_predicted_value(self,name="predicted_value",type="float not null"):
+        print("set pred value ",name)
         self.predicted_value=name
         self.add_coll(name,type)
         
-    def set_predicted_value(self,name="predicted_value_error",type="float not null"):
+    def set_predicted_value_error(self,name="predicted_value_error",type="float not null"):
         self.predicted_value_error=name
         self.add_coll(name,type)
         
