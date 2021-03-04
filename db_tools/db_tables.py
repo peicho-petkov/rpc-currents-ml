@@ -310,7 +310,6 @@ class PredictedCurrentsTable(dbTable):
         self.add_coll(name,type)
     
     def set_predicted_value(self,name="predicted_value",type="float not null"):
-        print("set pred value ",name)
         self.predicted_value=name
         self.add_coll(name,type)
         
@@ -338,4 +337,7 @@ if __name__ == "__main__":
     model_table_conf.get_select_query_by_modelconf_id(5),'\n',
     model_table_conf.get_select_query_by_model_name("ha taka"))
     
-#CREATE TABLE UXC_ENV ( rec_id bigint auto_increment primary key, LAST_UPDATE timestamp not null, CHANGE_DATE timestamp not null, NEXT_CHANGE_DATE timestamp not null, uxcPressure float default null, uxcTemperature float default null, uxcRH float default null);
+    #CREATE TABLE UXC_ENV ( rec_id bigint auto_increment primary key, LAST_UPDATE timestamp not null, CHANGE_DATE timestamp not null, NEXT_CHANGE_DATE timestamp not null, uxcPressure float default null, uxcTemperature float default null, uxcRH float default null);
+    pred_vals_table = PredictedCurrentsTable()
+    q = pred_vals_table.get_myqsl_create_query()
+    print(q)

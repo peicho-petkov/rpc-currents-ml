@@ -7,16 +7,15 @@ class PredictionsManager:
         self.model_id = model_id
         self.dpid = dpid
         self.db_conn = db_conn
-        #self.db_conn.self_cursor_mode()
+        self.db_conn.self_cursor_mode()
         
     def insert_record(self,prediction_datetime,prediction, prediction_err, measured_val):
         query = table_predicted_current.get_insert_query(self.model_id,self.dpid,prediction_datetime,prediction,prediction_err,measured_val)
-        print(query)
-        #self.db_conn.execute_query_self(query)
+        self.db_conn.execute_query_self(query)
         
     def commit_records(self):
-        #self.db_conn.execute_commit_self()
-        pass
+        self.db_conn.execute_commit_self()
+
         
 
 if __name__ == '__main__':
