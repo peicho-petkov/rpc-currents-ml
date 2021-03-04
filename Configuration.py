@@ -2,19 +2,25 @@ from db_tools import table_configuration
 
 class Configuration:
     def __init__(self,db_conn):
-        self.db_conn = db_conn 
+        self.db_conn = db_conn
+        self.db_conn.self_cursor_mode()
         
     def AddParameter(self,par_name,par_val,par_val_type):
         query = table_configuration.get_add_parameter_query(par_name,par_val,par_val_type)
+        print(query)
         self.db_conn.execute_commit_query_self(query)
     
     def SetParameter(self,par_name,par_val):
         query = table_configuration.get_set_parameter_query(par_name,par_val)
+        print(query)
         self.db_conn.execute_commit_query_self(query)
     
     def GetParameter(self,par_name):
-        query = table_configuration.get_get_parameter_query(par_name)
-        data = self.db_conn.fetchall_query_self(query)
+        query = table_configuration.get_get_parameter_value_query(par_name)
+        data = self.db_conn.fetchall_for_query_self(query)
+        if len(data) < 1:
+            return None
+
         value = str(data[0][0])
         par_type = str(data[0][1])
         
