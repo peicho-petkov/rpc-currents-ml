@@ -263,7 +263,7 @@ def fill_inst_lumi_table():
                                                   "STARTTIME",["STARTTIME","STOPTIME","INSTLUMI"]):
             dp.insert_inst_lumi_record('LUMI_DATA',"STARTTIME","STOPTIME","INSTLUMI",instlumidata)
    
-        dp.commit_inserted_records()
+        dp.commit_inserted_records()  
 
 def fill_imon_vmon_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
