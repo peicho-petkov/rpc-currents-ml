@@ -3,7 +3,7 @@ from db_tools import table_training, table_mlmodelsconf, table_mlmodels
 from db_tools import base as dbase
 from TrainerModule import MLTrainer, DataManager, MLModelsManager, MLModelsConfManager
 
-rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
 rpccurrml.connect_to_db('RPCCURRML')    
 extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
 

@@ -38,7 +38,7 @@ if __name__ == '__main__':
     
     h2o.init()
     
-    rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
     
     mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)

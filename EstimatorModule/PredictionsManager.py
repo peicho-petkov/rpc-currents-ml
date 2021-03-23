@@ -19,7 +19,7 @@ class PredictionsManager:
         
 
 if __name__ == '__main__':
-    rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML') 
       
     pm = PredictionsManager(rpccurrml,-777,-315)

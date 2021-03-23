@@ -3,7 +3,7 @@ import RPCHVChannelModel
 import Configuration
 from db_tools import base as dbase
 
-rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
 rpccurrml.connect_to_db('RPCCURRML')
 conf = Configuration.Configuration(rpccurrml)
 

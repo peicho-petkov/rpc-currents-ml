@@ -4,7 +4,7 @@ from .db_tools import base as dbase
 from TrainerModule import MLTrainer, DataManager, MLModel, MLModelConf, MLModelManager, MLModelsConfManager
 
 if __name__ == '__main__':
-    rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
     
     

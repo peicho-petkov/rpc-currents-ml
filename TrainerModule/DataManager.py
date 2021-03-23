@@ -216,7 +216,7 @@ class DataPopulator:
         self._dbcon.execute_query_self(query)
 
 def insert_integrated_lumi():
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
     dp = DataPopulator(rpccurrml)
     
@@ -240,7 +240,7 @@ def fill_inst_lumi_table():
     omds = oracle_dbConnector(user='CMS_RPC_R',password='rpcr34d3r')
     omds.connect_to_db('cms_omds_adg')
 
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
 
     ce = Extractor_Oracle(omds)
@@ -269,7 +269,7 @@ def fill_imon_vmon_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
     omds.connect_to_db('cman_int2r')
 
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
 
     ce = Extractor_Oracle(omds)
@@ -309,7 +309,7 @@ def update_uxc_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
     omds.connect_to_db('cman_int2r')
 
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
 
     ce = Extractor_Oracle(omds)
@@ -347,7 +347,7 @@ def update_uxc_data():
     print("done...")
 
 def test():
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
 
     rpccurrml.self_cursor_mode()
@@ -367,7 +367,7 @@ def fill_imon_vmon_uxc_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
     omds.connect_to_db('cman_int2r')
 
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
     rpccurrml.self_cursor_mode()
 
@@ -479,7 +479,7 @@ def fill_imon_vmon_uxc_data():
             fromdate=todate
  
 def test_mysql_extractor():
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
 #    rpccurrml.connect_to_db('RPCCURRML')
 #    rpccurrml.self_cursor_mode()
 

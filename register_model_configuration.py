@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     (options, args) = oparser.parse_args()
     
-    rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='cmsrpc')
+    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
     
     mconf = MLModelConf()
