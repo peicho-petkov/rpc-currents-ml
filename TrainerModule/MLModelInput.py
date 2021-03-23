@@ -13,23 +13,25 @@ class ModelInput:
             raise Exception(f"Sorry, Not Suppored MODEL CLASS ({model_conf.mlclass})")
         self.model_conf = model_conf
         
-    def get_input_for_dataset(self,dataset):
+    def get_input_for_dataset(self,dataset,extra_col_names=None):
         if self.model_conf.mlclass == 'GLM_V1':
-            return self.glm_v1(dataset)        
+            return self.glm_v1(dataset,extra_col_names)        
         elif self.model_conf.mlclass == 'GLM_V2':
-            return self.glm_v2(dataset)
+            return self.glm_v2(dataset,extra_col_names)
             
-    def glm_v1(self,dataset):
+    def glm_v1(self,dataset,extra_col_names):
         incols = []
         outcols = []
         input_ds = dataset
         
         return incols,outcols,input_ds
         
-    def glm_v2(self,dataset):
+    def glm_v2(self,dataset,extra_col_names):
         incols = self.model_conf.input_cols.split(',')
         outcols = self.model_conf.output_cols.split(',')
         colnames = incols+outcols
+        if extra_col_names is not None:
+            colnames = incols+outcols+extra_col_names
         outcols = outcols[0]
         print("intcols ",incols)
         print("outcols ",outcols)

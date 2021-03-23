@@ -10,9 +10,9 @@ if __name__ == '__main__':
     oparser.add_option("--model-conf-name", action="store",
                        type="string", dest="conf_name")
     oparser.add_option("--train-from", action="store", type="string", dest="train_from",
-                       help="the begining of the training period [dd-mm-yyyy]")
+                       help="the begining of the training period [yyyy-mm-dd]")
     oparser.add_option("--train-to", action="store", type="string", dest="train_to",
-                       help="the end of the training period [dd-mm-yyyy]")
+                       help="the end of the training period [yyyy-mm-dd]")
     oparser.add_option("--mlclass", action="store", type="string", dest="mlclass",default='GLM_V2',
                        help="accepts supported ml classes only. accepts 'GLM_V2', currently.")
 
@@ -33,3 +33,12 @@ if __name__ == '__main__':
     # TODO: implement test period
     mconf.test_from = options.train_from
     mconf.test_to = options.train_to
+
+    mconf_id = mconf_manager.RegisterMLModelConf(mconf)
+
+    if mconf_id == -1:
+        print("modelconf already registered...")
+    elif mconf_id == -2:
+        print('modelconf registration failed...')
+    else:
+        print(f"The model configuration registered successfully with modelconf_id {mconf_id}")

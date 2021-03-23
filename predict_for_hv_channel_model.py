@@ -6,6 +6,7 @@ from optparse import OptionParser
 from EstimatorModule import PredictionsManager, Estimator
 from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
 from db_tools import table_mlmodels, table_mlmodelsconf, table_training,base as dbase
+from datetime import datetime
 
 if __name__ == '__main__':
     oparser = OptionParser()
@@ -16,7 +17,7 @@ if __name__ == '__main__':
                        type="int", dest="flag", default=56)
     
     oparser.add_option("--predict-from", action="store", type="string", dest="predict_from",
-                       help="the begining of the prediction period [dd-mm-yyyy]")
+                       help="the begining of the prediction period [yyyy-mm-dd]")
     oparser.add_option("--predict-to", action="store", type="string", dest="predict_to",
                        help="the end of the prediction period [dd-mm-yyyy]")
 
@@ -25,9 +26,12 @@ if __name__ == '__main__':
     conf_name=options.conf_name
     dpid = options.dpid
     flag = options.flag
-    predict_from = options.predict_from
-    predict_to = options.predict_to
-    
+
+    predict_from = datetime.strptime(options.predict_from,'%Y-%m-%d')
+    predict_to = datetime.strptime(options.predict_to,'%Y-%m-%d')
+
+    print(f'current prediction for DPID {dpid} from {predict_from} to {predict_to}') 
+
     print(f"conf_name {conf_name}")
     print(f"dpid {dpid}")
     print(f"flag {flag}")
@@ -48,29 +52,36 @@ if __name__ == '__main__':
     hv_curr_estimator = Estimator.Estimator(model)
     
     extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
-    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(','))
+    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
     extractor_table_training.set_time_widow(predict_from,predict_to)
     extractor_table_training.set_DPID(dpid)
     extractor_table_training.set_FLAG(flag)
     
     query = extractor_table_training.get_data_by_dpid_flag_query()
     data = rpccurrml.fetchall_for_query_self(query)
-    
+
     mlinput = MLModelInput.ModelInput(mconf)
         
-    incols, outcol, dataset = mlinput.get_input_for_dataset(data)
+    incols, outcol, dataset = mlinput.get_input_for_dataset(data,[table_training.change_date])
     
     pred, pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
+
+    del hv_curr_estimator
     
     n = len(pred)
     
     pm = PredictionsManager.PredictionsManager(rpccurrml,model.model_id,dpid)
-    
+
+    print("pred:",pred)
+    print("dataset.names:",dataset.names)
+    print("dataset.types:",dataset.types)
+
     for i in range(n):
         pred_curr = pred[i]
         pred_curr_err = pred_err[i]
-        pred_datetime = data[i,table_training.change_date]
-        imon = data[i,'imon']
+        pred_datetime = data[i][-1] #dataset[i,table_training.change_date]
+        imon = dataset[i,table_training.imon]
+#        print('i',i,pred_curr,pred_curr_err,pred_datetime,imon)
         pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon)
         
     pm.commit_records()
