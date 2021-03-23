@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+
+import RPCHVChannelModel
+import h2o
+from optparse import OptionParser
+from EstimatorModule import PredictionsManager, Estimator
+from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
+from db_tools import table_mlmodels, table_mlmodelsconf, table_training,base as dbase
+
+if __name__ == '__main__':
+    oparser = OptionParser()
+    oparser.add_option("--model-conf-name", action="store",
+                       type="string", dest="conf_name")
+    oparser.add_option("--dpid", action="store", type="int", dest="dpid")
+    oparser.add_option("--flag", action="store",
+                       type="int", dest="flag", default=56)
+    
+    oparser.add_option("--predict-from", action="store", type="string", dest="predict_from",
+                       help="the begining of the prediction period [dd-mm-yyyy]")
+    oparser.add_option("--predict-to", action="store", type="string", dest="predict_to",
+                       help="the end of the prediction period [dd-mm-yyyy]")
+
+    (options, args) = oparser.parse_args()
+
+    conf_name=options.conf_name
+    dpid = options.dpid
+    flag = options.flag
+    predict_from = options.predict_from
+    predict_to = options.predict_to
+    
+    print(f"conf_name {conf_name}")
+    print(f"dpid {dpid}")
+    print(f"flag {flag}")
+    
+    h2o.init()
+    
+    rpccurrml = dbase.mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
+    rpccurrml.connect_to_db('RPCCURRML')
+    
+    mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    
+    mconf = mconf_manager.get_by_name(conf_name)
+    
+    model_manager = MLModelManager.MLModelsManager(rpccurrml,table_mlmodels)
+    
+    model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,dpid)
+    
+    hv_curr_estimator = Estimator.Estimator(model)
+    
+    extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
+    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(','))
+    extractor_table_training.set_time_widow(predict_from,predict_to)
+    extractor_table_training.set_DPID(dpid)
+    extractor_table_training.set_FLAG(flag)
+    
+    query = extractor_table_training.get_data_by_dpid_flag_query()
+    data = rpccurrml.fetchall_for_query_self(query)
+    
+    mlinput = MLModelInput.ModelInput(mconf)
+        
+    incols, outcol, dataset = mlinput.get_input_for_dataset(data)
+    
+    pred, pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
+    
+    n = len(pred)
+    
+    pm = PredictionsManager.PredictionsManager(rpccurrml,model.model_id,dpid)
+    
+    for i in range(n):
+        pred_curr = pred[i]
+        pred_curr_err = pred_err[i]
+        pred_datetime = data[i,table_training.change_date]
+        imon = data[i,'imon']
+        pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon)
+        
+    pm.commit_records()
+    
+    

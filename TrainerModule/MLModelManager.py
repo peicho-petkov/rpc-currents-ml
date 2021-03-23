@@ -190,4 +190,32 @@ class MLModelsManager:
         ml_model.mojo_path = res_dict[self._mlmodelstab.mojo_path]
         
         return ml_model
+    
+    def get_by_modelconf_name_and_dpid(self,mlmodelsconftab,modelconf_name,dpid):
+        
+        mlconf_manager = MLModelsConfManager(self._connector,mlmodelsconftab)
+        mlconf = mlconf_manager.get_by_name(modelconf_name)
+        modelconf_id=mlconf.modelconf_id
+        
+        query = self._mlmodelstab.get_model_query(modelconf_id,dpid)
+        res = self._connector.fetchall_for_query_self(query)
+        
+        if len(res) != 1:
+            return None
+        
+        col_names = self._mlmodelstab.get_col_names()
+        col_values = res[0]
+        
+        res_dict = dict(zip(col_names,col_values))
+        
+        ml_model = MLModel()
+        ml_model.model_id = res_dict[self._mlmodelstab.model_id]
+        ml_model.modelconf_id= res_dict[self._mlmodelstab.modelconf_id]
+        ml_model.dpid = res_dict[self._mlmodelstab.dpid]
+        ml_model.r2 = res_dict[self._mlmodelstab.r2]
+        ml_model.mse = res_dict[self._mlmodelstab.mse]
+        ml_model.model_path = res_dict[self._mlmodelstab.model_path]
+        ml_model.mojo_path = res_dict[self._mlmodelstab.mojo_path]
+        
+        return ml_model
         
