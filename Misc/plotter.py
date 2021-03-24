@@ -18,7 +18,7 @@ class simple_plotter:
     def plot_it(self, xlabel="Date [YYYY-mm-dd]", ylabel="Current [uA]", filename=""):
         self.dataframe.set_index([self.columns[0]], inplace=True)
         self.dataframe.plot(legend=True, xlabel=xlabel, ylabel=ylabel, use_index=True)
-        if filename != "":
+        if filename == "":
             plt.show()
         else:
             plt.savefig(filename)
