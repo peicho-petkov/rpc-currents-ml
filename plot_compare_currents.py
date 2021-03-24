@@ -33,7 +33,7 @@ if __name__ == '__main__':
     filename = options.filename
 
     if dpid < 0 and modelconf_name == "" and model_id < 0:
-        print("To chose a model, specify --dpid and --modelconf_id or --model_id!")
+        print("To choose a model, specify --dpid and --modelconf_id or --model_id!")
     
     rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
