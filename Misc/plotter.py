@@ -15,10 +15,10 @@ class simple_plotter:
         self.dataframe.rename(columns=columns, inplace=True)
         self.dataframe[xcolumn] = pd.to_datetime(self.dataframe[xcolumn], format=time_format) 
 
-    def plot_it(self, xlabel="Date [YYYY-mm-dd]", ylabel="Current [uA]", filename=None):
+    def plot_it(self, xlabel="Date [YYYY-mm-dd]", ylabel="Current [uA]", filename=""):
         self.dataframe.set_index([self.columns[0]], inplace=True)
         self.dataframe.plot(legend=True, xlabel=xlabel, ylabel=ylabel, use_index=True)
-        if filename is None:
+        if filename != "":
             plt.show()
         else:
             plt.savefig(filename)
