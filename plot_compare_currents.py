@@ -16,13 +16,15 @@ if __name__ == '__main__':
                         help="The beginning of the prediction period you want to plot [yyyy-mm-dd]")
     oparser.add_option("--pred_finish-date", action="store", type="string", dest="finish_date", 
                         help="The end of the prediction period you want to plot [yyyy-mm-dd]") 
-    
+    oparser.add_option("--file-for-plots", action="store", type="string", dest="filename",
+                        default="", help="Enter the file name where you want the plots stored")
+
     (options, args) = oparser.parse_args()
 
     model_id = options.model_id
     start_date = datetime.strptime(options.start_date, '%Y-%m-%d')
     finish_date = datetime.strptime(options.finish_date, '%Y-%m-%d')
-
+    filename = options.filename
     rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
 
@@ -35,7 +37,7 @@ if __name__ == '__main__':
     data = rpccurrml.fetchall_for_query_self(query)
 
     plotter = plotter.simple_plotter({0:"predicted_for",1:"predicted_value",2:"measured_value"},data)
-    plotter.plot_it()
+    plotter.plot_it(filename)
 
 
 
