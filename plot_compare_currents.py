@@ -14,7 +14,7 @@ if __name__ == '__main__':
                         help="The model_id of the model used to make the prediction, integer")
     oparser.add_option("--pred-start-date", action="store", type="string", dest="start_date",\
                         help="The beginning of the prediction period you want to plot [yyyy-mm-dd]")
-    oparser.add_option("--pred_finish-date", action="store", type="string", dest="finish_date", 
+    oparser.add_option("--pred-finish-date", action="store", type="string", dest="finish_date", 
                         help="The end of the prediction period you want to plot [yyyy-mm-dd]") 
     oparser.add_option("--file-for-plots", action="store", type="string", dest="filename",
                         default="", help="Enter the file name where you want the plots stored")
