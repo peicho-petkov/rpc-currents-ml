@@ -27,7 +27,7 @@ if __name__ == '__main__':
     rpccurrml.connect_to_db('RPCCURRML')
 
     extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
-    extractor_pred_curr_table.set_column_name_list("predicted_for", "predicted_value", "measured_value")
+    extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
     extractor_pred_curr_table.set_timestamp_col('predicted_for')
     extractor_pred_curr_table.set_time_widow(start_date, finish_date)
 
