@@ -1,4 +1,4 @@
-import matplotplib.pyplot as plt 
+import matplotlib.pyplot as plt 
 import pandas as pd 
 
 class simple_plotter:
