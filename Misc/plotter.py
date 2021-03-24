@@ -1,4 +1,5 @@
-import matplotlib.pyplot as plt 
+import matplotlib
+from matplotlib import pyplot as plt 
 import pandas as pd 
 import numpy as np
 
@@ -36,14 +37,17 @@ class simple_plotter_opt:
         ncols = len(self.columns)
         nrows = len(data)
         xcolumn = str(columns[0])
-        self.date = np.zeros(nrows, dtype=np.float)
-        self.pred = np.zeros(nrows, dtype=np.float)
-        self.meas = np.zeros(nrpws, dtype=np.float)
+        self.date = list() #np.zeros(nrows, dtype=np.float)
+        self.pred = list() #np.zeros(nrows, dtype=np.float)
+        self.meas = list() #np.zeros(nrows, dtype=np.float)
         i = 0 
         for row in data:
-            self.date[i] = matplotlib.dates.date2num(row[0])
-            self.pred[i] = row[1]
-            self.meas[i] = row[2]
+            self.date.append(row[0])
+            self.pred.append(row[1])
+            self.meas.append(row[2])
+            #self.date[i] = matplotlib.dates.date2num(row[0])
+            #self.pred[i] = row[1]
+            #self.meas[i] = row[2]
             i = i + 1
         
     def plot_it(self, xlabel="Date [YYYY-mm-dd]", ylabel="Current [uA]", filename=""):

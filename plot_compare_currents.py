@@ -36,7 +36,7 @@ if __name__ == '__main__':
     query = extractor_pred_curr_table.get_data_query()
     data = rpccurrml.fetchall_for_query_self(query)
 
-    plotter = plotter.simple_plotter_opt({0:"predicted_for",1:"predicted_value",2:"measured_value"},data)
+    plotter = plotter.simple_plotter({0:"predicted_for",1:"predicted_value",2:"measured_value"},data)
     plotter.plot_it(filename=filename)
 
 
