@@ -38,6 +38,12 @@ class Extractor_MySql:
     def set_dpid_col_name(self,dpidcolname='DPID'):
         self._dpid_col_name = dpidcolname
                 
+    def set_model_id_col_name(self,modelidcolname='model_id'):
+        self._model_id_col_name = modelidcolname          
+    
+    def set_model_id(self, modelid):
+        self._model_id = modelid
+    
     def set_DPID(self,dpid):
         self._DPID = dpid
 
@@ -65,7 +71,20 @@ class Extractor_MySql:
         enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
         query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}' and {self._flag_col_name} = '{self._FLAG}' and {self._dpid_col_name} = '{self._DPID}'"
         return query
-
+    
+    def get_data_by_model_id_query(self):
+        collist = ",".join(self._column_names)
+        startdate_str = self._startdate.strftime("%Y-%m-%d %H:%M:%S")
+        enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
+        query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}' and {self._model_id_col_name} = '{self._model_id}'"
+        return query
+    
+    def get_data_by_dpid_only_query(self):
+        collist = ",".join(self._column_names)
+        startdate_str = self._startdate.strftime("%Y-%m-%d %H:%M:%S")
+        enddate_str = self._enddate.strftime("%Y-%m-%d %H:%M:%S")
+        query = f"SELECT {collist} FROM {self._tablename} where {self._timestamp_col} between '{startdate_str}' and '{enddate_str}' and {self._dpid_col_name} = '{self._DPID}'"
+        return query
 
 class Extractor_Oracle:
     ''' Selects and gets the RPC imon and vmon datapoints
