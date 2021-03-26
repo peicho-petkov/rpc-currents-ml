@@ -83,7 +83,7 @@ if __name__ == '__main__':
         imon = dataset[i,table_training.imon]
 #        print('i',i,pred_curr,pred_curr_err,pred_datetime,imon)
         pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon)
-        
-    pm.commit_records()
+        if i%1000 == 0:
+            pm.commit_records()
     
     
