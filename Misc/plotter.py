@@ -25,6 +25,18 @@ class simple_plotter:
         else:
             plt.savefig(filename) 
 
+    def plot_diff(self, xlabel="Date [YYYY-mm-dd]", ylabel="Current difference [uA]", filename=""):
+        self.dataframe.set_index([self.columns[0]], inplace=True)
+        difference = self.dataframe[self.columns[2]] - self.dataframe[self.columns[1]]
+        fig, (sp1, sp2) = plt.subplots(1,2,gridspec_kw={'width_ratios':[5, 2]})
+        sp1.plot(difference, use_index=True)
+        sp2.hist(difference, bins=50, orientation="horizontal")
+        if filename == "":
+            plt.show()
+        else:
+            plt.savefig(filename)
+
+
 class simple_plotter_opt:
     ''' Plots versus date, i.e. assumes time as x-axis 
     '''
