@@ -37,6 +37,22 @@ class simple_plotter:
         else:
             plt.savefig(filename) 
 
+    def plot_run_avg(self, xlabel="Date [YYYY-mm-dd]", ylabel="CurrentDiffRunAvg [uA]", filename="")
+        difference = self.dataframe[self.columns[2]] - self.dataframe[self.columns[1]]
+        self.dataframe['difference'] = difference
+        newdataframe = self.dataframe[['predicted_for', 'difference']].copy()
+        self.dataframe.drop(['difference'], axis=1)
+        newdataframe.set_index(['predicted_for'], inplace=True)
+        newdataframe.rolling(30).mean()
+        newdataframe.plot(legend=True, xlabel=xlabel, ylabel=ylabel, use_index=True)
+        if filename="":
+            plt.show()
+        else:
+            plt.savefig(filename)
+
+
+
+
 class simple_plotter_opt:
     ''' Plots versus date, i.e. assumes time as x-axis 
     '''
