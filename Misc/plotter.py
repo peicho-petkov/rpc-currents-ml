@@ -41,9 +41,9 @@ class simple_plotter:
         difference = self.dataframe[self.columns[2]] - self.dataframe[self.columns[1]]
         self.dataframe['difference'] = difference
         newdataframe = self.dataframe[['predicted_for', 'difference']].copy()
-        self.dataframe.drop(['difference'], axis=1)
+        self.dataframe = self.dataframe.drop(['difference'], axis=1)
         newdataframe.set_index(['predicted_for'], inplace=True)
-        rolling = newdataframe.rolling(8000).mean()
+        rolling = newdataframe.rolling(100).mean()
         newdataframe['rolling_avg'] = rolling 
         newdataframe  = newdataframe.drop(['difference'], axis=1)
         newdataframe.plot(legend=True, xlabel=xlabel, ylabel=ylabel, use_index=True)
