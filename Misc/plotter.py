@@ -32,6 +32,7 @@ class simple_plotter:
         fig, (sp1, sp2) = plt.subplots(1,2,gridspec_kw={'width_ratios':[5, 2]})
         sp1.plot(x, difference)
         sp2.hist(difference, bins=50, orientation="horizontal")
+        fig.autofmt_xdate()
         if filename == "":
             plt.show()
         else:
