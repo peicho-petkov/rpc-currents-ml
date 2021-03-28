@@ -57,5 +57,6 @@ if __name__ == '__main__':
 
     plotter = plotter.simple_plotter({0:"predicted_for",1:"predicted_value",2:"measured_value"},data)
     plotter.plot_diff(filename="diff-"+filename)
+    plotter.plot_run_avg(filename="run-avg-"+filename)
     plotter.plot_it(filename=filename)
     
