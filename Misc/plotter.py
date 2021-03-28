@@ -29,10 +29,12 @@ class simple_plotter:
         difference = self.dataframe[self.columns[2]] - self.dataframe[self.columns[1]]
         xcolumn = str(self.columns[0])
         x = self.dataframe[xcolumn]
-        fig, (sp1, sp2) = plt.subplots(1,2,gridspec_kw={'width_ratios':[5, 2]})
+        fig, (sp1, sp2) = plt.subplots(1,2,gridspec_kw={'width_ratios':[5, 2]}) 
         sp1.plot(x, difference)
+        sp1.set_xlabel(xlabel)
+        sp1.set_ylabel(ylabel)
+        plt.setp(sp1.xaxis.get_majorticklabels(), rotation=30)
         sp2.hist(difference, bins=50, orientation="horizontal")
-        fig.autofmt_xdate()
         if filename == "":
             plt.show()
         else:
