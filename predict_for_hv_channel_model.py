@@ -85,5 +85,5 @@ if __name__ == '__main__':
         pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon)
         if i%1000 == 0:
             pm.commit_records()
-    
+    pm.commit_records()
     
