@@ -56,7 +56,7 @@ if __name__ == '__main__':
     data = rpccurrml.fetchall_for_query_self(query)
 
     plotter = plotter.simple_plotter({0:"predicted_for",1:"predicted_value",2:"measured_value"},data)
-    plotter.plot_diff(filename="diff-"+filename)
+    plotter.plot_diff_opt(filename="diff-"+filename)
     plotter.plot_run_avg(filename="run-avg-"+filename)
     plotter.plot_it(filename=filename)
     

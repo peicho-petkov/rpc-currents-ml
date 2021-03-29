@@ -40,6 +40,21 @@ class simple_plotter:
         else:
             plt.savefig(filename) 
 
+    def plot_diff_opt(self, xlabel="Date [YYYY-mm-dd]", ylabel="CurrentDifference [uA]", filename=""):
+        difference = self.dataframe[self.columns[2]] - self.dataframe[self.columns[1]]
+        self.dataframe['difference'] = difference
+        newdataframe = self.dataframe[['predicted_for', 'difference']].copy()
+        self.dataframe = self.dataframe.drop(['difference'], axis=1)
+        newdataframe.set_index(['predicted_for'], inplace=True)
+        fig, (sp1, sp2) = plt.subplots(1,2, gridspec_kw={'width_ratios':[5, 2]})
+        newdataframe.plot(ax=sp1, legend=True, xlabel=xlabel, ylabel=ylabel, use_index=True)
+        sp2.hist(difference, bins=50, orientation="horizontal")
+        if filename == "":
+            plt.show()
+        else:
+            plt.savefig(filename)
+
+ 
     def plot_run_avg(self, xlabel="Date [YYYY-mm-dd]", ylabel="CurrentDiffRunAvg [uA]", filename=""):
         difference = self.dataframe[self.columns[2]] - self.dataframe[self.columns[1]]
         self.dataframe['difference'] = difference
