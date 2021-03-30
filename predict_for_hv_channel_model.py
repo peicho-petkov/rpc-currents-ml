@@ -17,7 +17,7 @@ if __name__ == '__main__':
                        type="int", dest="flag", default=56)
     
     oparser.add_option("--predict-from", action="store", type="string", dest="predict_from",
-                       help="the begining of the prediction period [yyyy-mm-dd]")
+                       help="the beginning of the prediction period [yyyy-mm-dd]")
     oparser.add_option("--predict-to", action="store", type="string", dest="predict_to",
                        help="the end of the prediction period [dd-mm-yyyy]")
 
@@ -72,6 +72,8 @@ if __name__ == '__main__':
     
     pm = PredictionsManager.PredictionsManager(rpccurrml,model.model_id,dpid)
 
+    imon = dataset.as_data_frame()[table_training.imon].tolist()
+
     print("pred:",pred)
     print("dataset.names:",dataset.names)
     print("dataset.types:",dataset.types)
@@ -80,10 +82,11 @@ if __name__ == '__main__':
         pred_curr = pred[i]
         pred_curr_err = pred_err[i]
         pred_datetime = data[i][-1] #dataset[i,table_training.change_date]
-        imon = dataset[i,table_training.imon]
 #        print('i',i,pred_curr,pred_curr_err,pred_datetime,imon)
-        pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon)
-        if i%1000 == 0:
+        pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon[i])
+        if i%10000 == 0:
             pm.commit_records()
-    pm.commit_records()
+            print(f"{i/float(n)*100.:.1f}% records committed")
     
+    pm.commit_records()
+    print("prediction done...")

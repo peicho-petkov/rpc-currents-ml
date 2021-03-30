@@ -12,13 +12,13 @@ if __name__ == '__main__':
     oparser = OptionParser()
     oparser.add_option("--model-id", action="store", type="int", dest="model_id", default=-1,
                         help="The model_id of the model used to make the prediction, integer")
-    oparser.add_option("--modelconf-name", action="store", type="string", dest="conf_name",
+    oparser.add_option("--model-conf-name", action="store", type="string", dest="conf_name",
                         default="", help="Select model by model configuration name")
     oparser.add_option("--dpid", action="store", type="int", dest="DPID",
                         default=-1, help="Select model by dpid")
     oparser.add_option("--pred-start-date", action="store", type="string", dest="start_date",\
                         help="The beginning of the prediction period you want to plot [yyyy-mm-dd]")
-    oparser.add_option("--pred-finish-date", action="store", type="string", dest="finish_date", 
+    oparser.add_option("--pred-end-date", action="store", type="string", dest="finish_date", 
                         help="The end of the prediction period you want to plot [yyyy-mm-dd]") 
     oparser.add_option("--file-for-plots", action="store", type="string", dest="filename",
                         default="", help="Enter the file name where you want the plots stored")
@@ -37,10 +37,25 @@ if __name__ == '__main__':
     
     rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
     rpccurrml.connect_to_db('RPCCURRML')
+    rpccurrml.self_cursor_mode()
 
     if model_id < 0:
-        query = f" select MLModels.model_id from MLModels, MLModelsConf where MLModels.MODELCONF_ID=MLModelsConf.modelconf_id and MLModelsConf.NAME='{modelconf_name}'"
-        model_id = rpccurrml.fetchall_for_query_self(query)[0][0]
+        query = f" select MLModels.model_id from MLModels, MLModelsConf where MLModels.MODELCONF_ID=MLModelsConf.modelconf_id and MLModelsConf.NAME='{modelconf_name}' and MLModels.dpid={dpid}"
+        model_id = rpccurrml.fetchall_for_query_self(query)
+        if len(model_id) > 1:
+            print(f"************************************************************")
+            print(f"* ERROR: More than 1 model_ids found... Probably a bug!... *")
+            print(f"************************************************************")
+            exit(1)
+        if len(model_id) == 0:
+            
+            print(f'''*************************************************************
+* ERROR: No suitable models found for                       *   
+* conf name {modelconf_name:24} and dpid {dpid:10}!...*
+*************************************************************''')
+            
+            exit(1)
+        model_id = model_id[0][0]
 
     extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
     extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
@@ -54,6 +69,12 @@ if __name__ == '__main__':
 
     query = extractor_pred_curr_table.get_data_by_model_id_query()
     data = rpccurrml.fetchall_for_query_self(query)
+
+    if len(data) == 0:
+        print("**************************************")
+        print("* ERROR: no prediction data found... *")
+        print("**************************************")
+        exit(1)
 
     plotter = plotter.simple_plotter({0:"predicted_for",1:"predicted_value",2:"measured_value"},data)
     plotter.plot_diff_opt(filename="diff-"+filename)
