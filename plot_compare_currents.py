@@ -2,7 +2,7 @@
 from optparse import OptionParser
 from db_tools import base as dbase
 from datetime import datetime
-from db_tools import table_predicted_current
+from db_tools import table_predicted_current, rpccurrml
 from TrainerModule import DataManager 
 import pandas as pd 
 from Misc import plotter
@@ -34,10 +34,6 @@ if __name__ == '__main__':
 
     if dpid < 0 and modelconf_name == "" and model_id < 0:
         print("To choose a model, specify --dpid and --modelconf_id or --model_id!")
-    
-    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
-    rpccurrml.connect_to_db('RPCCURRML')
-    rpccurrml.self_cursor_mode()
 
     if model_id < 0:
         query = f" select MLModels.model_id from MLModels, MLModelsConf where MLModels.MODELCONF_ID=MLModelsConf.modelconf_id and MLModelsConf.NAME='{modelconf_name}' and MLModels.dpid={dpid}"

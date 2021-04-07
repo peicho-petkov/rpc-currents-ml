@@ -1,12 +1,9 @@
-from .db_tools import table_training, table_mlmodelsconf, table_mlmodels
+from .db_tools import table_training, table_mlmodelsconf, table_mlmodels, rpccurrml
 from .db_tools import base as dbase
 
 from TrainerModule import MLTrainer, DataManager, MLModel, MLModelConf, MLModelManager, MLModelsConfManager
 
-if __name__ == '__main__':
-    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
-    rpccurrml.connect_to_db('RPCCURRML')
-    
+if __name__ == '__main__':    
     
     extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
     extractor_table_training.set_FLAG(56)

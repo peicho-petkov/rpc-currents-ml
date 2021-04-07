@@ -5,7 +5,7 @@ import h2o
 from optparse import OptionParser
 from EstimatorModule import PredictionsManager, Estimator
 from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
-from db_tools import table_mlmodels, table_mlmodelsconf, table_training,base as dbase
+from db_tools import table_mlmodels, table_mlmodelsconf, table_training, rpccurrml, base as dbase
 from datetime import datetime
 
 if __name__ == '__main__':
@@ -37,9 +37,6 @@ if __name__ == '__main__':
     print(f"flag {flag}")
     
     h2o.init()
-    
-    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
-    rpccurrml.connect_to_db('RPCCURRML')
     
     mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
     

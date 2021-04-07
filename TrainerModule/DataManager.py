@@ -2,7 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from db_tools.base import mysql_dbConnector
 from db_tools.base import oracle_dbConnector
-from db_tools import table_training, table_uxcenv, table_lumi
+from db_tools import table_training, table_uxcenv, table_lumi, rpccurrml
 
 class Extractor_MySql:
     ''' Selects and gets the RPC imon and vmon datapoints
@@ -236,8 +236,6 @@ class DataPopulator:
         self._dbcon.execute_query_self(query)
 
 def insert_integrated_lumi():
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    rpccurrml.connect_to_db('RPCCURRML')
     dp = DataPopulator(rpccurrml)
     
     sdate=dp.get_min_colname_cond(tablename='LUMI_DATA',col_name="STARTTIME",condition="where INTEGRATED IS NULL")
@@ -259,9 +257,6 @@ def insert_integrated_lumi():
 def fill_inst_lumi_table():
     omds = oracle_dbConnector(user='CMS_RPC_R',password='rpcr34d3r')
     omds.connect_to_db('cms_omds_adg')
-
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    rpccurrml.connect_to_db('RPCCURRML')
 
     ce = Extractor_Oracle(omds)
     
@@ -288,9 +283,6 @@ def fill_inst_lumi_table():
 def fill_imon_vmon_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
     omds.connect_to_db('cman_int2r')
-
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    rpccurrml.connect_to_db('RPCCURRML')
 
     ce = Extractor_Oracle(omds)
 
@@ -329,9 +321,6 @@ def update_uxc_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
     omds.connect_to_db('cman_int2r')
 
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    rpccurrml.connect_to_db('RPCCURRML')
-
     ce = Extractor_Oracle(omds)
 
     ce.set_flag_col_name("FLAG")
@@ -367,10 +356,6 @@ def update_uxc_data():
     print("done...")
 
 def test():
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    rpccurrml.connect_to_db('RPCCURRML')
-
-    rpccurrml.self_cursor_mode()
 
     uxc_data = rpccurrml.fetchall_for_query_self("select CHANGE_DATE,NEXT_CHANGE_DATE,uxcPressure,uxcTemperature,uxcRH from UXC_ENV")
 
@@ -386,10 +371,6 @@ def test():
 def fill_imon_vmon_uxc_data():
     omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
     omds.connect_to_db('cman_int2r')
-
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-    rpccurrml.connect_to_db('RPCCURRML')
-    rpccurrml.self_cursor_mode()
 
     ce = Extractor_Oracle(omds)
 
@@ -499,9 +480,6 @@ def fill_imon_vmon_uxc_data():
             fromdate=todate
  
 def test_mysql_extractor():
-    rpccurrml = mysql_dbConnector(host='localhost',user='ppetkov',password='Fastunche')
-#    rpccurrml.connect_to_db('RPCCURRML')
-#    rpccurrml.self_cursor_mode()
 
     TrainingTable_extractor = Extractor_MySql(table_training.tablename,rpccurrml)
     

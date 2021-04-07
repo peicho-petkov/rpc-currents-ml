@@ -1,4 +1,4 @@
-from db_tools import table_predicted_current
+from db_tools import table_predicted_current, rpccurrml
 from db_tools import base as dbase
 from datetime import datetime
 
@@ -19,9 +19,6 @@ class PredictionsManager:
         
 
 if __name__ == '__main__':
-    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
-    rpccurrml.connect_to_db('RPCCURRML') 
-      
     pm = PredictionsManager(rpccurrml,-777,-315)
     pm.insert_record(datetime(2018,7,17,15,33,21),-15,-4,-5)
     

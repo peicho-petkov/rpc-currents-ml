@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from optparse import OptionParser
-from db_tools import table_mlmodelsconf, table_training
+from db_tools import table_mlmodelsconf, table_training, rpccurrml
 from db_tools import base as dbase
 from TrainerModule import MLModelConf,MLModelsConfManager
 
@@ -17,9 +17,6 @@ if __name__ == '__main__':
                        help="accepts supported ml classes only. accepts 'GLM_V2', currently.")
 
     (options, args) = oparser.parse_args()
-    
-    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
-    rpccurrml.connect_to_db('RPCCURRML')
     
     mconf = MLModelConf()
     mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
