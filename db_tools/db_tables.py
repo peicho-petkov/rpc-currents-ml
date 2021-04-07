@@ -362,6 +362,13 @@ class ConfigurationTable(dbTable):
         query=f"SELECT {self.parameter_value},{self.parameter_value_type} from {self.tablename} WHERE {self.parameter_name}='{parameter_name}'"
         return query
     
+class NotificationsTable:
+    ''' Stores wanings and errors. 
+        columns: rec_id, last_update, dpid, modelconf_id, type (waning/error), flag_raised_time, av_discrepancy, ack, mask, sent '''
+        #TODO: implementation...
+    def __init__(self):
+        pass
+ 
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()
