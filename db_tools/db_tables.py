@@ -362,13 +362,73 @@ class ConfigurationTable(dbTable):
         query=f"SELECT {self.parameter_value},{self.parameter_value_type} from {self.tablename} WHERE {self.parameter_name}='{parameter_name}'"
         return query
     
-class NotificationsTable:
-    ''' Stores wanings and errors. 
-        columns: rec_id, last_update, dpid, modelconf_id, type (waning/error), flag_raised_time, av_discrepancy, ack, mask, sent '''
-        #TODO: implementation...
-    def __init__(self):
-        pass
- 
+class NotificationsTable(dbTable):
+    ''' Stores warnings and errors. 
+        columns: rec_id, last_update, dpid, modelconf_id, notification type (warning/error),
+        flag_raised_time, av_discrepancy, sent, acknowleged, masked '''
+
+    def __init__(self, tablename="Notifications"):
+        super().__init__(tablename)
+        self.add_coll("rec_id","bigint auto_increment primary key")
+        self.add_coll("LAST_UPDATE","timestamp not null")
+        self.set_dpid_col()
+        self.set_modelconf_id_col()
+        self.set_notification_type_col()
+        self.set_flag_raised_time_col()
+        self.set_avg_discrepancy_col()
+        self.set_sent_col()
+        self.set_acknowledged_col()
+        self.set_masked_col()
+
+    def set_dpid_col(self,name="DPID",type="int not null"):
+        self.dpid=name
+        self.add_coll(name,type)
+
+    def set_modelconf_id_col(self,name="modelconf_id",type="int not null"):
+        self.modelconf_id=name
+        self.add_coll(name,type)
+
+    def set_notification_type_col(self,name="notification_type", type="VARCHAR(4096) not null"):
+        self.notification_type=name
+        self.add_coll(name,type)
+
+    def set_flag_raised_time_col(self,name="flag_raised_time",type="datetime not null"):
+        self.flag_raised_time=name
+        self.add_coll(name,type)
+
+    def set_avg_discrepancy_col(self,name="avg_discrepancy",type="float not null"):
+        self.avg_discrepancy=name
+        self.add_coll(name,type)
+
+    def set_sent_col(self,name="Sent",type="BIT(1)"):
+        self.sent=name
+        self.add_coll(name,type)
+
+    def set_acknowledged_col(self,name="Acknowledged",type="BIT(1)"):
+        self.acknowledged=name
+        self.add_coll(name,type)
+
+    def set_masked_col(self,name="Masked",type="BIT(1)"):
+        self.masked=name
+        self.add_coll(name,type)
+
+    def get_insert_notification_query(self,dpid,modelconf_id,notification_type,flag_raised_time,avg_discrepancy,sent,acknowledged,masked):
+        query=f"INSERT INTO {self.tablename} ({self.dpid},{self.modelconf_id},{self.notification_type},{self.flag_raised_time},{self.avg_discrepancy},{self.sent},{self.acknowledged},{self.masked}) VALUES ('{dpid}','{modelconf_id}','{notification_type}','{flag_raised_time}','{avg_discrepancy}','{sent}','{acknowledged}','{masked}')"
+        return query
+
+    def get_update_sent_col_query(self,sent,dpid,modelconf_id):
+        query=f"UPDATE {self.tablename} SET {self.sent}='{sent}' WHERE {self.dpid}='{dpid}' AND {self.modelconf_id}='{modelconf_id}'"
+        return query
+
+    def get_update_acknowledged_col_query(self,acknowledged,dpid,modelconf_id):
+        query=f"UPDATE {self.tablename} SET {self.acknowledged}='{acknowledged}' WHERE {self.dpid}='{dpid}' AND {self.modelconf_id}='{modelconf_id}'"
+        return query
+
+    def get_update_masked_col_query(self,Masked,dpid,modelconf_id):
+        query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.modelconf_id}='{modelconf_id}'"
+        return query
+    
+
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()
@@ -387,3 +447,10 @@ if __name__ == "__main__":
     print(conftable.get_add_parameter_query("Pers_time","5","float"))
     print(conftable.get_set_parameter_value_query("Pers_time","10.0"))
     
+    print("\n")
+    print("++++ Creating Notifications Table ++++")
+    print("\n")
+    notificationtable = NotificationsTable()
+    print("The table is called: ",notificationtable.tablename)
+    print(notificationtable.get_myqsl_create_query())
+    print(notificationtable.get_insert_notification_query(317,23,'warning','2018-03-02',4.5,1,0,0))

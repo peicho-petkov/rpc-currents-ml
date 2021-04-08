@@ -8,6 +8,7 @@ table_mlmodelsconf = db_tables.MLModelsConf()
 table_mlmodels = db_tables.MLModels()
 table_predicted_current = db_tables.PredictedCurrentsTable()
 table_configuration = db_tables.ConfigurationTable()
+table_notifications = db_tables.NotificationsTable()
 
 rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
 rpccurrml.connect_to_db('RPCCURRML')
