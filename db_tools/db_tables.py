@@ -447,9 +447,7 @@ if __name__ == "__main__":
     print(conftable.get_add_parameter_query("Pers_time","5","float"))
     print(conftable.get_set_parameter_value_query("Pers_time","10.0"))
     
-    print("\n")
-    print("++++ Creating Notifications Table ++++")
-    print("\n")
+    print("\n++++ Creating Notifications Table ++++\n")
     notificationtable = NotificationsTable()
     print("The table is called: ",notificationtable.tablename)
     print(notificationtable.get_myqsl_create_query())
