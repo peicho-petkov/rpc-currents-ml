@@ -11,7 +11,11 @@ rpccurrml.self_cursor_mode()
 notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,100)
 
 notificationstable=table_notifications
-query=notificationstable.get_myqsl_create_query()
 
-rpccurrml.execute_commit_query_self(query)
+#query=notificationstable.get_myqsl_create_query()
+#rpccurrml.execute_commit_query_self(query)
+
+query=notificationstable.get_insert_notification_query(316,23,'error','2017-06-06',6.5,1,0,0)
+query1=notificationstable.get_update_acknowledged_col_query(1,316,23)
+rpccurrml.execute_commit_query_self(query1)
 

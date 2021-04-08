@@ -400,15 +400,15 @@ class NotificationsTable(dbTable):
         self.avg_discrepancy=name
         self.add_coll(name,type)
 
-    def set_sent_col(self,name="Sent",type="BIT(1)"):
+    def set_sent_col(self,name="Sent",type="tinyint(1) not null"):
         self.sent=name
         self.add_coll(name,type)
 
-    def set_acknowledged_col(self,name="Acknowledged",type="BIT(1)"):
+    def set_acknowledged_col(self,name="Acknowledged",type="tinyint(1) not null"):
         self.acknowledged=name
         self.add_coll(name,type)
 
-    def set_masked_col(self,name="Masked",type="BIT(1)"):
+    def set_masked_col(self,name="Masked",type="tinyint(1) not null"):
         self.masked=name
         self.add_coll(name,type)
 
