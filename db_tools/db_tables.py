@@ -364,7 +364,7 @@ class ConfigurationTable(dbTable):
     
 class NotificationsTable(dbTable):
     ''' Stores warnings and errors. 
-        columns: rec_id, last_update, dpid, modelconf_id, notification type (warning/error),
+        columns: rec_id, last_update, dpid, model_id, notification type (warning/error),
         flag_raised_time, av_discrepancy, sent, acknowleged, masked '''
 
     def __init__(self, tablename="Notifications"):
@@ -372,7 +372,7 @@ class NotificationsTable(dbTable):
         self.add_coll("rec_id","bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE","timestamp not null")
         self.set_dpid_col()
-        self.set_modelconf_id_col()
+        self.set_model_id_col()
         self.set_notification_type_col()
         self.set_flag_raised_time_col()
         self.set_avg_discrepancy_col()
@@ -384,8 +384,8 @@ class NotificationsTable(dbTable):
         self.dpid=name
         self.add_coll(name,type)
 
-    def set_modelconf_id_col(self,name="modelconf_id",type="int not null"):
-        self.modelconf_id=name
+    def set_model_id_col(self,name="model_id",type="int not null"):
+        self.model_id=name
         self.add_coll(name,type)
 
     def set_notification_type_col(self,name="notification_type", type="VARCHAR(4096) not null"):
@@ -412,20 +412,20 @@ class NotificationsTable(dbTable):
         self.masked=name
         self.add_coll(name,type)
 
-    def get_insert_notification_query(self,dpid,modelconf_id,notification_type,flag_raised_time,avg_discrepancy,sent,acknowledged,masked):
-        query=f"INSERT INTO {self.tablename} ({self.dpid},{self.modelconf_id},{self.notification_type},{self.flag_raised_time},{self.avg_discrepancy},{self.sent},{self.acknowledged},{self.masked}) VALUES ('{dpid}','{modelconf_id}','{notification_type}','{flag_raised_time}','{avg_discrepancy}','{sent}','{acknowledged}','{masked}')"
+    def get_insert_notification_query(self,dpid,model_id,notification_type,flag_raised_time,avg_discrepancy,sent,acknowledged,masked):
+        query=f"INSERT INTO {self.tablename} ({self.dpid},{self.model_id},{self.notification_type},{self.flag_raised_time},{self.avg_discrepancy},{self.sent},{self.acknowledged},{self.masked}) VALUES ('{dpid}','{model_id}','{notification_type}','{flag_raised_time}','{avg_discrepancy}','{sent}','{acknowledged}','{masked}')"
         return query
 
-    def get_update_sent_col_query(self,sent,dpid,modelconf_id):
-        query=f"UPDATE {self.tablename} SET {self.sent}='{sent}' WHERE {self.dpid}='{dpid}' AND {self.modelconf_id}='{modelconf_id}'"
+    def get_update_sent_col_query(self,sent,dpid,model_id):
+        query=f"UPDATE {self.tablename} SET {self.sent}='{sent}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
 
-    def get_update_acknowledged_col_query(self,acknowledged,dpid,modelconf_id):
-        query=f"UPDATE {self.tablename} SET {self.acknowledged}='{acknowledged}' WHERE {self.dpid}='{dpid}' AND {self.modelconf_id}='{modelconf_id}'"
+    def get_update_acknowledged_col_query(self,acknowledged,dpid,model_id):
+        query=f"UPDATE {self.tablename} SET {self.acknowledged}='{acknowledged}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
 
-    def get_update_masked_col_query(self,Masked,dpid,modelconf_id):
-        query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.modelconf_id}='{modelconf_id}'"
+    def get_update_masked_col_query(self,Masked,dpid,model_id):
+        query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
     
 
