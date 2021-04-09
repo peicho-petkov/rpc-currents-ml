@@ -1,5 +1,6 @@
 from db_tools import table_predicted_current
 import time
+
 def datetime2unix(dt):
     return time.mktime(dt.timetuple())
 
@@ -20,14 +21,23 @@ class NotificationManager:
         ''' hard limit in uA - for errors raising '''
         self.hard_limit = hard_limit
 
+    def load_data(self, data, time_format='%Y-%m-%d %H:%M:%'):
+        self.timestamp=list()
+        self.prediction=list()
+        self.mon=list()
+        for row in data:
+            self.timestamp.append(row[0])
+            self.prediction.append(row[1])
+            self.mon.append(row[2])
+
     def set_persistence_time(self, persistence_time = 8192):
         ''' time period [s] above soft/hard limit to encounter warning/error '''
         self.persistence_time = persistence_time
 
-    def analyse(self, timestamp, prediction, mon):
-        lt = len(timestamp)
-        lp = len(prediction)
-        lm = len(mon)
+    def analyse(self):
+        lt = len(self.timestamp)
+        lp = len(self.prediction)
+        lm = len(self.mon)
         
         if not (lt == lp and lp == lm):
             raise "datasets len does not match..."
@@ -43,10 +53,10 @@ class NotificationManager:
 
         diff = []
         for kk in range(self.rolling_average_window - 1):
-            diff.append(mon[kk]-prediction[kk])
+            diff.append(self.mon[kk]-self.prediction[kk])
 
         for kk in range(self.rolling_average_window - 1, npoints):
-            diff.append(mon[kk]-prediction[kk])
+            diff.append(self.mon[kk]-self.prediction[kk])
             rav = sum(diff)/self.rolling_average_window
             diff.pop(0)
             
@@ -75,14 +85,14 @@ class NotificationManager:
                 soft_acc_n = soft_acc_n + 1
 
             if k_raised_hard > -1 and rav >= self.hard_limit:
-                if datetime2unix(timestamp[kk]) - datetime2unix(timestamp[k_raised_soft]) >= self.persistence_time: 
-                    yield "ERROR", timestamp[kk], hard_acc/hard_acc_n
+                if datetime2unix(self.timestamp[kk]) - datetime2unix(self.timestamp[k_raised_soft]) >= self.persistence_time: 
+                    yield "ERROR", self.timestamp[kk], hard_acc/hard_acc_n
                     k_raised_hard = -1
                     hard_acc = 0.0
                     hard_acc_n = 0
             elif k_raised_soft > -1 and rav >= self.soft_limit:
-                if datetime2unix(timestamp[kk]) - datetime2unix(timestamp[k_raised_soft]) >= self.persistence_time: 
-                    yield "WARNING", timestamp[kk], soft_acc/soft_acc_n
+                if datetime2unix(self.timestamp[kk]) - datetime2unix(self.timestamp[k_raised_soft]) >= self.persistence_time: 
+                    yield "WARNING", self.timestamp[kk], soft_acc/soft_acc_n
                     k_raised_soft = -1
                     soft_acc = 0.0
                     soft_acc_n = 0
