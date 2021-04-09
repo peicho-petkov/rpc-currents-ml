@@ -96,3 +96,4 @@ class NotificationManager:
                     k_raised_soft = -1
                     soft_acc = 0.0
                     soft_acc_n = 0
+
