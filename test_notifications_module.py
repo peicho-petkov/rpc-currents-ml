@@ -47,6 +47,6 @@ if __name__="__main__":
     notmanager.load_data(data)
     
     for message, timestamp, avgdiff in notmanager.analyse():    
-        myquery=table_notifications.get_insert_notification_query(317,4,message,timestamp,avgdiff,1,0,0)
+        myquery=table_notifications.get_insert_notification_query(dpid,model_id,message,timestamp,avgdiff,1,0,0)
         rpccurrml.execute_commit_query_self(myquery)
 
