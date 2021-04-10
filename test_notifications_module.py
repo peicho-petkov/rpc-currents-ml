@@ -4,33 +4,49 @@ from TrainerModule import DataManager
 from db_tools import rpccurrml
 from db_tools import base as dbase
 from datetime import datetime
+from optparse import OptionParser
 
-rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
-rpccurrml.connect_to_db('RPCCURRML')
-rpccurrml.self_cursor_mode()
+if __name__="__main__":
+    oparser = OptionParser()
+    oparser.add_option("--model-id", action="store", type="int", dest="model_id", default=-1,
+                        help="The model_id of the model you want to analyse, integer")
+    oparser.add_option("--dpid", action="store" type="int", dest="dpid",
+                        help="The dpid of the hv channel you want to analyse, integer")
+    oparser.add_option("--start-date", action="store", type="int", dest="start_date", 
+                        help="The starting date of the period you want to analyse")
+    oparser.add_option("--end-date", action="store", type="int", dest="end_date", 
+                        help="The end date of the period you want to analyse")
+    
+    (options, args) = oparser.parse_args()
+    model_id = options.model_id
+    dpid = options.dpid
+    start_date = datetime.strptime(options.start_date, '%Y-%m-%d')
+    end_date = datetime.strptime(options.end_date, '%Y-%m-%d')
+
+    rpccurrml = dbase.mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
+    rpccurrml.connect_to_db('RPCCURRML')
+    rpccurrml.self_cursor_mode()
 
 
-extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
-extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
-extractor_pred_curr_table.set_timestamp_col('predicted_for')
-extractor_pred_curr_table.set_dpid_col_name('dpid')
-extractor_pred_curr_table.set_DPID(317)
-extractor_pred_curr_table.set_model_id_col_name('model_id')
-extractor_pred_curr_table.set_model_id(4)
-start_date=datetime.strptime('2016-05-06','%Y-%m-%d')
-end_date=datetime.strptime('2016-06-30','%Y-%m-%d')
-extractor_pred_curr_table.set_time_widow(start_date,end_date)
+    extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
+    extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
+    extractor_pred_curr_table.set_timestamp_col('predicted_for')
+    extractor_pred_curr_table.set_dpid_col_name('dpid')
+    extractor_pred_curr_table.set_DPID(dpid)
+    extractor_pred_curr_table.set_model_id_col_name('model_id')
+    extractor_pred_curr_table.set_model_id(model_id)
+    extractor_pred_curr_table.set_time_widow(start_date,end_date)
 
-query=extractor_pred_curr_table.get_data_by_model_id_query()
-data=rpccurrml.fetchall_for_query_self(query)
+    query=extractor_pred_curr_table.get_data_by_model_id_query()
+    data=rpccurrml.fetchall_for_query_self(query)
 
-notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,10)
-notmanager.set_soft_limit(1)
-notmanager.set_hard_limit(3)
-notmanager.set_persistence_time(100)
-notmanager.load_data(data)
-# notmanager.analyse()
-for message, timestamp, avgdiff in notmanager.analyse():    
-    myquery=table_notifications.get_insert_notification_query(317,4,message,timestamp,avgdiff,1,0,0)
-    rpccurrml.execute_commit_query_self(myquery)
+    notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,10)
+    notmanager.set_soft_limit(1)
+    notmanager.set_hard_limit(3)
+    notmanager.set_persistence_time(100)
+    notmanager.load_data(data)
+    
+    for message, timestamp, avgdiff in notmanager.analyse():    
+        myquery=table_notifications.get_insert_notification_query(317,4,message,timestamp,avgdiff,1,0,0)
+        rpccurrml.execute_commit_query_self(myquery)
 
