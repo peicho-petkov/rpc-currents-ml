@@ -24,14 +24,13 @@ extractor_pred_curr_table.set_time_widow(start_date,end_date)
 query=extractor_pred_curr_table.get_data_by_model_id_query()
 data=rpccurrml.fetchall_for_query_self(query)
 
-notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,100)
-notmanager.set_soft_limit()
-notmanager.set_hard_limit()
-notmanager.set_persistence_time()
+notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,10)
+notmanager.set_soft_limit(1)
+notmanager.set_hard_limit(3)
+notmanager.set_persistence_time(100)
 notmanager.load_data(data)
 # notmanager.analyse()
-for message, timestamp, avgdiff in notmanager.analyse():
-    
+for message, timestamp, avgdiff in notmanager.analyse():    
     myquery=table_notifications.get_insert_notification_query(317,4,message,timestamp,avgdiff,1,0,0)
-    rpccurml.execute_commit_query_self(myquery)
+    rpccurrml.execute_commit_query_self(myquery)
 
