@@ -7,12 +7,10 @@ class Configuration:
         
     def AddParameter(self,par_name,par_val,par_val_type):
         query = table_configuration.get_add_parameter_query(par_name,par_val,par_val_type)
-        print(query)
         self.db_conn.execute_commit_query_self(query)
     
     def SetParameter(self,par_name,par_val):
-        query = table_configuration.get_set_parameter_query(par_name,par_val)
-        print(query)
+        query = table_configuration.get_set_parameter_value_query(par_name,par_val)
         self.db_conn.execute_commit_query_self(query)
     
     def GetParameter(self,par_name):

@@ -1,16 +1,18 @@
+#!/usr/bin/env python3
 from db_tools import table_notifications, table_predicted_current
 from NotificationModule import NotificationManager
 from TrainerModule import DataManager
 from db_tools import rpccurrml
+from Configuration import Configuration
 from db_tools import base as dbase
 from datetime import datetime
 from optparse import OptionParser
 
-if __name__="__main__":
+if __name__ == "__main__":
     oparser = OptionParser()
     oparser.add_option("--model-id", action="store", type="int", dest="model_id", default=-1,
                         help="The model_id of the model you want to analyse, integer")
-    oparser.add_option("--dpid", action="store" type="int", dest="dpid",
+    oparser.add_option("--dpid", action="store", type="int", dest="dpid",
                         help="The dpid of the hv channel you want to analyse, integer")
     oparser.add_option("--start-date", action="store", type="int", dest="start_date", 
                         help="The starting date of the period you want to analyse")
@@ -40,10 +42,16 @@ if __name__="__main__":
     query=extractor_pred_curr_table.get_data_by_model_id_query()
     data=rpccurrml.fetchall_for_query_self(query)
 
-    notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,10)
-    notmanager.set_soft_limit(1)
-    notmanager.set_hard_limit(3)
-    notmanager.set_persistence_time(100)
+    conf = Configuration()
+    rolling_window = conf.GetParameter("rolling_window")
+    persistence_time = conf.GetParamater("persistence_time")
+    soft_limit = conf.GetParameter("soft_limit")
+    hard_limit = conf.GetParameter("hard_limit")
+  
+    notmanager = NotificationManager.NotificationManager(rpccurrml,table_predicted_current,rolling_window)
+    notmanager.set_soft_limit(soft_limit)
+    notmanager.set_hard_limit(hard_limit)
+    notmanager.set_persistence_time(persistence_time)
     notmanager.load_data(data)
     
     for message, timestamp, avgdiff in notmanager.analyse():    
