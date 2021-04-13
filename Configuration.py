@@ -41,4 +41,4 @@ class Configuration:
                 for v in value_tmp:
                     value.append(str(v))
         return value
-        
+

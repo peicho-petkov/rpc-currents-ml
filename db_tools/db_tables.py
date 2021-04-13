@@ -23,11 +23,11 @@ class dbTable:
         return query
     
     def get_notnull_coll_names(self):
-        collnames=[]
+        colnames=[]
         for colname, coltype in self.colls.items():
             if "not null" in str(coltype).to_lower():
-                collnames.append(collnames)
-        return collnames
+                colnames.append(colname)
+        return colnames
     
     def get_col_names(self):
         return list(self.colls)
@@ -180,6 +180,7 @@ class MLModels(dbTable):
         self.set_mse()
         self.set_model_path()
         self.set_mojo_path()
+        self.set_active()
 
     def set_modelconf_id(self,name="MODELCONF_ID",type="int not null"):
         self.modelconf_id=name
@@ -205,8 +206,12 @@ class MLModels(dbTable):
         self.mojo_path=name
         self.add_coll(name,type)
 
-    def get_insert_query(self,modelconf_id,dpid,r2,mse,model_path,mojo_path):
-        query=f"INSERT INTO {self.tablename} ({self.modelconf_id}, {self.dpid}, {self.r2}, {self.mse}, {self.model_path}, {self.mojo_path}) VALUES ('{modelconf_id}','{dpid}','{r2}','{mse}','{model_path}','{mojo_path}')"
+    def set_active(self,name="ACTIVE",type="tinyint(1) default 0"):
+        self.active=name
+        self.add_coll(name,type)
+
+    def get_insert_query(self,modelconf_id,dpid,r2,mse,model_path,mojo_path, active_val=0):
+        query = f"INSERT INTO {self.tablename} ({self.modelconf_id}, {self.dpid}, {self.r2}, {self.mse}, {self.model_path}, {self.mojo_path}, {self.active}) VALUES ('{modelconf_id}','{dpid}','{r2}','{mse}','{model_path}','{mojo_path}','{active_val}')"
         return query
     
     def get_update_model_query(self, model_id, modelconf_id, dpid, r2, mse, model_path, mojo_path):
@@ -214,7 +219,11 @@ class MLModels(dbTable):
         return query
     
     def get_model_query(self,modelconf_id,dpid):
-        query=f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
+        query = f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
+        return query
+
+    def get_set_active_query(self,active_val, modelconf_id,dpid):
+        query = f"UPDATE {self.tablename} SET {self.active} = '{active_val}' WHERE {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
         return query
 
 class MLModelsConf(dbTable):
@@ -424,7 +433,7 @@ class NotificationsTable(dbTable):
         query=f"UPDATE {self.tablename} SET {self.acknowledged}='{acknowledged}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
 
-    def get_update_masked_col_query(self,Masked,dpid,model_id):
+    def get_update_masked_col_query(self,masked,dpid,model_id):
         query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
     
