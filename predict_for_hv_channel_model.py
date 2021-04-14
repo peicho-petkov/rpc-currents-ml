@@ -19,7 +19,7 @@ if __name__ == '__main__':
     oparser.add_option("--predict-from", action="store", type="string", dest="predict_from",
                        help="the beginning of the prediction period [yyyy-mm-dd]")
     oparser.add_option("--predict-to", action="store", type="string", dest="predict_to",
-                       help="the end of the prediction period [dd-mm-yyyy]")
+                       help="the end of the prediction period [yyyy-mm-dd]")
 
     (options, args) = oparser.parse_args()
 

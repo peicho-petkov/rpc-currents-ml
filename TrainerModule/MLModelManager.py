@@ -118,6 +118,7 @@ class MLModel:
         self.mse = -1
         self.model_path = ''
         self.mojo_path = ''
+        self.active = 0 
 
 class MLModelsManager:
     def __init__(self,connector,mlmodelstab):
