@@ -228,11 +228,12 @@ class MLModelsManager:
         # The three commented lines above are redundant to the next two lines
         
         query = mlmodelsconftab.get_select_modelconfid_by_modelconfname_query(modelconf_name)
-        modelconf_id = self._connector.fetchall_for_query_self(query)[0]
-
+        modelconf_id = self._connector.fetchall_for_query_self(query)[0][0]
+        print(f"The modelconf_id for this name is: {modelconf_id}")
         thequery = self._mlmodelstab.get_get_model_ids_by_conf_id_query(modelconf_id)
-        model_ids = list()
         model_ids = self._connector.fetchall_for_query_self(thequery)
+        model_ids = [i[0] for i in model_ids]
+        print(f"The model ids are : {model_ids}")
         if len(model_ids) < 1:
             print("[-][-] No models found for that model configuration name!! [-][-]")
             exit(0)

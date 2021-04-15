@@ -3,6 +3,7 @@
 from TrainerModule import MLModelManager
 from db_tools import table_mlmodels, table_mlmodelsconf
 from optparse import OptionParser
+from db_tools import base as dbase
 
 if __name__ == "__main__":
     oparser = OptionParser()
