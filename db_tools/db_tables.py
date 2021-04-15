@@ -104,6 +104,14 @@ class TrainingDataTable(dbTable):
         self.hours_without_lumi=name
         self.add_coll(name,type)
 
+    def get_get_number_of_rows_for_dpid_in_period_query(self, dpid, start_date, end_date):
+        query = f"select count(*) from {self.tablename} where {self.dpid}='{dpid}' and {self.change_date} between '{start_date}' and '{end_date}'' "
+        return query
+
+    def get_get_all_dpids_query(self):
+        query = f"select distinct {self.dpid} from {self.tablename}"
+        return query 
+
 class LumiDataTable(dbTable):
     def __init__(self, tablename='LUMI_DATA'):
         super().__init__(tablename)
@@ -225,6 +233,26 @@ class MLModels(dbTable):
     def get_set_active_query(self,active_val, modelconf_id,dpid):
         query = f"UPDATE {self.tablename} SET {self.active} = '{active_val}' WHERE {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
         return query
+    
+    def get_set_active_for_id(self, model_id, active):
+        query = f"UPDATE {self.tablename} SET {self.active} = '{active}' WHERE {self.model_id} = '{model_id}'"
+        return query
+
+    def get_get_model_ids_by_conf_id_query(self, modelconf_id):
+        query = f"select {self.model_id} from {self.tablename} where {self.modelconf_id}='{modelconf_id}'"
+        return query
+
+    def get_get_dpid_by_model_id_query(self, model_id):
+        query = f"select {self.dpid} from {self.tablename} where {self.model_id} = '{model_id}'"
+        return query 
+
+    def get_get_active_model_ids_query(self):
+        query = f"select {self.model_id} from {self.tablename} where {self.active}=1"
+        return query 
+
+    def get_get_confid_dpid_for_mid_query(self, model_id):
+        query = f"select {self.modelconf_id}, {self.dpid} from {self.tablename} where {self.model_id} = '{model_id}'"
+        return query
 
 class MLModelsConf(dbTable):
     def __init__(self, tablename='MLModelsConf'):
@@ -292,6 +320,14 @@ class MLModelsConf(dbTable):
 
     def get_select_query_by_modelconf_id(self,modelconf_id):
         query=f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
+        return query
+
+    def get_select_modelconfid_by_modelconfname_query(self, modelconf_name):
+        query=f"select {self.modelconf_id} from {self.tablename} where {self.name}='{modelconf_name}'"
+        return query
+
+    def get_select_modelconfname_by_modelconfid_query(self, modelconf_id):
+        query=f"select {self.name} from {self.tablename} where {self.modelconf_id}='{modelconf_id}'"
         return query
 
 class PredictedCurrentsTable(dbTable):
