@@ -17,5 +17,8 @@ if __name__ == "__main__":
     rpccurrml.connect_to_db("RPCCURRML")
     rpccurrml.self_cursor_mode()
 
+    query = table_mlmodels.get_set_active(0)
+    rpccurrml.execute_commit_query_self(query)
+
     modelmanager = MLModelManager.MLModelsManager(rpccurrml, table_mlmodels)
     modelmanager.set_mlmodels_active_state(table_mlmodelsconf, modelconf_name)

@@ -11,10 +11,15 @@ def predict(model_id, flag, predict_from, predict_to):
     rpccurrml.connect_to_db("RPCCURRML")
     rpccurrml.self_cursor_mode()
 
-    thequery = table_mlmodels.get_get_confname_dpid_for_mid_query(model_id)
-    (modelconf_id, dpid) = rpccurrml.fetchall_for_query_self(thequery)
+    thequery = table_mlmodels.get_get_confid_dpid_for_mid_query(model_id)
+    result = rpccurrml.fetchall_for_query_self(thequery)
+    print(f"The query returns {result}")
+    modelconf_id = result[0][0]
+    print(f"Modelconfid is {modelconf_id}")
+    dpid = result[0][1]
+    print(f"dpid is {dpid}")
     newquery = table_mlmodelsconf.get_select_modelconfname_by_modelconfid_query(modelconf_id)
-    conf_name = rpccurrml.fetchall_for_query_self(newquery)
+    conf_name = rpccurrml.fetchall_for_query_self(newquery)[0][0]
 
     predict_from = datetime.strptime(predict_from,'%Y-%m-%d')
     predict_to = datetime.strptime(predict_to,'%Y-%m-%d')
