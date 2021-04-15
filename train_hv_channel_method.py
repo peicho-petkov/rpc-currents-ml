@@ -1,7 +1,7 @@
 import RPCHVChannelModel
 import h2o
 
-def train(model_conf_name, dpid, flag=56, mojopath, modelpath):
+def train(model_conf_name, dpid, flag, mojopath, modelpath):
     conf_name = model_conf_name
     
     h2o.init()

@@ -3,7 +3,7 @@
 from db_tools import table_predicted_current, table_training, table_mlmodels, table_mlmodelsconf, table_configuration
 from db_tools import base as dbase 
 from TrainerModule import MLModelManager 
-
+from optparse import OptionParser
 if __name__ == "__main__":
     oparser = OptionParser()
     oparser.add_option("--pred-start-date", action="store", type="string", dest="start_date",
