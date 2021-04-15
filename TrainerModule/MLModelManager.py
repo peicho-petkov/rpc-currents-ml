@@ -1,4 +1,5 @@
 from db_tools import db_tables
+from db_tools import rpccurrml
 
 class MLModelConf:
     def __init__(self):
@@ -219,3 +220,26 @@ class MLModelsManager:
         
         return ml_model
         
+    def set_mlmodels_active_state(self, mlmodelsconftab, modelconf_name, enable=1):
+        # confmanager = MLModelsConfManager(self._connector, mlmodelsconftab)
+        # modelconf = confmanager.get_by_name(modelconf_name)
+        # modelconf_id = modelconf.modelconf_id
+        # The three commented lines above are redundant to the next two lines
+        
+        query = mlmodelsconftab.get_select_modelconfid_by_modelconfname_query(modelconf_name)
+        modelconf_id = self._connector.fetchall_for_query_self(query)[0]
+
+        thequery = self._mlmodelstab.get_get_model_ids_by_conf_id_query(modelconf_id)
+        model_ids = list()
+        model_ids = self._connector.fetchall_for_query_self(thequery)
+        if len(model_ids) < 1:
+            print("[-][-] No models found for that model configuration name!! [-][-]")
+            exit(0)
+
+        for model_id in model_ids:
+            myquery = self._mlmodelstab.get_set_active_for_id(model_id, enable)
+            self._connector.execute_commit_query_self(myquery)
+        
+        # return modelconf, model_ids 
+    
+
