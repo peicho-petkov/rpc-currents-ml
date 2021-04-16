@@ -5,7 +5,7 @@ from Configuration import Configuration
 from db_tools import base as dbase
 from datetime import datetime
 
-def analyse_predictions(model_id, dpid, start_date, end_date, rpccurrml):
+def analyse_prediction(model_id, dpid, start_date, end_date, rpccurrml):
     extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
     extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
     extractor_pred_curr_table.set_timestamp_col('predicted_for')
