@@ -258,6 +258,13 @@ class MLModels(dbTable):
         query = f"select {self.modelconf_id}, {self.dpid} from {self.tablename} where {self.model_id} = '{model_id}'"
         return query
 
+    def get_get_active_modelconf_id_query(self):
+        query = f"select distinct {self.modelconf_id} from {self.tablename} where {self.active}=1"
+        return query
+
+    def get_count_for_conf_id_dpid_query(self, modelconf_id, dpid):
+        query = f"select count(*) from {self.tablename} where {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
+        return query 
 class MLModelsConf(dbTable):
     def __init__(self, tablename='MLModelsConf'):
         super().__init__(tablename)
