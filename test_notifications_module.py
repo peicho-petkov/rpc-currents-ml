@@ -14,9 +14,9 @@ if __name__ == "__main__":
                         help="The model_id of the model you want to analyse, integer")
     oparser.add_option("--dpid", action="store", type="int", dest="dpid",
                         help="The dpid of the hv channel you want to analyse, integer")
-    oparser.add_option("--start-date", action="store", type="int", dest="start_date", 
+    oparser.add_option("--start-date", action="store", type="string", dest="start_date", 
                         help="The starting date of the period you want to analyse")
-    oparser.add_option("--end-date", action="store", type="int", dest="end_date", 
+    oparser.add_option("--end-date", action="store", type="string", dest="end_date", 
                         help="The end date of the period you want to analyse")
     
     (options, args) = oparser.parse_args()

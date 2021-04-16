@@ -1,4 +1,4 @@
-from db_tables import table_predicted_current
+from db_tools import table_predicted_current, table_notifications
 from NotificationModule import NotificationManager
 from TrainerModule import DataManager
 from Configuration import Configuration
@@ -6,6 +6,9 @@ from db_tools import base as dbase
 from datetime import datetime
 
 def analyse_prediction(model_id, dpid, start_date, end_date, rpccurrml):
+    start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
     extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
     extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
     extractor_pred_curr_table.set_timestamp_col('predicted_for')
@@ -19,11 +22,15 @@ def analyse_prediction(model_id, dpid, start_date, end_date, rpccurrml):
     data=rpccurrml.fetchall_for_query_self(query)
 
     conf = Configuration(rpccurrml)
-    rolling_window = conf.GetParameter("rolling_window")
-    persistence_time = conf.GetParameter("persistence_time")
-    soft_limit = conf.GetParameter("soft_limit")
-    hard_limit = conf.GetParameter("hard_limit")
-  
+    rolling_window = int(conf.GetParameter("rolling_window"))
+    persistence_time = int(conf.GetParameter("persistence_time"))
+    soft_limit = float(conf.GetParameter("soft_limit"))
+    hard_limit = float(conf.GetParameter("hard_limit"))
+    print(f"\n The rolling window is: {rolling_window}")
+    print(f"\n The persistence time is: {persistence_time}")
+    print(f"\n The soft limit is: {soft_limit}")
+    print(f"\n The hard limit is: {hard_limit}") 
+ 
     notmanager = NotificationManager.NotificationManager(rpccurrml, rolling_window)
     notmanager.set_soft_limit(soft_limit)
     notmanager.set_hard_limit(hard_limit)

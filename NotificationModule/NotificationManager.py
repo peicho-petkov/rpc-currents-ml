@@ -39,7 +39,7 @@ class NotificationManager:
         lm = len(self.mon)
         
         if not (lt == lp and lp == lm):
-            raise "datasets len does not match..."
+            raise Exception("datasets len does not match...")
 
         npoints = lm
 
@@ -51,6 +51,9 @@ class NotificationManager:
         hard_acc_n = 0
 
         diff = []
+
+        print(f"\n ++++++ The index range goes from 0 to {self.rolling_average_window - 1} +++++ \n")
+        print(f"\n ++++++ The mon length is {lm} +++++ \n")
         for kk in range(self.rolling_average_window - 1):
             diff.append(self.mon[kk]-self.prediction[kk])
 
