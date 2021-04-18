@@ -60,9 +60,9 @@ def predict(model_id, flag, predict_from, predict_to):
 
     imon = dataset.as_data_frame()[table_training.imon].tolist()
 
-    print("pred:",pred)
-    print("dataset.names:",dataset.names)
-    print("dataset.types:",dataset.types)
+    # print("pred:",pred)
+    # print("dataset.names:",dataset.names)
+    # print("dataset.types:",dataset.types)
 
     for i in range(n):
         pred_curr = pred[i]

@@ -254,6 +254,10 @@ class MLModels(dbTable):
         query = f"select {self.model_id} from {self.tablename} where {self.active}=1"
         return query 
 
+    def get_get_active_model_ids_and_dpids_query(self):
+        query = f"select {self.model_id}, {self.dpid} from {self.tablename} where {self.active}=1"
+        return query 
+
     def get_get_confid_dpid_for_mid_query(self, model_id):
         query = f"select {self.modelconf_id}, {self.dpid} from {self.tablename} where {self.model_id} = '{model_id}'"
         return query

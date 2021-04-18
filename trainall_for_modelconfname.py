@@ -40,5 +40,7 @@ if __name__ == "__main__":
     dpids = rpccurrml.fetchall_for_query_self(query)
     dpids = [i[0] for i in dpids] 
 
+    h2o.init()
+
     for dpid in dpids:
         train_hv_channel_method.train(modelconf_name, dpid, flag, mojopath, modelpath)

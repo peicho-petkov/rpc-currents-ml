@@ -33,9 +33,9 @@ class mysql_dbConnector(dbConnector):
         self._db = None
         self._cursor = None
 
-    def __del__(self):
-        if self._db is not None:
-            self._db.close()
+    # def __del__(self):
+    #     if self._db is not None:
+    #         self._db.close()
 
 
     def connect_to_db(self, database=None):

@@ -4,7 +4,7 @@ import h2o
 def train(model_conf_name, dpid, flag, mojopath, modelpath):
     conf_name = model_conf_name
     
-    h2o.init()
+    # h2o.init()
     
     RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
     

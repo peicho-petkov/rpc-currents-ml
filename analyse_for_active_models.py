@@ -2,6 +2,7 @@
 
 from db_tools import table_predicted_current, table_training, table_mlmodels, table_mlmodelsconf, table_configuration
 from db_tools import base as dbase 
+from db_tools import rpccurrml
 from Configuration import Configuration
 from optparse import OptionParser
 import analyse_for_period
@@ -20,22 +21,22 @@ if __name__ == "__main__":
     # start_date = datetime.strptime(start_date, '%Y-%m-%d')
     # end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
-    rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
-    rpccurrml.connect_to_db("RPCCURRML")
-    rpccurrml.self_cursor_mode()
+    # rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
+    # rpccurrml.connect_to_db("RPCCURRML")
+    # rpccurrml.self_cursor_mode()
 
-    query = table_mlmodels.get_get_active_model_ids_query()
+    query = table_mlmodels.get_get_active_model_ids_and_dpids_query()
     print(query)
     active_model_ids = rpccurrml.fetchall_for_query_self(query)
-    active_model_ids = [i[0] for i in active_model_ids]
+    active_model_ids = [(i[0],i[1]) for i in active_model_ids]
     print(active_model_ids)
     conf = Configuration(rpccurrml)
     flag = conf.GetParameter("flag")
 
-    for model_id in active_model_ids:
-        newquery = table_mlmodels.get_get_dpid_by_model_id_query(model_id)
-        print(newquery)
-        dpid = rpccurrml.fetchall_for_query_self(newquery)[0][0]
+    for model_id, dpid in active_model_ids:
+        # newquery = table_mlmodels.get_get_dpid_by_model_id_query(model_id)
+        # print(newquery)
+        # dpid = rpccurrml.fetchall_for_query_self(newquery)[0][0]
         print(f"The dpid is: {dpid}")
       
         try:
