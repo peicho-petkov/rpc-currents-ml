@@ -24,6 +24,9 @@ def get_for_dpid(dpid,flag):
     extractor_table_training.set_FLAG(flag)
     query = extractor_table_training.get_data_by_dpid_flag_query()
     data = rpccurrml.fetchall_for_query_self(query)
+    # check if len data > 0
+    if len(data) < 1:
+        return None
     model = trainer.train_model_for_dpid(extractor_table_training._DPID,data)
     return model
 
@@ -31,6 +34,8 @@ def get_for_dpid(dpid,flag):
 def train_and_register_for_dpid(dpid,flag,forceupdate=False):
     model = get_for_dpid(dpid,flag)
     print("model type ", type(model))
+    if model is None:
+        return -2
     model_id = model_manager.RegisterMLModel(model)
     if model_id < 0 and forceupdate:
         model_id = model_manager.UpdateRegistedMLModel(model)

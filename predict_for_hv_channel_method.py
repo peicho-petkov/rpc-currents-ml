@@ -7,9 +7,6 @@ from db_tools import base as dbase
 from datetime import datetime
 
 def predict(model_id, flag, predict_from, predict_to):
-    rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
-    rpccurrml.connect_to_db("RPCCURRML")
-    rpccurrml.self_cursor_mode()
 
     thequery = table_mlmodels.get_get_confid_dpid_for_mid_query(model_id)
     result = rpccurrml.fetchall_for_query_self(thequery)
@@ -24,7 +21,7 @@ def predict(model_id, flag, predict_from, predict_to):
     predict_from = datetime.strptime(predict_from,'%Y-%m-%d')
     predict_to = datetime.strptime(predict_to,'%Y-%m-%d')
         
-    h2o.init()
+    # h2o.init()
     
     mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
     
@@ -44,6 +41,10 @@ def predict(model_id, flag, predict_from, predict_to):
     
     query = extractor_table_training.get_data_by_dpid_flag_query()
     data = rpccurrml.fetchall_for_query_self(query)
+
+    # check if len data > 0
+    if len(data) < 1:
+        return False
 
     mlinput = MLModelInput.ModelInput(mconf)
         
@@ -75,3 +76,5 @@ def predict(model_id, flag, predict_from, predict_to):
     
     pm.commit_records()
     print("prediction done...")
+
+    return True

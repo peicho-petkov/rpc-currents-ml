@@ -2,12 +2,14 @@
 
 from db_tools import table_predicted_current, table_training, table_mlmodels, table_mlmodelsconf, table_configuration
 from db_tools import base as dbase 
+from db_tools import rpccurrml
 from TrainerModule import MLModelManager 
 from Configuration import Configuration
 from optparse import OptionParser
 import predict_for_hv_channel_method
 import analyse_for_period
 from datetime import datetime
+import h2o
 
 if __name__ == "__main__":
     oparser = OptionParser()
@@ -22,9 +24,9 @@ if __name__ == "__main__":
     # start_date = datetime.strptime(start_date, '%Y-%m-%d')
     # end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
-    rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
-    rpccurrml.connect_to_db("RPCCURRML")
-    rpccurrml.self_cursor_mode()
+    # rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
+    # rpccurrml.connect_to_db("RPCCURRML")
+    # rpccurrml.self_cursor_mode()
 
     query = table_mlmodels.get_get_active_model_ids_query()
     print(query)
@@ -34,18 +36,19 @@ if __name__ == "__main__":
     conf = Configuration(rpccurrml)
     flag = conf.GetParameter("flag")
 
+    h2o.init()
+
     for model_id in active_model_ids:
-        newquery = table_mlmodels.get_get_dpid_by_model_id_query(model_id)
-        print(newquery)
-        dpid = rpccurrml.fetchall_for_query_self(newquery)[0][0]
-        print(f"The dpid is: {dpid}")
-        thequery = table_training.get_get_number_of_rows_for_dpid_in_period_query(dpid, start_date, end_date)
-        count = rpccurrml.fetchall_for_query_self(thequery)[0][0]
-        print(f"number of rows is {count}")
-        if count < 1:
-            print(f"No data for dpid {dpid} in period {start_date} to {end_date}")
+        # newquery = table_mlmodels.get_get_dpid_by_model_id_query(model_id)
+        # print(newquery)
+        # dpid = rpccurrml.fetchall_for_query_self(newquery)[0][0]
+        # print(f"The dpid is: {dpid}")
+        
+        ok = predict_for_hv_channel_method.predict(model_id, flag, start_date, end_date)
+
+        if not ok:
+            print(f"No data for {model_id} in period {start_date} to {end_date}")
             continue
-        predict_for_hv_channel_method.predict(model_id, flag, start_date, end_date)
 
     # for model_id in active_model_ids:
         # try:

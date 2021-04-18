@@ -41,9 +41,4 @@ if __name__ == "__main__":
     dpids = [i[0] for i in dpids] 
 
     for dpid in dpids:
-        thequery = table_training.get_get_number_of_rows_for_dpid_in_period_query(dpid, train_start_date, train_end_date)
-        count = rpccurrml.fetchall_for_query_self(thequery)[0][0]
-        if count < 1:
-            print(f"No data for dpid {dpid} in period {train_start_date} to {train_end_date}")
-            continue
         train_hv_channel_method.train(modelconf_name, dpid, flag, mojopath, modelpath)
