@@ -7,6 +7,7 @@ from TrainerModule import MLModelManager
 from optparse import OptionParser
 import train_hv_channel_method
 from Configuration import Configuration
+import h2o
 
 if __name__ == "__main__":
     oparser = OptionParser()
