@@ -155,7 +155,7 @@ class MLModelsManager:
         query = self._mlmodelstab.get_model_query(ml_model.modelconf_id,ml_model.dpid)
         res = self._connector.fetchall_for_query_self(query)
         if len(res) != 1:
-            return -2
+            return -3
 
         col_names = self._mlmodelstab.get_col_names()
         col_values = res[0]
@@ -168,7 +168,7 @@ class MLModelsManager:
         query = self._mlmodelstab.get_update_model_query(ml_model.model_id, ml_model.modelconf_id, ml_model.dpid, ml_model.r2, ml_model.mse, ml_model.model_path, ml_model.mojo_path)
         print(query)
         self._connector.execute_commit_query_self(query)
-        return 0
+        return ml_model.model_id
         
     def get_by_modelconf_id_dpid(self,modelconf_id,dpid):
         query = self._mlmodelstab.get_model_query(modelconf_id,dpid)
