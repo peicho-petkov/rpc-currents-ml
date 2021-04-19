@@ -4,10 +4,8 @@ import time
 import train_hv_channel_method
 from Configuration import Configuration
 from TrainerModule import MLModelManager
+from db_tools import rpccurrml
 
-rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
-rpccurrml.connect_to_db("RPCCURRML")
-rpccurrml.self_cursor_mode()
 
 while True:
     print("\n ++++++++++ NEW CYCLE BEGINS ++++++++++ \n")
@@ -50,13 +48,13 @@ while True:
             model_path = conf.GetParameter("modelpath")
             train_hv_channel_method.train(conf_name, dpid, flag, mojo_path, model_path)
             print("\n Finished Training \n")
-
-            aquery = table_mlmodels.get_set_active_query(1, active_conf, dpid)
-            rpccurrml.execute_commit_query_self(aquery)
+            #TODO: add condition ...
+            # aquery = table_mlmodels.get_set_active_query(1, active_conf, dpid)
+            # rpccurrml.execute_commit_query_self(aquery)
             
             c = c + 1
         else:
-            time.sleep(2)
+            # time.sleep(2)
             continue 
 
     print(f"In this cycle, {c} models were trained")
