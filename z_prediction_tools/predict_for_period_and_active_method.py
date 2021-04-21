@@ -4,8 +4,7 @@ from db_tools import rpccurrml
 from TrainerModule import MLModelManager 
 from Configuration import Configuration
 from optparse import OptionParser
-import predict_for_hv_channel_method
-import analyse_for_period
+from z_prediction_tools import predict_for_hv_channel_method
 from datetime import datetime
 import h2o
 

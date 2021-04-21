@@ -3,7 +3,7 @@ from db_tools import base as dbase
 from db_tools import rpccurrml
 from Configuration import Configuration
 from optparse import OptionParser
-import analyse_for_period
+from z_analysis_tools import analyse_for_period
 from datetime import datetime
 
 def perform_analysis(start_date, end_date):
@@ -18,7 +18,7 @@ def perform_analysis(start_date, end_date):
     conf = Configuration(rpccurrml)
     flag = conf.GetParameter("flag")
 
-    for model_id, dpid in active_model_ids
+    for model_id, dpid in active_model_ids:
         print(f"The dpid is: {dpid}")
         try:
             print(f"Search for warnings/errors in this prediction period begins for model_id {model_id}")
