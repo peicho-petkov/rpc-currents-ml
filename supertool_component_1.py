@@ -30,5 +30,12 @@ def register_new_model_configuration(mlclass="GLM_V2"):
 
     mconf_id = mconf_manager.RegisterMLModelConf(mconf) 
 
+    if mconf_id == -1:
+        print("modelconf already registered...")
+    elif mconf_id == -2:
+        print('modelconf registration failed...')
+    else:
+        print(f"The model configuration registered successfully with modelconf_id {mconf_id}")
+
 if __name__ == "__main__":
     register_new_model_configuration()
