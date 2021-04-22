@@ -17,7 +17,7 @@ def register_new_model_configuration(mlclass="GLM_V2"):
     print(f"The training and testing interval for model configuration with name {modelconf_name} is: {train_from} to {train_to}")
 
     mconf = MLModelConf()
-    mconf_manager = MLModelsConfManager()
+    mconf_manager = MLModelsConfManager(rpccurrml, table_mlmodelsconf)
 
     mconf.name = modelconf_name
     mconf.mlclass = mlclass
