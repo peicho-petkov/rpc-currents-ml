@@ -37,5 +37,7 @@ def register_new_model_configuration(mlclass="GLM_V2"):
     else:
         print(f"The model configuration registered successfully with modelconf_id {mconf_id}")
 
+    return mconf.name       
+
 if __name__ == "__main__":
     register_new_model_configuration()
