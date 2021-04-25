@@ -1,4 +1,4 @@
-from db_tools import table_training, table_mlmodels, table_mlmodelsconf
+from db_tools import table_training, table_mlmodels, table_mlmodelsconf, table_dpidstate
 from db_tools import base as dbase
 import time
 import train_hv_channel_method
@@ -48,9 +48,15 @@ while True:
             model_path = conf.GetParameter("modelpath")
             train_hv_channel_method.train(conf_name, dpid, flag, mojo_path, model_path)
             print("\n Finished Training \n")
-            #TODO: add condition ...
-            # aquery = table_mlmodels.get_set_active_query(1, active_conf, dpid)
-            # rpccurrml.execute_commit_query_self(aquery)
+
+            query = table_dpidstate.get_get_state_for_dpid_and_conf_query(dpid, conf_name)
+            state = rpccurrml.fetchall_for_query_self(query)[0][0]
+            if (state == 1):
+                aquery = table_mlmodels.get_set_active_query(1, active_conf, dpid)
+                rpccurrml.execute_commit_query_self(aquery)
+                print(f"The newly trained model for dpid {dpid} with modelconf_id {active_conf} was set to active")
+            else:
+                print(f"The newly trained model for dpid {dpid} with modelconf_id {active_conf} was NOT set to active")
             
             c = c + 1
         else:
