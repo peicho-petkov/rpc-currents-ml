@@ -5,14 +5,14 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 
-def register_new_model_configuration(mlclass="GLM_V2"):
+def register_new_model_configuration(flag="56", mlclass="GLM_V2"):
     train_to = datetime.now()
     train_from = train_to - relativedelta(months=+14)
 
     train_from = train_from.strftime("%Y-%m-%d")
     train_to = train_to.strftime("%Y-%m-%d")
 
-    modelconf_name = f"{train_from[5:7]}-{train_from[0:4]}-{train_to[5:7]}-{train_to[0:4]}-f56-v2"
+    modelconf_name = f"{train_from[5:7]}-{train_from[0:4]}-{train_to[5:7]}-{train_to[0:4]}-f{flag}-v2"
 
     print(f"The training and testing interval for model configuration with name {modelconf_name} is: {train_from} to {train_to}")
 
