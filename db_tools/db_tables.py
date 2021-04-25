@@ -489,15 +489,19 @@ class NotificationsTable(dbTable):
         return query
 
 class dpidStateTable(dbTable):
+    '''  A table where in each entry, a dpid is associated with a modelconf_name and a flag 
+         called state (1/0), which shows whether training for this combination is a "go" or not '''
+
     def __init__(self, tablename = "dpidStatesTable"):
         super().__init__(tablename)
         self.add_coll("rec_id", "bigint auto_increment primary key")
         self.add_coll("LAST_UPDATE", "timestamp not null")
         self.set_dpid_col()
+        self.set_chambers_col()
         self.set_modelconf_name_col()
         self.set_state_col()
-    
-    def set_dpid_col(self, name="DPID", type="int"):
+        
+    def set_dpid_col(self, name="DPID", type="int not null"):
         self.dpid = name
         self.add_coll(name, type)
 
@@ -509,8 +513,12 @@ class dpidStateTable(dbTable):
         self.state = name
         self.add_coll(name, type)
 
-    def get_insert_entry_query(self, dpid, conf_name, state):
-        query = f"INSERT INTO {self.tablename} ({self.dpid}, {self.modelconf_name}, {self.state}) VALUES ('{dpid}', '{conf_name}', '{state}')"
+    def set_chambers_col(self, name="chambers", type="VARCHAR(4096)"):
+        self.chambers = name
+        self.add_coll(name, type)
+
+    def get_insert_entry_query(self, dpid, chambers, conf_name, state):
+        query = f"INSERT INTO {self.tablename} ({self.dpid}, {self.chambers},{self.modelconf_name}, {self.state}) VALUES ('{dpid}', '{chambers}','{conf_name}', '{state}')"
         return query
 
     def get_get_state_for_dpid_and_conf_query(self, dpid, conf_name):
@@ -549,5 +557,5 @@ if __name__ == "__main__":
     table_dpidstate = dpidStateTable()
     print("The table is called: ", table_dpidstate.tablename)
     print(table_dpidstate.get_myqsl_create_query())
-    print(table_dpidstate.get_insert_entry_query(315, "05-2016-07-2017-f56-v2", 1))
+    print(table_dpidstate.get_insert_entry_query(315, "W+2_RB1_1in", "05-2016-07-2017-f56-v2", 1))
     print(table_dpidstate.get_get_state_for_dpid_and_conf_query(315, "05-2016-07-2017-f56-v2"))
