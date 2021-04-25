@@ -487,7 +487,39 @@ class NotificationsTable(dbTable):
     def get_update_masked_col_query(self,masked,dpid,model_id):
         query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
+
+class dpidStateTable(dbTable):
+    def __init__(self, tablename = "dpidStatesTable"):
+        super().__init__(tablename)
+        self.add_coll("rec_id", "bigint auto_increment primary key")
+        self.add_coll("LAST_UPDATE", "timestamp not null")
+        self.set_dpid_col()
+        self.set_modelconf_name_col()
+        self.set_state_col()
     
+    def set_dpid_col(self, name="DPID", type="int"):
+        self.dpid = name
+        self.add_coll(name, type)
+
+    def set_modelconf_name_col(self, name="modelconf_name", type="VARCHAR(4096) not null"):
+        self.modelconf_name = name
+        self.add_coll(name, type)
+
+    def set_state_col(self, name="state", type="tinyint(1) not null"):
+        self.state = name
+        self.add_coll(name, type)
+
+    def get_insert_entry_query(self, dpid, conf_name, state):
+        query = f"INSERT INTO {self.tablename} ({self.dpid}, {self.modelconf_name}, {self.state}) VALUES ('{dpid}', '{conf_name}', '{state}')"
+        return query
+
+    def get_get_state_for_dpid_and_conf_query(self, dpid, conf_name):
+        query = f"SELECT {self.state} FROM {self.tablename} WHERE {self.dpid} = '{dpid}' AND {self.modelconf_name} = '{conf_name}'"
+        return query
+
+    def get_set_active_state_query(self, dpid, conf_name, state):
+        query = f"UPDATE {self.tablename} SET {self.state} = '{state}' WHERE {self.dpid} = '{dpid}' AND {self.modelconf_name} = '{conf_name}'"
+        return query 
 
 if __name__ == "__main__":
     print("creating...")
@@ -512,3 +544,10 @@ if __name__ == "__main__":
     print("The table is called: ",notificationtable.tablename)
     print(notificationtable.get_myqsl_create_query())
     print(notificationtable.get_insert_notification_query(317,23,'warning','2018-03-02',4.5,1,0,0))
+
+    print("\n++++ Creating dpidState Table ++++\n")
+    table_dpidstate = dpidStateTable()
+    print("The table is called: ", table_dpidstate.tablename)
+    print(table_dpidstate.get_myqsl_create_query())
+    print(table_dpidstate.get_insert_entry_query(315, "05-2016-07-2017-f56-v2", 1))
+    print(table_dpidstate.get_get_state_for_dpid_and_conf_query(315, "05-2016-07-2017-f56-v2"))
