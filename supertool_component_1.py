@@ -1,4 +1,4 @@
-from db_tools import rpccurrml, table_mlmodelsconf, table_training 
+from db_tools import rpccurrml, table_mlmodelsconf, table_training, table_dpidstates
 from TrainerModule import MLModelConf, MLModelsConfManager
 import time
 from datetime import datetime, timedelta
@@ -36,6 +36,15 @@ def register_new_model_configuration(flag="56", mlclass="GLM_V2"):
         print('modelconf registration failed...')
     else:
         print(f"The model configuration registered successfully with modelconf_id {mconf_id}")
+
+    # A loop to write in dpidStates table
+    query = table_training.get_get_all_dpids_query()
+    dpids = rpccurrml.fetchall_for_query_self(query)
+    dpids = [i[0] for i in dpids]
+    for dpid in dpids:
+        zquery = table_dpidstates.get_insert_entry_query(dpid=dpid, chambers="", conf_name=mconf.name, state=0)
+        rpccurrml.execute_commit_query_self(zquery)
+    print("\n ++++ Done writing to dpidStatesTable ++++ \n ")
 
     return mconf.name       
 
