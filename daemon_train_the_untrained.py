@@ -1,7 +1,7 @@
-from db_tools import table_training, table_mlmodels, table_mlmodelsconf, table_dpidstate
+from db_tools import table_training, table_mlmodels, table_mlmodelsconf, table_dpidstates
 from db_tools import base as dbase
 import time
-import train_hv_channel_method
+from z_training_tools import train_hv_channel_method
 from Configuration import Configuration
 from TrainerModule import MLModelManager
 from db_tools import rpccurrml
@@ -36,7 +36,7 @@ while True:
             result = rpccurrml.fetchall_for_query_self(newquery)[0][0]
             print(f"The number of models with that dpid and modelconf_id are: {result} \n")
 
-            query = table_dpidstate.get_get_state_for_dpid_and_conf_query(dpid, conf_name)
+            query = table_dpidstates.get_get_state_for_dpid_and_conf_query(dpid, conf_name)
             state = rpccurrml.fetchall_for_query_self(query)[0][0]
             if (result == 0 and state == 1):
                 thequery = table_training.get_get_number_of_rows_for_dpid_in_period_query(dpid, start_date, end_date)
