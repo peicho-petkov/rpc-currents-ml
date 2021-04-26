@@ -489,8 +489,9 @@ class NotificationsTable(dbTable):
         return query
 
 class dpidStateTable(dbTable):
-    '''  A table where in each entry, a dpid is associated with a modelconf_name and a flag 
-         called state (1/0), which shows whether training for this combination is a "go" or not '''
+    '''  A table where in each entry, a dpid (and the corresponding chamber/s) 
+         is associated with a modelconf_name and a flag called state (1/0), 
+         which shows whether training for this combination is a "go" or not '''
 
     def __init__(self, tablename = "dpidStatesTable"):
         super().__init__(tablename)
