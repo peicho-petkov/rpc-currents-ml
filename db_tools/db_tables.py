@@ -530,6 +530,10 @@ class dpidStateTable(dbTable):
         query = f"UPDATE {self.tablename} SET {self.state} = '{state}' WHERE {self.dpid} = '{dpid}' AND {self.modelconf_name} = '{conf_name}'"
         return query 
 
+    def get_get_all_dpids_query(self):
+        query = f"select distinct {self.dpid} from {self.tablename}"
+        return query 
+
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()
