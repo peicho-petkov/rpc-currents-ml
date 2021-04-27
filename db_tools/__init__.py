@@ -14,3 +14,6 @@ table_dpidstates = db_tables.dpidStateTable()
 rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
 rpccurrml.connect_to_db('RPCCURRML')
 rpccurrml.self_cursor_mode()
+
+omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
+omds.connect_to_db('cman_int2r')
