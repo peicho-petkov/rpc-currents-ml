@@ -1,4 +1,3 @@
-
 from TrainerModule import DataManager
 import fill_new_data
 from db_tools import rpccurrml, omds
