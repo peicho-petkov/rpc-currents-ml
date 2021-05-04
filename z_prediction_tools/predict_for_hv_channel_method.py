@@ -55,6 +55,9 @@ def predict(model_id, flag, predict_from, predict_to):
     pred, pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
 
     del hv_curr_estimator
+
+    if pred is None:
+        return False
     
     n = len(pred)
     
