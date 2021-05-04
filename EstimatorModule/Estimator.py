@@ -14,6 +14,7 @@ class Estimator():
         return pred[:,0],pred[:,1]
         
     def __del__(self):
+        print(self.h2omodel)
         h2o.remove(self.h2omodel)
         if self.prediction is not None:
             h2o.remove(self.prediction)
