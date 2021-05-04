@@ -7,9 +7,6 @@ from z_analysis_tools import analyse_for_period
 from datetime import datetime
 
 def perform_analysis(start_date, end_date):
-    start_date = options.start_date
-    end_date = options.end_date
-
     query = table_mlmodels.get_get_active_model_ids_and_dpids_query()
     print(query)
     active_model_ids = rpccurrml.fetchall_for_query_self(query)
