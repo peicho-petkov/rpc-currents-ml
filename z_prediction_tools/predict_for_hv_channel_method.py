@@ -18,8 +18,10 @@ def predict(model_id, flag, predict_from, predict_to):
     newquery = table_mlmodelsconf.get_select_modelconfname_by_modelconfid_query(modelconf_id)
     conf_name = rpccurrml.fetchall_for_query_self(newquery)[0][0]
 
-    predict_from = datetime.strptime(predict_from,'%Y-%m-%d %H:%M:%S')
-    predict_to = datetime.strptime(predict_to,'%Y-%m-%d %H:%M:%S')
+    if type(predict_from) is str:
+        predict_from = datetime.strptime(predict_from,'%Y-%m-%d %H:%M:%S')
+    if type(predict_to) is str:
+        predict_to = datetime.strptime(predict_to,'%Y-%m-%d %H:%M:%S')
         
     # h2o.init()
     
