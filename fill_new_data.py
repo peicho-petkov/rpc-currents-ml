@@ -1,5 +1,6 @@
 from TrainerModule.DataManager import Extractor_Oracle, DataPopulator, Extractor_MySql
 from db_tools import table_training, table_uxcenv, table_lumi, rpccurrml, omds
+from dateutil.relativedelta import relativedelta
 
 
 class FillTrainingTable:
@@ -43,7 +44,7 @@ class FillTrainingTable:
 
         fromdate = self.start_date
         while fromdate < self.end_date: 
-            todate = fromdate + relativedelta(seconds = time_step)
+            todate = fromdate + relativedelta(months = time_step)
             ce.set_time_widow(fromdate,todate)
             fromdate = todate
             # print(ce._startdate,ce._enddate)
@@ -66,7 +67,7 @@ class FillTrainingTable:
         fromdate = self.start_date 
         old_data=[]
         while fromdate < self.end_date: 
-            todate = fromdate + relativedelta(seconds = time_step)
+            todate = fromdate + relativedelta(days = time_step)
             ce.set_time_widow(fromdate,todate)
             fromdate = todate
             # print("start date ", ce._startdate," enddate ", ce._enddate)
@@ -268,8 +269,8 @@ class FillTrainingTable:
                     if nbuf > 0:
                         instbuf = instbuf/nbuf
                         intebuf = intebuf/nbuf
-
-                    rpccurrml.execute_query_self(table_training.get_insert_data_query(ch_date, imon, vmon, dpid, flag, instbuf, P, T, RH, intebuf, VmonAvg))
+                    query = table_training.get_insert_data_query(ch_date, imon, vmon, dpid, flag, instbuf, P, T, RH, intebuf, VmonAvg)
+                    rpccurrml.execute_query_self(query)
                 
                 rpccurrml.execute_commit_self()
                 dt = todate - fromdate
