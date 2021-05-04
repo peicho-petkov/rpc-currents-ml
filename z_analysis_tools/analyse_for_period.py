@@ -6,8 +6,10 @@ from db_tools import base as dbase
 from datetime import datetime
 
 def analyse_prediction(model_id, dpid, start_date, end_date, rpccurrml):
-    start_date = datetime.strptime(start_date, '%Y-%m-%d')
-    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    if type(start_date) is str:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    if type(end_date) is str:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
     extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
     extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
