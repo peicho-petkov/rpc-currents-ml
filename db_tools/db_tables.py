@@ -397,6 +397,7 @@ class ConfigurationTable(dbTable):
         self.set_parameter_name_cols()
         self.set_parameter_value_cols()
         self.set_parameter_value_type_cols()
+        self.set_parameter_unit_cols()
 
     def set_parameter_name_cols(self,name="PARAMETER_NAME",type="VARCHAR(4096) not null"):
         self.parameter_name=name
@@ -409,6 +410,10 @@ class ConfigurationTable(dbTable):
     def set_parameter_value_type_cols(self,name="PARAMETER_TYPE",type="VARCHAR(4096) not null"):
         self.parameter_value_type=name
         self.add_coll(name,type)
+
+    def set_parameter_unit_cols(self, name="PARAMETER_UNIT", type="VARCHAR(4096) not null"):
+        self.parameter_unit=name
+        self.add_coll(name, type)
     
     def get_add_parameter_query(self,parameter_name,parameter_value,parameter_type='string'):
         query=f"INSERT INTO {self.tablename} ({self.parameter_name}, {self.parameter_value}, {self.parameter_value_type}) VALUES ('{parameter_name}', '{parameter_value}', '{parameter_type}')"
@@ -417,6 +422,10 @@ class ConfigurationTable(dbTable):
     def get_set_parameter_value_query(self,parameter_name,parameter_value):
         query=f"UPDATE {self.tablename} SET {self.parameter_value} = '{parameter_value}' WHERE {self.parameter_name}='{parameter_name}'"
         return query
+
+    def get_set_parameter_unit_query(self, parameter_name, parameter_unit):
+        query = f"UPDATE {self.tablename} SET {self.parameter_unit} = '{parameter_unit}' WHERE {self.parameter_name} = '{parameter_name}'"
+        return query 
     
     def get_get_parameter_value_query(self,parameter_name):
         query=f"SELECT {self.parameter_value},{self.parameter_value_type} from {self.tablename} WHERE {self.parameter_name}='{parameter_name}'"

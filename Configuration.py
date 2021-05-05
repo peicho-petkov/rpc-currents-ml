@@ -12,6 +12,10 @@ class Configuration:
     def SetParameter(self,par_name,par_val):
         query = table_configuration.get_set_parameter_value_query(par_name,par_val)
         self.db_conn.execute_commit_query_self(query)
+
+    def SetParameterUnit(self, par_name, par_unit):
+        query = table_configuration.get_set_parameter_unit_query(par_name, par_unit)
+        self.db_conn.execute_commit_query_self(query)
     
     def GetParameter(self,par_name):
         query = table_configuration.get_get_parameter_value_query(par_name)
