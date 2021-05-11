@@ -21,12 +21,14 @@ class MLTrainer:
         
         if self.model_conf.mlclass == 'GLM_V3':
             glm = h2o.estimators.H2OGeneralizedLinearEstimator(family="gaussian",       
-                                                       lambda_=0,   
+                                                       lambda_=0,               
+                                                       compute_p_values=True,   
                                                        model_id=model_name,
                                                        non_negative = True)
         else:
             glm = h2o.estimators.H2OGeneralizedLinearEstimator(family="gaussian",       
-                                                       lambda_=0,   
+                                                       lambda_=0,               
+                                                       compute_p_values=True,   
                                                        model_id=model_name)
 
         glm.train(incols, outcol, training_frame=trainig_dataset)
