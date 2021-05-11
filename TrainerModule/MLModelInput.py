@@ -4,7 +4,7 @@ from db_tools import table_training
 
 class ModelInput:
     def __init__(self,model_conf = None):
-        self.supported_modelclasses = ['GLM_V1','GLM_V2']
+        self.supported_modelclasses = ['GLM_V1','GLM_V2','GLM_V3']
         if model_conf is not None:
             self.set_model_conf(model_conf)
             
@@ -18,6 +18,8 @@ class ModelInput:
             return self.glm_v1(dataset,extra_col_names)        
         elif self.model_conf.mlclass == 'GLM_V2':
             return self.glm_v2(dataset,extra_col_names)
+        elif self.model_conf.mlclass == 'GLM_V3':
+            return self.glm_v3(dataset,extra_col_names)
             
     def glm_v1(self,dataset,extra_col_names):
         incols = []
@@ -45,6 +47,31 @@ class ModelInput:
         input_ds[table_training.uxcRH] = input_ds[table_training.uxcRH]*1000
         input_ds[table_training.uxcT] = input_ds[table_training.uxcT]*1000    
         
+        incols.append('LexpWHV')                                                         
+        
+        return incols,outcols,input_ds
+
+    def glm_v3(self,dataset,extra_col_names):
+        incols = self.model_conf.input_cols.split(',')
+        outcols = self.model_conf.output_cols.split(',')
+        colnames = incols+outcols
+        if extra_col_names is not None:
+            colnames = incols+outcols+extra_col_names
+        outcols = outcols[0]
+        print("intcols ",incols)
+        print("outcols ",outcols)
+        
+        input_ds = h2o.H2OFrame.from_python(dataset,column_names=colnames)
+        
+        print(input_ds)
+        
+        input_ds['WHV'] = input_ds[table_training.vmon]/input_ds[table_training.uxcP]                                    
+        input_ds['LexpWHV'] = input_ds[table_training.instant_lumi]*input_ds['WHV'].exp()                              
+        input_ds[table_training.uxcRH] = input_ds[table_training.uxcRH]*1000
+        input_ds[table_training.uxcT] = input_ds[table_training.uxcT]*1000    
+        input_ds[table_training.hours_without_lumi] = input_ds[table_training.hours_without_lumi].scale(-1)
+        input_ds[table_training.uxcP] = input_ds[table_training.uxcP].scale(-1)
+
         incols.append('LexpWHV')                                                         
         
         return incols,outcols,input_ds
