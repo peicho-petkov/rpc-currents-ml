@@ -17,8 +17,10 @@ class Estimator():
         print(self.prediction)
         pred = self.prediction.as_data_frame().values
         # prediction and prediction error
-        return pred[:,0],pred[:,1]
-        
+        # return pred[:,0],pred[:,1]
+        n = len(pred[:,0])
+        return pred[:,0],[0.]*n
+
     # def __del__(self):
     #     print(self.h2omodel)
     #     try:

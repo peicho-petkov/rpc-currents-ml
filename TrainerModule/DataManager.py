@@ -496,7 +496,6 @@ def fill_imon_vmon_uxc_data_for_DPIDs(dpids=[]):
     edate=datetime.datetime(2018,12,12)
 
     for dpid in dpids:
-        dpid=dpid.strip()
         VmonLast=0.0
         fromdate=sdate
         VmonXt=0.0

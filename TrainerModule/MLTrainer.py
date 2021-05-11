@@ -18,18 +18,28 @@ class MLTrainer:
         mlinput = MLModelInput.ModelInput(self.model_conf)
         
         incols,outcol,trainig_dataset = mlinput.get_input_for_dataset(in_dataset)
+
+        glm = None
         
         if self.model_conf.mlclass == 'GLM_V3':
+            n = len(incols[:])            
+            # Create a beta_constraints frame
+            constraints = h2o.H2OFrame({'names':incols[:],
+                                        'lower_bounds': [0.]*n,
+                                        'upper_bounds': [1e27]*n})
+                                        # 'beta_given': [1]*n,
+                                        # 'rho': [0.2]*n})
+            print(constraints)
             glm = h2o.estimators.H2OGeneralizedLinearEstimator(family="gaussian",       
-                                                       lambda_=0,               
-                                                       compute_p_values=True,   
-                                                       model_id=model_name,
-                                                       non_negative = True)
+                                                        compute_p_values=False,
+                                                        lambda_=0,
+                                                        model_id=model_name,
+                                                        beta_constraints=constraints)
         else:
             glm = h2o.estimators.H2OGeneralizedLinearEstimator(family="gaussian",       
-                                                       lambda_=0,               
-                                                       compute_p_values=True,   
-                                                       model_id=model_name)
+                                                        compute_p_values=True,
+                                                        lambda_=0,
+                                                        model_id=model_name)
 
         glm.train(incols, outcol, training_frame=trainig_dataset)
         
