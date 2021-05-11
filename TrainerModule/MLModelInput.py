@@ -69,8 +69,8 @@ class ModelInput:
         input_ds['LexpWHV'] = input_ds[table_training.instant_lumi]*input_ds['WHV'].exp()                              
         input_ds[table_training.uxcRH] = input_ds[table_training.uxcRH]*1000
         input_ds[table_training.uxcT] = input_ds[table_training.uxcT]*1000    
-        input_ds[table_training.hours_without_lumi] = input_ds[table_training.hours_without_lumi].scale(-1)
-        input_ds[table_training.uxcP] = input_ds[table_training.uxcP].scale(-1)
+        input_ds[table_training.hours_without_lumi] = -input_ds[table_training.hours_without_lumi]
+        input_ds[table_training.uxcP] = -input_ds[table_training.uxcP]
 
         incols.append('LexpWHV')                                                         
         
