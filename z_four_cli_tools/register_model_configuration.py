@@ -23,7 +23,12 @@ if __name__ == '__main__':
     
     mconf.name = options.conf_name
     mconf.mlclass = options.mlclass
-    mconf.input_cols = ",".join([table_training.vmon,table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+
+    if mconf.mlclass == 'GLM_V4':
+        mconf.input_cols = ",".join([table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+    else:
+        mconf.input_cols = ",".join([table_training.vmon,table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+
     mconf.output_cols = table_training.imon
     mconf.train_from = options.train_from
     mconf.train_to = options.train_to

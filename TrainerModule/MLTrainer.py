@@ -3,11 +3,12 @@ from . import MLModelInput
 from . import MLModelManager
 
 class MLTrainer:
-    def __init__(self, model_conf, model_files_path, mojo_files_path):
+    def __init__(self, model_conf, model_files_path, mojo_files_path,extra_col_names=None):
         self.model_conf = model_conf
         self.model_files_path = model_files_path
         self.mojo_files_path = mojo_files_path
-        
+        self.extra_col_names = extra_col_names
+
     def train_model_for_dpid(self,dpid, in_dataset):
         themodel = MLModelManager.MLModel()
         themodel.dpid = dpid
@@ -17,11 +18,11 @@ class MLTrainer:
 
         mlinput = MLModelInput.ModelInput(self.model_conf)
         
-        incols,outcol,trainig_dataset = mlinput.get_input_for_dataset(in_dataset)
+        incols,outcol,trainig_dataset = mlinput.get_input_for_dataset(dataset=in_dataset,extra_col_names=self.extra_col_names)
 
         glm = None
         
-        if self.model_conf.mlclass == 'GLM_V3':
+        if self.model_conf.mlclass == 'GLM_V3' or self.model_conf.mlclass == 'GLM_V4':
             n = len(incols[:])            
             # Create a beta_constraints frame
             constraints = h2o.H2OFrame({'names':incols[:],

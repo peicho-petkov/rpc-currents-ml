@@ -37,6 +37,7 @@ if __name__ == '__main__':
 
     if model_id < 0:
         query = f" select MLModels.model_id from MLModels, MLModelsConf where MLModels.MODELCONF_ID=MLModelsConf.modelconf_id and MLModelsConf.NAME='{modelconf_name}' and MLModels.dpid={dpid}"
+        print(query)
         model_id = rpccurrml.fetchall_for_query_self(query)
         if len(model_id) > 1:
             print(f"************************************************************")
@@ -64,6 +65,7 @@ if __name__ == '__main__':
    
 
     query = extractor_pred_curr_table.get_data_by_model_id_query()
+    print(query)
     data = rpccurrml.fetchall_for_query_self(query)
 
     if len(data) == 0:

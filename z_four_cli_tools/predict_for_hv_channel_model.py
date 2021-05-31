@@ -49,7 +49,12 @@ if __name__ == '__main__':
     hv_curr_estimator = Estimator.Estimator(model)
     
     extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
-    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
+
+    if mconf.mlclass == 'GLM_V4':
+        extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.vmon,table_training.change_date])
+    else:
+        extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
+
     extractor_table_training.set_time_widow(predict_from,predict_to)
     extractor_table_training.set_DPID(dpid)
     extractor_table_training.set_FLAG(flag)
@@ -58,9 +63,11 @@ if __name__ == '__main__':
     data = rpccurrml.fetchall_for_query_self(query)
 
     mlinput = MLModelInput.ModelInput(mconf)
-        
-    incols, outcol, dataset = mlinput.get_input_for_dataset(data,[table_training.change_date])
-    
+    if mconf.mlclass == 'GLM_V4':
+        incols, outcol, dataset = mlinput.get_input_for_dataset(data,[table_training.vmon,table_training.change_date])
+    else:
+        incols, outcol, dataset = mlinput.get_input_for_dataset(data,[table_training.change_date])
+
     pred, pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
 
     del hv_curr_estimator

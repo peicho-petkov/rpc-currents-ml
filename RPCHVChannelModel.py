@@ -12,11 +12,21 @@ print(type(table_mlmodels))
 def init(model_conf_name,mlmodels_path=".",mojofiles_path="."):
     global trainer
     global mconf
+   
     mconf = mconf_manager.get_by_name(model_conf_name)
-    trainer = MLTrainer(mconf,mlmodels_path,mojofiles_path)
+    
+    extra_cols_list = None
+    if mconf.mlclass == 'GLM_V4':
+        extra_cols_list = [table_training.vmon]
+    
+    trainer = MLTrainer(mconf,mlmodels_path,mojofiles_path,extra_cols_list)
+    
     if mconf is None:
         raise Exception(f"ML Configuration {model_conf_name} is not registered...")
-    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(','))
+    if extra_cols_list is not None:
+        extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+extra_cols_list)
+    else:
+        extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')) 
     extractor_table_training.set_time_widow(mconf.train_from,mconf.train_to)
 
 def get_for_dpid(dpid,flag):

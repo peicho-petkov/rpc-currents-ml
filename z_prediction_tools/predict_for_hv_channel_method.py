@@ -36,7 +36,12 @@ def predict(model_id, flag, predict_from, predict_to):
     hv_curr_estimator = Estimator.Estimator(model)
     
     extractor_table_training = DataManager.Extractor_MySql(table_training.tablename,rpccurrml)
-    extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
+
+    if mconf.mlclass == 'GLM_V4':
+        extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date,table_training.vmon])
+    else:
+        extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
+
     extractor_table_training.set_time_widow(predict_from,predict_to)
     extractor_table_training.set_DPID(dpid)
     extractor_table_training.set_FLAG(flag)
