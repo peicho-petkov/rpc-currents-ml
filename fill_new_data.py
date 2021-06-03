@@ -262,6 +262,7 @@ class FillTrainingTable:
                             instbuf = inst
                             intebuf = inte
                             nbuf = nbuf + 1
+                            break
                         elif le > ch_date:
                             break
 
@@ -269,8 +270,8 @@ class FillTrainingTable:
                     if nbuf > 0:
                         instbuf = instbuf/nbuf
                         intebuf = intebuf/nbuf
-                    query = table_training.get_insert_data_query(ch_date, imon, vmon, dpid, flag, instbuf, P, T, RH, intebuf, VmonAvg)
-                    rpccurrml.execute_query_self(query)
+                        query = table_training.get_insert_data_query(ch_date, imon, vmon, dpid, flag, instbuf, P, T, RH, intebuf, VmonAvg)
+                        rpccurrml.execute_query_self(query)
                 
                 rpccurrml.execute_commit_self()
                 dt = todate - fromdate
