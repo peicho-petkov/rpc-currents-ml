@@ -87,7 +87,7 @@ class MLModelsConfManager:
     def get_by_name(self,name):
         query = self._mlmodelsconftab.get_select_query_by_model_name(name)
         res = self._connector.fetchall_for_query_self(query)
-        
+
         if len(res) != 1:
             return None
         
@@ -173,8 +173,13 @@ class MLModelsManager:
     def get_by_modelconf_id_dpid(self,modelconf_id,dpid):
         query = self._mlmodelstab.get_model_query(modelconf_id,dpid)
         res = self._connector.fetchall_for_query_self(query)
-        
-        if len(res) != 1:
+
+        if len(res) > 1:
+            print(f"More than one model records found for {modelconf_id} {dpid}")
+            return None
+
+        if len(res) < 1:
+            print(f"No model records found for {modelconf_id} {dpid}")
             return None
         
         col_names = self._mlmodelstab.get_col_names()

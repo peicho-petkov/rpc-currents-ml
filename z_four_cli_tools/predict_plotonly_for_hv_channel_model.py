@@ -8,7 +8,7 @@ from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLMo
 from db_tools import table_mlmodels, table_mlmodelsconf, table_training, rpccurrml, base as dbase
 from datetime import datetime
 from matplotlib import pyplot as plt
-
+import pandas as pd
 
 if __name__ == '__main__':
     oparser = OptionParser()
@@ -75,31 +75,34 @@ if __name__ == '__main__':
     else:
         incols, outcol, dataset = mlinput.get_input_for_dataset(data,[table_training.change_date])
 
-    pred, pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
+    pf = dataset[table_training.change_date].as_data_frame()
+
+    pf['predicted'], pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
 
     del hv_curr_estimator
     
-    n = len(pred)
-    
-    pm = PredictionsManager.PredictionsManager(rpccurrml,model.model_id,dpid)
-
-    imon = dataset.as_data_frame()[table_training.imon].tolist()
-
-    print("pred:",pred)
-    print("dataset.names:",dataset.names)
-    print("dataset.types:",dataset.types)
-
-    dates = data[:][-1]
-
     print("prediction done...")
 
-    plt.plot(dates, imon, label="measured")
-    plt.plot(dates, pred, label="predicted")
+    pf[table_training.imon] = dataset[table_training.imon].as_data_frame()
+    pf[table_training.change_date] = pd.to_datetime(pf[table_training.change_date].to_list(),unit='ms')
+#    pf['predicted'] = pred[:]
+    print(pf)
+
+     
+    ax = plt.gca()
+    pf.set_index([table_training.change_date], inplace=True)
+    pf.plot(legend=True, xlabel="date", ylabel="Current [uA]", use_index=True,ax=ax)    
     plt.title(f"{dpid} {conf_name}")
-    plt.xlabel("date")
-    plt.ylabel("Current [uA]")
-    plt.legend()
     plt.xticks(rotation=45)
+
+    # plt.plot(dates, imon, label="measured")
+    # plt.plot(dates, pred, label="predicted")
+    
+    # plt.xlabel("date")
+    # plt.ylabel("Current [uA]")
+    # plt.legend()
+    # plt.xticks(rotation=45)
+    # plt.gcf().autofmt_xdate()
 
 #     for i in range(n):
 #         pred_curr = pred[i]
@@ -112,6 +115,7 @@ if __name__ == '__main__':
 #             print(f"{i/float(n)*100.:.1f}% records committed")
     
 #     pm.commit_records()
+
     if filename == "":
         plt.show()
     else:
