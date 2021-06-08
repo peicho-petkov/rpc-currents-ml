@@ -40,6 +40,20 @@ def get_for_dpid(dpid,flag):
     model = trainer.train_model_for_dpid(extractor_table_training._DPID,data)
     return model
 
+def validate_get_for_dpid(dpid,flag):
+    extractor_table_training.set_DPID(dpid)
+    extractor_table_training.set_FLAG(flag)
+    query = extractor_table_training.get_data_by_dpid_flag_query()
+    data = rpccurrml.fetchall_for_query_self(query)
+    print(mconf.test_from,mconf.test_to)
+    extractor_table_training.set_time_widow(mconf.test_from,mconf.test_to)
+    query = extractor_table_training.get_data_by_dpid_flag_query()
+    test_data = rpccurrml.fetchall_for_query_self(query)
+    # check if len data > 0
+    if len(data) < 1 and len(test_data) < 1:
+        return None
+    model = trainer.train_and_test_model_for_dpid(extractor_table_training._DPID,data,test_data)
+    return model
 
 def train_and_register_for_dpid(dpid,flag,forceupdate=False):
     model = get_for_dpid(dpid,flag)
@@ -50,6 +64,17 @@ def train_and_register_for_dpid(dpid,flag,forceupdate=False):
     if model_id < 0 and forceupdate:
         model_id = model_manager.UpdateRegistedMLModel(model)
     return model_id
+
+def train_validate_and_register_for_dpid(dpid,flag,forceupdate=False):
+    model = validate_get_for_dpid(dpid,flag)
+    print("model type ", type(model))
+    if model is None:
+        return -2
+    model_id = model_manager.RegisterMLModel(model)
+    if model_id < 0 and forceupdate:
+        model_id = model_manager.UpdateRegistedMLModel(model)
+    return model_id
+
 
 if __name__ == '__main__':
     h2o.init()

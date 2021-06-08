@@ -13,6 +13,10 @@ if __name__ == '__main__':
                        help="the begining of the training period [yyyy-mm-dd]")
     oparser.add_option("--train-to", action="store", type="string", dest="train_to",
                        help="the end of the training period [yyyy-mm-dd]")
+    oparser.add_option("--test-from", action="store", type="string", dest="test_from",default='',
+                       help="the begining of the validation period [yyyy-mm-dd]")
+    oparser.add_option("--test-to", action="store", type="string", dest="test_to",default='',
+                       help="the end of the validation period [yyyy-mm-dd]")
     oparser.add_option("--mlclass", action="store", type="string", dest="mlclass",default='GLM_V2',
                        help="accepts supported ml classes only. accepts 'GLM_V2', currently.")
 
@@ -32,9 +36,16 @@ if __name__ == '__main__':
     mconf.output_cols = table_training.imon
     mconf.train_from = options.train_from
     mconf.train_to = options.train_to
-    # TODO: implement test period
-    mconf.test_from = options.train_from
-    mconf.test_to = options.train_to
+
+    if options.test_from=='':
+        mconf.test_from = options.train_from
+    else:
+        mconf.test_from = options.test_from
+    
+    if options.test_to=='':
+        mconf.test_to = options.train_to
+    else:
+        mconf.test_to = options.test_to
 
     mconf_id = mconf_manager.RegisterMLModelConf(mconf)
 

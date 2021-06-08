@@ -88,7 +88,7 @@ if __name__ == '__main__':
         pred_datetime = data[i][-1] #dataset[i,table_training.change_date]
 #        print('i',i,pred_curr,pred_curr_err,pred_datetime,imon)
         pm.insert_record(pred_datetime,pred_curr, pred_curr_err, imon[i])
-        if i%10000 == 0:
+        if i%20000 == 0:
             pm.commit_records()
             print(f"{i/float(n)*100.:.1f}% records committed")
     
