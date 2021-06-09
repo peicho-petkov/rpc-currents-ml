@@ -105,12 +105,16 @@ class TrainingDataTable(dbTable):
         self.add_coll(name,type)
 
     def get_get_number_of_rows_for_dpid_in_period_query(self, dpid, start_date, end_date):
-        query = f"select count(*) from {self.tablename} where {self.dpid}='{dpid}' and {self.change_date} between '{start_date}' and '{end_date}' "
+        query = f"select count(*) from {self.tablename} where {self.dpid}='{dpid}' and {self.change_date} between '{start_date}' and '{end_date}'"
         return query
 
     def get_get_all_dpids_query(self):
         query = f"select distinct {self.dpid} from {self.tablename}"
-        return query 
+        return query
+
+    def get_latest_HoursWithoutLumi_query(self,dpid):
+        query = f"SELECT {self.hours_without_lumi} from {self.tablename} where {self.dpid} = {dpid} order by {self.change_date} desc limit 1"
+        return query
 
 class LumiDataTable(dbTable):
     def __init__(self, tablename='LUMI_DATA'):

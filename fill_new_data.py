@@ -112,13 +112,19 @@ class FillTrainingTable:
         for dpid in self.dpids:
             dpid = dpid.strip()
             VmonLast=0.0
-            fromdate=sdate
+            fromdate=self.start_date
             VmonXt=0.0
             dt_last=0
-            VmonAvg=0.0
             R=0.0
             T=0.0
             RH=0.0
+
+            q = table_training.get_latest_HoursWithoutLumi_query(dpid)
+            q_res = self.mysql_connect.fetchall_for_query_self(q)
+            VmonAvg=0.0
+            if len(q_res) == 1:
+                VmonAvg = float(q_res[0][0])
+            
             while fromdate < self.end_date: 
                 todate = fromdate + relativedelta(days = time_step)
                 ce.set_time_widow(fromdate, todate)
