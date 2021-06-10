@@ -30,5 +30,5 @@ enddate = datetime(2018,12,3)
 ftt = fill_new_data.FillTrainingTable(rpccurrml, omds, dpids, startdate, enddate)
 #ftt.fill_inst_lumi_table(time_step = 1)  # time step in months
 #ftt.insert_integrated_lumi(time_step = 1)  # time step in months
-ftt.fill_imon_vmon_uxc_data_for_DPIDs(time_step = 1)  # time step in days
+ftt.fill_imon_vmon_uxc_data_for_DPIDs(time_step_days = 1)  # time step in days
 #ftt.update_uxc_data(1)
