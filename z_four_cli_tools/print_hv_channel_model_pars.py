@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ..TrainerModule import print_channel_model_pars
+from TrainerModule import print_channel_model_pars
 import h2o
 from optparse import OptionParser
 
