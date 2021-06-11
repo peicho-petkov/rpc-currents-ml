@@ -425,8 +425,8 @@ class FillTrainingTable:
                     dt = ch_date - last_vmon_timestamp
                     dt = dt.total_seconds()
                     
-                    if last_vmon > 8500 and not flag == 56:
-                        HwoL = HwoL + dt
+                    if not flag == 56:
+                        HwoL = HwoL + vmon*dt
 
                     last_vmon = vmon
                     last_vmon_timestamp = ch_date
