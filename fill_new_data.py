@@ -389,15 +389,13 @@ class FillTrainingTable:
 
         for dpid in self.dpids:
             dpid = dpid.strip()
-            VmonLast = 0.0
-            fromdate = self.start_date
-            VmonXt = 0.0
-            dt_last = 0
-            VmonAvg = 0.0
-            R = 0.0
-            T = 0.0
-            RH = 0.0
-            
+            fromdate=self.start_date
+            last_vmon=0.0
+            last_vmon_timestamp=self.start_date
+            P=0.0
+            T=0.0
+            RH=0.0
+
             q = table_training.get_latest_HoursWithoutLumi_query(dpid)
             q_res = self.mysql_connect.fetchall_for_query_self(q)
             HwoL=0.0
@@ -425,9 +423,6 @@ class FillTrainingTable:
                     dt = ch_date - last_vmon_timestamp
                     dt = dt.total_seconds()
                     
-                    if not flag == 56:
-                        HwoL = HwoL + vmon*dt
-
                     last_vmon = vmon
                     last_vmon_timestamp = ch_date
 
@@ -440,6 +435,9 @@ class FillTrainingTable:
                             RH = uxcrec[4]
                         elif uxc_next_ch_date > ch_date:
                             break
+
+                    if not flag == 56 and not P == 0:
+                        HwoL = HwoL + (vmon/P)*dt
 
                     if (vmon < 6400):
                         continue
