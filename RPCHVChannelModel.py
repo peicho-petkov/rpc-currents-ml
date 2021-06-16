@@ -40,6 +40,18 @@ def get_for_dpid(dpid,flag):
     model = trainer.train_model_for_dpid(extractor_table_training._DPID,data)
     return model
 
+def get_refined_for_dpid(dpid,flag,scale_sd=5.0):
+    extractor_table_training.set_DPID(dpid)
+    extractor_table_training.set_FLAG(flag)
+    query = extractor_table_training.get_data_by_dpid_flag_query()
+    data = rpccurrml.fetchall_for_query_self(query)
+    # check if len data > 0
+    if len(data) < 1:
+        return None
+    model = trainer.train_and_refine_model_for_dpid(extractor_table_training._DPID,data,scale_sd=scale_sd)
+    return model
+
+
 def validate_get_for_dpid(dpid,flag):
     extractor_table_training.set_DPID(dpid)
     extractor_table_training.set_FLAG(flag)
@@ -57,6 +69,16 @@ def validate_get_for_dpid(dpid,flag):
 
 def train_and_register_for_dpid(dpid,flag,forceupdate=False):
     model = get_for_dpid(dpid,flag)
+    print("model type ", type(model))
+    if model is None:
+        return -2
+    model_id = model_manager.RegisterMLModel(model)
+    if model_id < 0 and forceupdate:
+        model_id = model_manager.UpdateRegistedMLModel(model)
+    return model_id
+
+def train_refined_and_register_for_dpid(dpid,flag,scale_sd=5.0,forceupdate=False):
+    model = get_refined_for_dpid(dpid,flag,scale_sd=scale_sd)
     print("model type ", type(model))
     if model is None:
         return -2

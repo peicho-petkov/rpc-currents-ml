@@ -112,3 +112,75 @@ class MLTrainer:
         return themodel
         
         
+    def train_and_refine_model_for_dpid(self,dpid, in_dataset,scale_sd=5.):
+        themodel = MLModelManager.MLModel()
+        themodel.dpid = dpid
+        themodel.modelconf_id = self.model_conf.modelconf_id
+
+        model_name = f'{self.model_conf.modelconf_id}_{dpid}'
+
+        mlinput = MLModelInput.ModelInput(self.model_conf)
+        
+        incols,outcol,trainig_dataset = mlinput.get_input_for_dataset(dataset=in_dataset,extra_col_names=self.extra_col_names)
+
+        glm = None
+        
+        if self.model_conf.mlclass == 'GLM_V3' or self.model_conf.mlclass == 'GLM_V4' or self.model_conf.mlclass == 'GLM_V6':
+            n = len(incols[:])            
+            # Create a beta_constraints frame
+            constraints = h2o.H2OFrame({'names':incols[:],
+                                        'lower_bounds': [0.]*n,
+                                        'upper_bounds': [1e27]*n})
+                                        # 'beta_given': [1]*n,
+                                        # 'rho': [0.2]*n})
+            if self.model_conf.mlclass == 'GLM_V6':
+                mask=constraints['names']=='InstLumi'
+                constraints[mask,'lower_bounds']=-1e27
+            print(constraints)
+            glm = h2o.estimators.H2OGeneralizedLinearEstimator(family="gaussian",       
+                                                        compute_p_values=False,
+                                                        lambda_=0,
+                                                        model_id=model_name,
+                                                               beta_constraints=constraints)
+        else:
+            glm = h2o.estimators.H2OGeneralizedLinearEstimator(family="gaussian",       
+                                                        compute_p_values=True,
+                                                        lambda_=0,
+                                                               model_id=model_name)
+
+        glm.train(incols, outcol, training_frame=trainig_dataset)
+        
+        # themodel.model_path = h2o.save_model(glm, self.model_files_path, force=True)               
+        # themodel.mojo_path = glm.download_mojo(path=self.mojo_files_path, get_genmodel_jar=True)
+        
+        print(glm._model_json['output']['coefficients_table'])
+        themodel.mse = glm.mse()
+        themodel.r2 = glm.r2()
+        
+        pred_frame = glm.predict(trainig_dataset)
+        
+        trainig_dataset['predict'] = pred_frame['predict']
+        
+        ###### refine training dataframe ######
+        
+        trainig_dataset['diff'] = trainig_dataset['predict'] - trainig_dataset[outcol]
+        trainig_dataset['abs_diff'] = trainig_dataset['diff'].abs()
+        trainig_dataset['sd'] = trainig_dataset['diff'].sd()
+        
+        mask = trainig_dataset['abs_diff'] > scale_sd*trainig_dataset['sd']
+        
+        new_trainig_dataset = trainig_dataset[mask,:]
+
+        glm.train(incols, outcol, training_frame=new_trainig_dataset)
+        
+        print(glm._model_json['output']['coefficients_table'])
+        themodel.mse = glm.mse()
+        themodel.r2 = glm.r2()
+
+        themodel.model_path = h2o.save_model(glm, self.model_files_path, force=True)               
+        themodel.mojo_path = glm.download_mojo(path=self.mojo_files_path, get_genmodel_jar=True)
+        
+        h2o.remove(glm)                                                             
+        h2o.remove(trainig_dataset) 
+        h2o.remove(new_trainig_dataset) 
+        return themodel
