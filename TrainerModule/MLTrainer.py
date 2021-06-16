@@ -167,7 +167,7 @@ class MLTrainer:
         trainig_dataset['abs_diff'] = trainig_dataset['diff'].abs()
         trainig_dataset['sd'] = trainig_dataset['diff'].sd()
         
-        mask = trainig_dataset['abs_diff'] > scale_sd*trainig_dataset['sd']
+        mask = trainig_dataset['abs_diff'] > scale_sd*trainig_dataset['sd'][0]
         
         new_trainig_dataset = trainig_dataset[mask,:]
 
