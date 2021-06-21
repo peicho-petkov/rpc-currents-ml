@@ -167,10 +167,10 @@ class MLTrainer:
         trainig_dataset['abs_diff'] = trainig_dataset['diff'].abs()
         trainig_dataset['sd'] = trainig_dataset['diff'].sd()[0]
         
-        mask = trainig_dataset['abs_diff'] > scale_sd*trainig_dataset['sd']
-        
+        mask = trainig_dataset['abs_diff'] < scale_sd*trainig_dataset['sd']
+        print(trainig_dataset)
         new_trainig_dataset = trainig_dataset[mask,:]
-
+        print(new_trainig_dataset)
         glm.train(incols, outcol, training_frame=new_trainig_dataset)
         
         print(glm._model_json['output']['coefficients_table'])
