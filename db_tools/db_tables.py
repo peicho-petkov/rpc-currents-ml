@@ -349,6 +349,10 @@ class MLModelsConf(dbTable):
         query=f"select {self.name} from {self.tablename} where {self.modelconf_id}='{modelconf_id}'"
         return query
 
+    def get_select_modelconfnames_query(self):
+        query=f"select {self.name} from {self.tablename} order by {self.last_update} desc"
+        return query
+
 class PredictedCurrentsTable(dbTable):
     def __init__(self, tablename='PredictedCurrent'):
         super().__init__(tablename)
