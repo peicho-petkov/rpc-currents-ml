@@ -263,8 +263,8 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
 
         del hv_curr_estimator
 
-        data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf[table_training.imon].values,name=f"{dpid} imon")]
-        data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf['predicted'].values, name=f"{dpid} predicted")]
+        data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf[table_training.imon].values,name=f"{dpid} imon",connectgaps = False)]
+        data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf['predicted'].values, name=f"{dpid} predicted",line = dict(dash = 'dash'),connectgaps = False)]
 
     fig = go.Figure(data=data)
     print(fig)
