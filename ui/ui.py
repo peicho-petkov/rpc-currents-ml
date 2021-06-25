@@ -178,13 +178,12 @@ confname_last = None
     Output("display","figure"),
     Output("display_diff","figure"),
     Output("display_diff_histo","figure"),
-    [
         Input("plot_button","n_clicks"),
-        Input("modelconfname_id","value"),
-        Input("dpid_id","value"),
-        Input('time-period-start-end-date','start_date'),
-        Input('time-period-start-end-date','end_date')
-    ]
+        State("modelconfname_id","value"),
+        State("dpid_id","value"),
+        State('time-period-start-end-date','start_date'),
+        State('time-period-start-end-date','end_date'),
+    
 )
 def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     global n_clicks_last
@@ -292,17 +291,17 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     for f in fig.data:
         print(f.name)
         
-    fig.update_layout(barmode='stack')
+    # fig.update_layout(barmode='stack')
 
     fig.update_layout(title='<b>RPC Current</b>',
                    yaxis_title='<b>Current [&mu;A]</b>')
     
-    fig_diff.update_layout(barmode='stack')
+    # fig_diff.update_layout(barmode='stack')
 
     fig_diff.update_layout(title='<b>Model deviation running average</b>',
                    yaxis_title='<b>IMON-prediciton [&mu;A]</b>')
     
-    fig_diff_histo.update_layout(barmode='stack')
+    # fig_diff_histo.update_layout(barmode='stack')
 
     fig_diff_histo.update_layout(title='<b>Model deviation distribution</b>',
                    xaxis_title='<b>IMON-prediciton [&mu;A]</b>')
