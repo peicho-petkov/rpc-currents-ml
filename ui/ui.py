@@ -1,4 +1,5 @@
 import dash
+from dash_bootstrap_components._components.Spinner import Spinner
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -65,7 +66,8 @@ app.layout = dbc.Container(
                             "DPID", id="dpid_button", style={'background-color': 'darkblue'}
                         ),
                         dbc.Collapse(
-                            dcc.Dropdown(id='dpid_id', multi = True, searchable = True),
+                            dbc.Spinner(
+                            dcc.Dropdown(id='dpid_id', multi = True, searchable = True),),
                             id="dpid_collapse",
                             is_open=True,
                         ),
@@ -127,11 +129,11 @@ def change_mlconfname(confname):
             dpids = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
             print(dpids)
             options = [{"label" : f"{entry}", "value" : f"{entry}"} for entry in dpids]
-            old_options = options 
+            old_options = options[:] 
         else:
             old_options = []
     print(old_options)
-    return old_options
+    return old_options[:]
 
 
 @app.callback(
@@ -204,7 +206,9 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
         timeplot_fig_last = fig
     else:
         fig = timeplot_fig_last
-
+    
+    fig = go.Figure()
+    
     if not plot_button_pressed or dpids is None or modelconfname is None or start_date is None or end_date is None:
         return fig
 
