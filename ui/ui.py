@@ -92,11 +92,12 @@ app.layout = dbc.Container(
                         )],
                     width=3,
                 ),
-                dbc.Col(
-                    [dbc.Spinner(dcc.Graph(id="display", style={"height": "90vh"}),),],
+                dbc.Col([
+                    dbc.Spinner(dcc.Graph(id="display", style={"height": "90vh"}),),
+                    dbc.Spinner(dcc.Graph(id="display_diff", style={"height": "90vh"}),),
+                    dbc.Spinner(dcc.Graph(id="display_diff_histo", style={"height": "90vh"}),),],
                     width=9,
-                    align="start",
-                ),
+                    align="start",)
             ]
         ),
         html.Hr(),
@@ -109,7 +110,7 @@ app.layout = dbc.Container(
 )
 
 old_mlconfname = None
-old_options = None
+old_options = []
 @app.callback(
     Output('dpid_id','options'),
     [Input('modelconfname_id','value')]
@@ -175,6 +176,8 @@ confname_last = None
 
 @app.callback(
     Output("display","figure"),
+    Output("display_diff","figure"),
+    Output("display_diff_histo","figure"),
     [
         Input("plot_button","n_clicks"),
         Input("modelconfname_id","value"),
@@ -203,14 +206,14 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
 
     if timeplot_fig_last is None:
         fig = go.Figure()
-        timeplot_fig_last = fig
+        timeplot_fig_last = fig,fig,fig
     else:
         fig = timeplot_fig_last
     
     fig = go.Figure()
     
     if not plot_button_pressed or dpids is None or modelconfname is None or start_date is None or end_date is None:
-        return fig
+        return fig,fig,fig
 
     print(n_clicks,modelconfname,dpids,start_date,end_date)
     
@@ -249,7 +252,11 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     else:
         extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
     print("plotting")
+    
     data = []
+    data_diff = []
+    data_diff_histo = []
+    
     for dpid in dpids_to_plot_last:
         model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,dpid)
         hv_curr_estimator = Estimator.Estimator(model)
@@ -269,12 +276,37 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
 
         data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf[table_training.imon].values,name=f"{dpid} imon",connectgaps = False)]
         data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf['predicted'].values, name=f"{dpid} predicted",line = dict(dash = 'dash'),connectgaps = False)]
+        
+        pf['diff_iom_predicted'] = pf[table_training.imon] - pf['predicted']
+        
+        data_diff_histo = data_diff_histo + [go.Histogram(x=pf['diff_iom_predicted'].values, name=f"{dpid} imon - predicted")]
+        
+        pf['diff_iom_predicted'] = pf['diff_iom_predicted'].rolling(100).mean()
+        data_diff = data_diff + [go.Scatter(x=pf[table_training.change_date].values, y=pf['diff_iom_predicted'].values, name=f"{dpid} imon - predicted",connectgaps = False)]
 
     fig = go.Figure(data=data)
     print(fig)
-    timeplot_fig_last = fig
+    fig_diff = go.Figure(data=data_diff)
+    fig_diff_histo = go.Figure(data=data_diff_histo)
+    timeplot_fig_last = (fig, fig_diff,fig_diff_histo)
+    for f in fig.data:
+        print(f.name)
+        
+    fig.update_layout(barmode='stack')
 
-    return fig
+    fig.update_layout(title='<b>RPC Current</b>',
+                   yaxis_title='<b>Current [&mu;A]</b>')
+    
+    fig_diff.update_layout(barmode='stack')
+
+    fig_diff.update_layout(title='<b>Model deviation running average</b>',
+                   yaxis_title='<b>IMON-prediciton [&mu;A]</b>')
+    
+    fig_diff_histo.update_layout(barmode='stack')
+
+    fig_diff_histo.update_layout(title='<b>Model deviation distribution</b>',
+                   xaxis_title='<b>IMON-prediciton [&mu;A]</b>')
+    return fig,fig_diff,fig_diff_histo
 
 if __name__ == "__main__":
     app.run_server(debug=False,port=8050,host='rpccurdevml.cern.ch')
