@@ -400,6 +400,10 @@ class PredictedCurrentsTable(dbTable):
     def get_select_by_dpid_model_id_dpid_timewindow_query(self, dpid, model_id, begw, endw):
         query = f"select * from {self.tablename} where {self.model_id} = '{model_id}' and {self.dpid} = '{dpid}' and {self.predicted_for} between '{begw}' and '{endw}' order by {self.predicted_for} asc"
         return query
+
+    def get_get_average_difference_query(self, dpid, model_id):
+        query = f"SELECT AVG({self.measured_value} - {self.predicted_value}) from {self.tablename} where {self.dpid}='{dpid}' and {self.model_id}='{model_id}' " 
+        return query
     
 class ConfigurationTable(dbTable):
     def __init__(self, tablename='Configuration'):
