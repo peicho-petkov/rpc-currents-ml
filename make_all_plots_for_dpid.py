@@ -96,9 +96,9 @@ if __name__ == '__main__':
     newpf['rolling'] = rolling    
     newpf = newpf.drop(['difference'], axis=1)    
 
-    ax = plt.gca()
+    fig0 = plt.figure()
     pf.set_index([table_training.change_date], inplace=True)
-    pf.plot(legend=True, xlabel="date", ylabel="Current [uA]", use_index=True,ax=ax)    
+    pf.plot(legend=True, xlabel="date", ylabel="Current [uA]", use_index=True)    
     plt.title(f"{dpid} {conf_name}")
     plt.xticks(rotation=45)
 

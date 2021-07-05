@@ -1,11 +1,12 @@
 from z_analysis_tools import analyse_for_period_and_active_method
 from z_prediction_tools import predict_for_period_and_active_method 
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import time
 import h2o
 
-emul_datenow = datetime(2018,10,3,8,15)
-emul_enddate = emul_datenow + timedelta(hours=12)
+emul_datenow = datetime(2018,9,1,0,0)
+emul_enddate = emul_datenow + relativedelta(months=2)
 
 while emul_datenow <= emul_enddate:
     h2o.init()
