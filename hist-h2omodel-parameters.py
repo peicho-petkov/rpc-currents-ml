@@ -16,6 +16,7 @@ for confname_id in conf_confid:
     paths = rpccurrml.fetchall_for_query_self(q)
     
     for model_file in paths:
+        model_file = model_file[0]
         print(f"model file: {model_file}")
 
         model = h2o.load_model(model_file)
