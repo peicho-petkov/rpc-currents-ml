@@ -566,11 +566,12 @@ class autoencoderData(dbTable):
 
     def __init__(self, dpids, tablename = "autoencoderData"):
         super().__init__(tablename)
+        self.dpids = dpids
         self.add_coll("timestamp", "timestamp not null")
-        self.add_all_colls(dpids)
+        self.add_all_colls()
 
-    def add_all_colls(self, dpids):
-        for dpid in dpids:    
+    def add_all_colls(self):
+        for dpid in self.dpids:    
             self.add_coll(f"dpid{dpid}", "float") 
 
     

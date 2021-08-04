@@ -10,6 +10,7 @@ table_predicted_current = db_tables.PredictedCurrentsTable()
 table_configuration = db_tables.ConfigurationTable()
 table_notifications = db_tables.NotificationsTable()
 table_dpidstates = db_tables.dpidStateTable()
+#table_autoencoder = db_tables.autoencoderData()
 
 rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
 rpccurrml.connect_to_db('RPCCURRML')
