@@ -559,6 +559,24 @@ class dpidStateTable(dbTable):
         query = f"select distinct {self.dpid} from {self.tablename}"
         return query 
 
+
+class autoencoderData(dbTable):
+    ''' A table that contains a timestamp as a first column and all dpids in separate columns,
+        the values are the corresponding currents expressed in uA '''
+
+    def __init__(self, dpids, tablename = "autoencoderData"):
+        super().__init__(tablename)
+        self.add_coll("timestamp", "timestamp not null")
+        self.add_all_colls(dpids)
+
+    def add_all_colls(self, dpids):
+        for dpid in dpids:    
+            self.add_coll(f"dpid{dpid}", "float") 
+
+    
+
+    
+
 if __name__ == "__main__":
     print("creating...")
     model_table_conf = MLModelsConf()
@@ -589,3 +607,11 @@ if __name__ == "__main__":
     print(table_dpidstate.get_myqsl_create_query())
     print(table_dpidstate.get_insert_entry_query(315, "W+2_RB1_1in", "05-2016-07-2017-f56-v2", 1))
     print(table_dpidstate.get_get_state_for_dpid_and_conf_query(315, "05-2016-07-2017-f56-v2"))
+
+    print("\n++++ Creating autoencoderData Table ++++\n")
+    dpids = ["315", "316", "354", "380"]
+    table_autoencoder = autoencoderData(dpids=dpids)
+    print("The table  is called: ", table_autoencoder.tablename)
+    print("The create table query is: ")
+    print(table_autoencoder.get_myqsl_create_query())
+    
