@@ -572,7 +572,7 @@ class autoencoderData(dbTable):
 
     def add_all_colls(self):
         for dpid in self.dpids:    
-            self.add_coll(f"dpid{dpid}", "float") 
+            self.add_coll(f"{dpid}", "float") 
 
     
 
