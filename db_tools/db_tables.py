@@ -564,20 +564,19 @@ class autoencoderData(dbTable):
     ''' A table that contains a timestamp as a first column and all dpids in separate columns,
         the values are the corresponding currents expressed in uA '''
 
-    def __init__(self, dpids, tablename = "autoencoderData"):
+    def __init__(self, dpids = [], tablename = "autoencoderData"):
         super().__init__(tablename)
         self.dpids = dpids
+        #self.add_coll("rec_id", "bigint auto_increment primary key")
         self.add_coll("timestamp", "timestamp not null")
         self.add_all_colls()
 
     def add_all_colls(self):
         for dpid in self.dpids:    
             self.add_coll(f"{dpid}", "float")
-            self.add_coll(f"dpid{dpid}", "float")
 
     def get_fill_row_query(self, values):
-        val_string = ",".join(values)
-        query = f"INSERT INTO {self.tablename} VALUES ({val_string})" 
+        query = f"INSERT INTO {self.tablename} VALUES {values}" 
         return query 
     
 
