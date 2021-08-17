@@ -578,7 +578,10 @@ class autoencoderData(dbTable):
     def get_fill_row_query(self, values):
         query = f"INSERT INTO {self.tablename} VALUES {values}" 
         return query 
-    
+   
+    def get_load_csv_data_query(self, filepath):
+        query = f"LOAD DATA INFILE '{filepath}' INTO TABLE {self.tablename} FIELDS TERMINATED BY ',' ENCLOSED BY '""' LINES TERMINATED BY '\n' IGNORE 1 ROWS"
+        return query 
 
     
 
