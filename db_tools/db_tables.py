@@ -573,7 +573,7 @@ class autoencoderData(dbTable):
 
     def add_all_colls(self):
         for dpid in self.dpids:    
-            self.add_coll(f"dpid{dpid}", "float not null default -42.0")
+            self.add_coll(f"{dpid}", "float not null default -42.0")
 
     def get_fill_row_query(self, values):
         query = f"INSERT INTO {self.tablename} VALUES {values}" 
@@ -582,7 +582,10 @@ class autoencoderData(dbTable):
     def get_load_csv_data_query(self, filepath):
         query = f"LOAD DATA INFILE '{filepath}' INTO TABLE {self.tablename} FIELDS TERMINATED BY ',' ENCLOSED BY '""' LINES TERMINATED BY '\n' IGNORE 1 ROWS"
         return query 
-
+    
+    def get_data_for_timeperiod_query(self, from_date, to_date):
+        query = f"SELECT * FROM {self.tablename} WHERE timestamp BETWEEN '{from_date.strftime("%Y-%m-%d %H:%M:%S")}' AND '{to_date.strftime("%Y-%m-%d %H:%M:%S")}' ORDER BY timestamp ASC"
+        return query
     
 
 if __name__ == "__main__":
