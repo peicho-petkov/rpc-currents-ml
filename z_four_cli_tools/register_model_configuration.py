@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from optparse import OptionParser
-from db_tools import table_mlmodelsconf, table_training, rpccurrml
+from db_tools import table_mlmodelsconf, table_training, rpccurrml, table_autoencoderData
 from db_tools import base as dbase
 from TrainerModule import MLModelConf,MLModelsConfManager
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     oparser.add_option("--test-to", action="store", type="string", dest="test_to",default='',
                        help="the end of the validation period [yyyy-mm-dd]")
     oparser.add_option("--mlclass", action="store", type="string", dest="mlclass",default='GLM_V2',
-                       help="accepts supported ml classes only. accepts 'GLM_V2', currently.")
+                       help="accepts supported ml classes only: 'GLM_V1','GLM_V2','GLM_V3','GLM_V4','GLM_V5','GLM_V6','GLM_V7' and 'AUTOENC_V1'")
 
     (options, args) = oparser.parse_args()
     
@@ -28,12 +28,17 @@ if __name__ == '__main__':
     mconf.name = options.conf_name
     mconf.mlclass = options.mlclass
 
+    mconf.output_cols = table_training.imon
+
     if mconf.mlclass == 'GLM_V4':
         mconf.input_cols = ",".join([table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+    elif mconf.mlclass == 'AUTOENC_V1':
+        mconf.input_cols = ",".join(table_autoencoderData.dpids)
+        mconf.input_cols = ",".join(table_autoencoderData.dpids)
     else:
         mconf.input_cols = ",".join([table_training.vmon,table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
 
-    mconf.output_cols = table_training.imon
+    
     mconf.train_from = options.train_from
     mconf.train_to = options.train_to
 
