@@ -14,8 +14,6 @@ for confname_id in conf_confid:
     conf_id = confname_id[1]
     q = f"select {table_mlmodels.model_path} from {table_mlmodels.tablename} where {table_mlmodels.modelconf_id} = {conf_id}"
     paths = rpccurrml.fetchall_for_query_self(q)
-    myfile = open(f'conf{conf_id}-coeffs.txt', 'w')
-    myfile2 = open(f'conf{conf_id}-stdcoeffs.txt', 'w')
     
     for model_file in paths:
         model_file = model_file[0]
@@ -32,13 +30,5 @@ for confname_id in conf_confid:
         print(par_coeff)                                                                                                             
         zzz = zip(par_names,par_coeff)                                                                                               
         zzz_std = zip(par_names,par_std)                                                                                             
-        print(dict(zzz)) 
-        myfile.write(str(par_coeff) + f", {model_file} \n")          
-        myfile2.write(str(par_std) + f", {model_file} \n")                                                                                                  
+        print(dict(zzz))                                                                                                             
         print(dict(zzz_std))
-
-    myfile.close()
-    myfile2.close()
-print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
-print("++++ The coefficients have been written to files ++++")
-print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
