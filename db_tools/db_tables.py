@@ -584,7 +584,7 @@ class autoencoderData(dbTable):
         return query 
     
     def get_data_for_timeperiod_query(self, from_date, to_date):
-        query = f"SELECT * FROM {self.tablename} WHERE timestamp BETWEEN '{from_date.strftime("%Y-%m-%d %H:%M:%S")}' AND '{to_date.strftime("%Y-%m-%d %H:%M:%S")}' ORDER BY timestamp ASC"
+        query = f"SELECT * FROM {self.tablename} WHERE timestamp BETWEEN '{from_date.strftime('%Y-%m-%d %H:%M:%S')}' AND '{to_date.strftime('%Y-%m-%d %H:%M:%S')}' ORDER BY timestamp ASC"
         return query
     
 
