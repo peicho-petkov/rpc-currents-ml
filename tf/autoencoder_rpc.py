@@ -43,7 +43,7 @@ class AE_DataManager:
             for rec in dataset:
                 if array is None:
                     array = mysql_buffer_to_float_np_array([rec[1:]])
-                    date_array = mysql_buffer_to_datetime_np_array(rec[0]) 
+                    date_array = mysql_buffer_to_datetime_np_array([rec[0]]) 
                 else:
                     array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
                     date_array = np.append(date_array,mysql_buffer_to_datetime_np_array(rec[0]),axis=0)
@@ -59,7 +59,7 @@ class AE_DataManager:
         for rec in dataset:
             if array is None:
                 array = mysql_buffer_to_float_np_array([rec[1:]])
-                date_array = mysql_buffer_to_datetime_np_array(rec[0]) 
+                date_array = mysql_buffer_to_datetime_np_array([rec[0]]) 
             else:
                 array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
                 date_array = np.append(date_array,mysql_buffer_to_datetime_np_array(rec[0]),axis=0)
