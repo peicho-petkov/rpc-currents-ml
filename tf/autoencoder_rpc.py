@@ -24,13 +24,13 @@ class AE_DataManager:
         self.from_datetime = from_datetime
         self.to_datetime = to_datetime
         
-    def get_dataframe(self):
+    def get_dataframe(self,tdelta_days=2):
         if self.from_datetime is None or self.to_datetime is None:
             raise Exception("AE_DataManger: calling get_dataframe without setting the time_window. Call set_time_window before getting data.")
         start_date = self.from_datetime
         
-        while start_date + timedelta(days=2) < self.to_datetime:
-            end_date = start_date + timedelta(days=2)
+        while start_date + timedelta(days=tdelta_days) < self.to_datetime:
+            end_date = start_date + timedelta(days=tdelta_days)
             q = table_autoencoderData.get_data_for_timeperiod_query(start_date,end_date)
             start_date = end_date
             dataset = self.dbcon.fetchall_for_query_self(q)
@@ -40,7 +40,9 @@ class AE_DataManager:
                     array = mysql_buffer_to_float_np_array([rec[1:]])
                 else:
                     array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
-            print(f"yield {len(dataset)} array len {len(array)}")
+            if array is None:
+                continue
+            print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape}")
             yield array
             
         q = table_autoencoderData.get_data_for_timeperiod_query(start_date,self.to_datetime)
@@ -51,8 +53,9 @@ class AE_DataManager:
                 array = mysql_buffer_to_float_np_array([rec[1:]])
             else:
                 array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
-        print(f"yield {len(dataset)} array len {len(array)}")
-        yield array
+        print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape}")
+        if array is not None:
+            yield array
         
 class RPCAutoencoder:
     def __init__(self, n_inputs):
@@ -75,12 +78,16 @@ class RPCAutoencoder:
         self.autoencoder.summary()
 
     def train(self,training_dataset,validation_dataset):
+        # self.autoencoder.fit(training_dataset, training_dataset,
+        #         epochs=300,
+        #         #batch_size=1024,
+        #         #shuffle=True,
+        #         validation_data=(validation_dataset, validation_dataset),
+        #         callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
         self.autoencoder.fit(training_dataset, training_dataset,
-                epochs=300,
-                #batch_size=1024,
-                #shuffle=True,
-                validation_data=(validation_dataset, validation_dataset),
-                callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+                epochs=100)
+
+
 
 if __name__ == '__main__':
     ae = AE_DataManager()

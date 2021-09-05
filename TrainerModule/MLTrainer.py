@@ -198,7 +198,8 @@ class MLTrainer:
         themodel.mojo_path = ''
         
         n_inputs = len(self.model_conf.input_cols.split(','))
-        
+        print(self.model_conf.input_cols)
+        print(n_inputs)
         rpc_ae = RPCAutoencoder(n_inputs=n_inputs)
         ae_dm = AE_DataManager()
         
