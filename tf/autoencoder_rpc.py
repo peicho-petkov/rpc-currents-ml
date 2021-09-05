@@ -9,6 +9,10 @@ def mysql_buffer_to_float_np_array(buffer):
     array = np.array(buffer,dtype=np.float)
     return array
 
+def mysql_buffer_to_datetime_np_array(buffer):
+    array = np.array(buffer,dtype='datetime64')
+    return array
+
 class AE_DataManager:
     def __init__(self, dbcon = rpccurrml):
         self.dbcon = dbcon
@@ -35,27 +39,33 @@ class AE_DataManager:
             start_date = end_date
             dataset = self.dbcon.fetchall_for_query_self(q)
             array = None
+            date_array = None
             for rec in dataset:
                 if array is None:
                     array = mysql_buffer_to_float_np_array([rec[1:]])
+                    date_array = mysql_buffer_to_datetime_np_array(rec[0]) 
                 else:
                     array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
+                    date_array = np.append(date_array,mysql_buffer_to_datetime_np_array(rec[0]),axis=0)
             if array is None:
                 continue
             print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape}")
-            yield array
+            yield array, date_array
             
         q = table_autoencoderData.get_data_for_timeperiod_query(start_date,self.to_datetime)
         dataset = self.dbcon.fetchall_for_query_self(q)
         array = None
+        date_array = None
         for rec in dataset:
             if array is None:
                 array = mysql_buffer_to_float_np_array([rec[1:]])
+                date_array = mysql_buffer_to_datetime_np_array(rec[0]) 
             else:
                 array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
-        print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape}")
+                date_array = np.append(date_array,mysql_buffer_to_datetime_np_array(rec[0]),axis=0)
         if array is not None:
-            yield array
+            print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape}")
+            yield array, date_array
         
 class RPCAutoencoder:
     def __init__(self, n_inputs):
@@ -92,5 +102,5 @@ class RPCAutoencoder:
 if __name__ == '__main__':
     ae = AE_DataManager()
     ae.set_time_window(datetime(2018,6,1),datetime(2018,8,15))
-    for ds in ae.get_dataframe():
+    for ds,dateds in ae.get_dataframe():
         print(f'ds {len(ds)}')

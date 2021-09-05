@@ -205,7 +205,7 @@ class MLTrainer:
         
         ae_dm.set_time_window(self.model_conf.train_from,self.model_conf.train_to)
         
-        for dataset in ae_dm.get_dataframe():
+        for dataset,datedataset in ae_dm.get_dataframe():
             rpc_ae.train(dataset,dataset)
         
         rpc_ae.autoencoder.save(themodel.model_path)
