@@ -17,11 +17,14 @@ def trainall(modelconf_name):
     modelpath = conf.GetParameter("modelpath") 
     flag = int(conf.GetParameter("flag"))
 
-    query = table_training.get_get_all_dpids_query()  # Maybe select only some dpids
-    dpids = rpccurrml.fetchall_for_query_self(query)
-    dpids = [i[0] for i in dpids] 
+    if "AUTOENC" in model_conf.mlclass:
+        train_hv_channel_method.train(modelconf_name, 'all', flag, mojopath, modelpath)
+    else:
+        query = table_training.get_get_all_dpids_query()
+        dpids = rpccurrml.fetchall_for_query_self(query)
+        dpids = [i[0] for i in dpids] 
 
-    h2o.init()
+        h2o.init()
 
-    for dpid in dpids:
-        train_hv_channel_method.train(modelconf_name, dpid, flag, mojopath, modelpath)
+        for dpid in dpids:
+            train_hv_channel_method.train(modelconf_name, dpid, flag, mojopath, modelpath)
