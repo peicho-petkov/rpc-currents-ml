@@ -3,7 +3,7 @@ from . import MLModelInput
 from . import MLModelManager
 
 from tf.autoencoder_rpc import AE_DataManager,RPCAutoencoder
-from db_tools.db_tables import table_autoencoderData
+from db_tools import table_autoencoderData
 
 class MLTrainer:
     def __init__(self, model_conf, model_files_path, mojo_files_path,extra_col_names=None):

@@ -34,7 +34,7 @@ if __name__ == '__main__':
         mconf.input_cols = ",".join([table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
     elif mconf.mlclass == 'AUTOENC_V1':
         mconf.input_cols = ",".join(table_autoencoderData.dpids)
-        mconf.input_cols = ",".join(table_autoencoderData.dpids)
+        mconf.output_cols = ",".join(table_autoencoderData.dpids)
     else:
         mconf.input_cols = ",".join([table_training.vmon,table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
 
