@@ -2,6 +2,9 @@ import h2o
 from . import MLModelInput
 from . import MLModelManager
 
+from tf.autoencoder_rpc import AE_DataManager,RPCAutoencoder
+from db_tools.db_tables import table_autoencoderData
+
 class MLTrainer:
     def __init__(self, model_conf, model_files_path, mojo_files_path,extra_col_names=None):
         self.model_conf = model_conf
@@ -184,3 +187,30 @@ class MLTrainer:
         h2o.remove(trainig_dataset) 
         h2o.remove(new_trainig_dataset) 
         return themodel
+    
+    def train_autoencoder(self):
+        themodel = MLModelManager.MLModel()
+        themodel.dpid = 'all'
+        themodel.modelconf_id = self.model_conf.modelconf_id
+        
+        model_name = f'{self.model_conf.modelconf_id}_{themodel.dpid}'
+        themodel.model_path = self.model_files_path+'/'+model_name
+        themodel.mojo_path = ''
+        
+        n_inputs = len(self.model_conf.input_cols.split(','))
+        
+        rpc_ae = RPCAutoencoder(n_inputs=n_inputs)
+        ae_dm = AE_DataManager()
+        
+        ae_dm.set_time_window(self.model_conf.train_from,self.model_conf.train_to)
+        
+        for dataset in ae_dm.get_dataframe():
+            rpc_ae.train(dataset,dataset)
+        
+        rpc_ae.autoencoder.save(themodel.model_path)
+
+        themodel.mse = 0
+        themodel.r2 = 0
+
+        return themodel    
+        

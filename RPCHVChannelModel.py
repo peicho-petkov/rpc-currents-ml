@@ -1,3 +1,4 @@
+from z_training_tools.train_hv_channel_method import train
 import h2o
 from db_tools import table_training, table_mlmodelsconf, table_mlmodels, rpccurrml
 from db_tools import base as dbase
@@ -97,6 +98,15 @@ def train_validate_and_register_for_dpid(dpid,flag,forceupdate=False):
         model_id = model_manager.UpdateRegistedMLModel(model)
     return model_id
 
+def train_and_register_autoencoder(forceupdate=False):
+    model = trainer.train_autoencoder()
+    print("model type ", type(model))
+    if model is None:
+        return -2
+    model_id = model_manager.RegisterMLModel(model)
+    if model_id < 0 and forceupdate:
+        model_id = model_manager.UpdateRegistedMLModel(model)
+    return model_id
 
 if __name__ == '__main__':
     h2o.init()

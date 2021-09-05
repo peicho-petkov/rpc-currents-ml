@@ -22,11 +22,15 @@ if __name__ == '__main__':
     print(f"conf_name {conf_name}")
     print(f"dpid {dpid}")
     print(f"flag {flag}")
-    h2o.init()
     
     RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
+
+    if "AUTOENC" in RPCHVChannelModel.mconf.mlclass:
+        model_id = RPCHVChannelModel.train_and_register_autoencoder(True)    
+    else:    
+        h2o.init()
+        model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
     
-    model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
     if model_id < 0:
         print(f"a model configuration with name {conf_name} already registered for DPID {dpid}...")
     else:

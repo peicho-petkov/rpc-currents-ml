@@ -8,7 +8,12 @@ def train(model_conf_name, dpid, flag, mojopath, modelpath):
     
     RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
     
-    model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
+    if 'AUTOENC' in RPCHVChannelModel.mconf.mlclass:
+        model_id = RPCHVChannelModel.train_and_register_autoencoder(True)      
+        
+    if 'GLM' in RPCHVChannelModel.mconf.mlclass:
+        model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
+    
     if model_id == -1:
         print(f"A model configuration with name {conf_name} already registered for DPID {dpid}...")
     elif model_id == -2:

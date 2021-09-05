@@ -12,6 +12,7 @@ class MLModelConf:
         self.train_to = ''
         self.test_from = ''
         self.test_to = ''
+        
     def print(self):
         print("modelconf_id =",self.modelconf_id)
         print("name =",self.name)
