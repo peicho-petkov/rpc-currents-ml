@@ -297,7 +297,7 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
                    yaxis_title='<b>Current [&mu;A]</b>')
     
     # fig_diff.update_layout(barmode='stack')
-_
+
     fig_diff.update_layout(title='<b>Model deviation running average</b>',
                    yaxis_title='<b>IMON-prediciton [&mu;A]</b>')
     
