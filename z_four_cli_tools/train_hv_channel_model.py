@@ -26,12 +26,17 @@ if __name__ == '__main__':
     RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
 
     if "AUTOENC" in RPCHVChannelModel.mconf.mlclass:
-        model_id = RPCHVChannelModel.train_and_register_autoencoder(True)    
+        model_ids,dpids = RPCHVChannelModel.train_and_register_autoencoder(True)
+        for kv in len(model_ids):
+            if model_ids[kv] < 0:
+                print(f"a model configuration with name {conf_name} already registered for DPID {dpids[kv]}...")
+            else:
+                print(f"An ML model with model_id {model_ids[kv]} with configuration name {conf_name} for DPID {dpids[kv]} was registered successfully...")    
     else:    
         h2o.init()
         model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
     
-    if model_id < 0:
-        print(f"a model configuration with name {conf_name} already registered for DPID {dpid}...")
-    else:
-        print(f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully...")
+        if model_id < 0:
+            print(f"a model configuration with name {conf_name} already registered for DPID {dpid}...")
+        else:
+            print(f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully...")
