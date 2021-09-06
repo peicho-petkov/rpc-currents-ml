@@ -1,6 +1,7 @@
 from db_tools import table_predicted_current, table_training, table_mlmodels, table_mlmodelsconf, table_configuration
 from db_tools import base as dbase 
 from db_tools import rpccurrml
+from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
 from TrainerModule import MLModelManager 
 from Configuration import Configuration
 from optparse import OptionParser
@@ -19,8 +20,18 @@ def perform_prediction(start_date, end_date):
 
     h2o.init()
 
+    mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    model_manager = MLModelManager.MLModelsManager(rpccurrml,table_mlmodels)
+
     for model_id in active_model_ids:
-        ok = predict_for_hv_channel_method.predict(model_id, flag, start_date, end_date)
-        if not ok:
-            print(f"No data for {model_id} in period {start_date} to {end_date}")
-            continue
+        model = model_manager.get_by_model_id(model_id=model_id)
+            
+        mconf = mconf_manager.get_by_modelconf_id(model.modelconf_id)
+
+        if 'AUTOENC' in mconf.mlclass:
+            pass
+        else:
+            ok = predict_for_hv_channel_method.predict(model_id, flag, start_date, end_date)
+            if not ok:
+                print(f"No data for {model_id} in period {start_date} to {end_date}")
+                continue

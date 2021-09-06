@@ -234,6 +234,11 @@ class MLModels(dbTable):
         query = f"select * from {self.tablename} where {self.modelconf_id} = '{modelconf_id}' and {self.dpid} = '{dpid}'"
         return query
 
+    def get_model_by_model_id_query(self,model_id):
+        query = f"select * from {self.tablename} where {self.model_id} = '{model_id}'"
+        return query
+
+
     def get_set_active(self, active):
         query = f"UPDATE {self.tablename} SET {self.active} = '{active}' "
         return query

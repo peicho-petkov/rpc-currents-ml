@@ -88,3 +88,36 @@ def predict(model_id, flag, predict_from, predict_to):
     print("prediction done...")
 
     return True
+
+def predict_autoencoder(model_ids, flag, predict_from, predict_to):
+
+    thequery = table_mlmodels.get_get_confid_dpid_for_mid_query(model_id)
+    result = rpccurrml.fetchall_for_query_self(thequery)
+    print(f"The query returns {result}")
+    modelconf_id = result[0][0]
+    print(f"Modelconfid is {modelconf_id}")
+    dpid = result[0][1]
+    print(f"dpid is {dpid}")
+    newquery = table_mlmodelsconf.get_select_modelconfname_by_modelconfid_query(modelconf_id)
+    conf_name = rpccurrml.fetchall_for_query_self(newquery)[0][0]
+
+    if type(predict_from) is str:
+        predict_from = datetime.strptime(predict_from,'%Y-%m-%d %H:%M:%S')
+    if type(predict_to) is str:
+        predict_to = datetime.strptime(predict_to,'%Y-%m-%d %H:%M:%S')
+        
+    # h2o.init()
+    
+    mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    
+    mconf = mconf_manager.get_by_name(conf_name)
+    
+    model_manager = MLModelManager.MLModelsManager(rpccurrml,table_mlmodels)
+    
+    model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,dpid)
+
+
+        model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,-1)
+        
+        hv_curr_estimator = EstimatorTF.EstimatorTF(model)
+        

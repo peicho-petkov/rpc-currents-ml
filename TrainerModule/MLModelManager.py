@@ -249,5 +249,32 @@ class MLModelsManager:
             self._connector.execute_commit_query_self(myquery)
         
         # return modelconf, model_ids 
-    
+
+    def get_by_model_id(self,model_id):
+        query = self._mlmodelstab.get_model_by_model_id_query(model_id)
+        res = self._connector.fetchall_for_query_self(query)
+
+        if len(res) > 1:
+            print(f"More than one model records found for {modelconf_id} {dpid}")
+            return None
+
+        if len(res) < 1:
+            print(f"No model records found for {modelconf_id} {dpid}")
+            return None
+        
+        col_names = self._mlmodelstab.get_col_names()
+        col_values = res[0]
+        
+        res_dict = dict(zip(col_names,col_values))
+        
+        ml_model = MLModel()
+        ml_model.model_id = res_dict[self._mlmodelstab.model_id]
+        ml_model.modelconf_id= res_dict[self._mlmodelstab.modelconf_id]
+        ml_model.dpid = res_dict[self._mlmodelstab.dpid]
+        ml_model.r2 = res_dict[self._mlmodelstab.r2]
+        ml_model.mse = res_dict[self._mlmodelstab.mse]
+        ml_model.model_path = res_dict[self._mlmodelstab.model_path]
+        ml_model.mojo_path = res_dict[self._mlmodelstab.mojo_path]
+        
+        return ml_model    
 
