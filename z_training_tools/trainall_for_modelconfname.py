@@ -38,7 +38,7 @@ if __name__ == "__main__":
     flag = int(conf.GetParameter("flag"))
 
     if "AUTOENC" in model_conf.mlclass:
-        train_hv_channel_method.train(modelconf_name, 'all', flag, mojopath, modelpath)
+        train_hv_channel_method.train(modelconf_name, -1, flag, mojopath, modelpath)
     else:
         query = table_training.get_get_all_dpids_query()
         dpids = rpccurrml.fetchall_for_query_self(query)

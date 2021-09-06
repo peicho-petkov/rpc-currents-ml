@@ -190,7 +190,7 @@ class MLTrainer:
     
     def train_autoencoder(self):
         themodel = MLModelManager.MLModel()
-        themodel.dpid = 'all'
+        themodel.dpid = -1
         themodel.modelconf_id = self.model_conf.modelconf_id
         
         model_name = f'{self.model_conf.modelconf_id}_{themodel.dpid}'

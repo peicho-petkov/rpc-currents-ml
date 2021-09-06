@@ -95,7 +95,7 @@ class RPCAutoencoder:
         #         validation_data=(validation_dataset, validation_dataset),
         #         callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
         self.autoencoder.fit(training_dataset, training_dataset,
-                epochs=100)
+                epochs=10)
 
 
 
