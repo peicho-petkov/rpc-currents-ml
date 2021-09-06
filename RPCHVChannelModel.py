@@ -105,14 +105,14 @@ def train_and_register_autoencoder(forceupdate=False):
         return -2
     model_ids = []
 
-    dpids = mconf.output_cols.strip('dpid').split(',')
+    dpids = [int(vv) for vv in mconf.output_cols.replace('dpid','').split(',')]
 
     for dpid in dpids:
         model.dpid = dpid
         model_id = model_manager.RegisterMLModel(model)
         if model_id < 0 and forceupdate:
             model_id = model_manager.UpdateRegistedMLModel(model)
-        dpids.append(model_id)
+        model_ids.append(model_id)
 
     return model_ids[:],dpids[:]
 
