@@ -42,7 +42,7 @@ def perform_prediction(start_date, end_date):
 
     for mconf_id in autoenc_models_dict:
         models = autoenc_models_dict[mconf_id]
-        ok = predict_for_hv_channel_method.predict_autoencoder(models, flag, start_date, end_date):
+        ok = predict_for_hv_channel_method.predict_autoencoder(models, flag, start_date, end_date)
         if not ok:
             print(f"No data for model conf id {mconf_id} in period {start_date} to {end_date}")
             continue 

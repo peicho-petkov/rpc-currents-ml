@@ -7,7 +7,7 @@ class EstimatorTF():
         self.model = model
         self.kerasmodel = None
         try:
-            self.kerasmodel = keras.load_model(self.model.model_path)
+            self.kerasmodel = keras.models.load_model(self.model.model_path)
         except:
             print(f"model cannot be loaded from {self.model.model_path}")
         self.prediction = None 
