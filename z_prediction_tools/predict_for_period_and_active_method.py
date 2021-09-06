@@ -23,15 +23,26 @@ def perform_prediction(start_date, end_date):
     mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
     model_manager = MLModelManager.MLModelsManager(rpccurrml,table_mlmodels)
 
+    autoenc_models_dict = {}
+
     for model_id in active_model_ids:
         model = model_manager.get_by_model_id(model_id=model_id)
             
         mconf = mconf_manager.get_by_modelconf_id(model.modelconf_id)
 
         if 'AUTOENC' in mconf.mlclass:
-            pass
+            if not (mconf.modelconf_id in autoenc_models_dict):
+                autoenc_models_dict[mconf.modelconf_id] = []
+            autoenc_models_dict[mconf.modelconf_id].append((model)
         else:
             ok = predict_for_hv_channel_method.predict(model_id, flag, start_date, end_date)
             if not ok:
                 print(f"No data for {model_id} in period {start_date} to {end_date}")
                 continue
+
+    for mconf_id in autoenc_models_dict:
+        models = autoenc_models_dict[mconf_id]
+        ok = predict_for_hv_channel_method.predict_autoencoder(models, flag, start_date, end_date):
+        if not ok:
+            print(f"No data for model conf id {mconf_id} in period {start_date} to {end_date}")
+            continue 

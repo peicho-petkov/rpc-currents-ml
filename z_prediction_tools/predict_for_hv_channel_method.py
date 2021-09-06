@@ -1,5 +1,6 @@
 import h2o
-from EstimatorModule import PredictionsManager, Estimator
+from tf import autoencoder_rpc
+from EstimatorModule import PredictionsManager, Estimator, EstimatorTF
 from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
 from db_tools import table_mlmodels, table_mlmodelsconf, table_training
 from db_tools import rpccurrml
@@ -89,35 +90,43 @@ def predict(model_id, flag, predict_from, predict_to):
 
     return True
 
-def predict_autoencoder(model_ids, flag, predict_from, predict_to):
-
-    thequery = table_mlmodels.get_get_confid_dpid_for_mid_query(model_id)
-    result = rpccurrml.fetchall_for_query_self(thequery)
-    print(f"The query returns {result}")
-    modelconf_id = result[0][0]
-    print(f"Modelconfid is {modelconf_id}")
-    dpid = result[0][1]
-    print(f"dpid is {dpid}")
-    newquery = table_mlmodelsconf.get_select_modelconfname_by_modelconfid_query(modelconf_id)
-    conf_name = rpccurrml.fetchall_for_query_self(newquery)[0][0]
+def predict_autoencoder(models, flag, predict_from, predict_to):
 
     if type(predict_from) is str:
         predict_from = datetime.strptime(predict_from,'%Y-%m-%d %H:%M:%S')
     if type(predict_to) is str:
         predict_to = datetime.strptime(predict_to,'%Y-%m-%d %H:%M:%S')
         
-    # h2o.init()
-    
+    if len(models) < 1:
+        return False
+
+    model = models[0]
+
     mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    mconf = mconf_manager.get_by_modelconf_id(model.modelconf_id)
     
-    mconf = mconf_manager.get_by_name(conf_name)
+    model_output_dpids = [int(x) for x in mconf.output_cols.replace('dpid','').split(',')]
     
-    model_manager = MLModelManager.MLModelsManager(rpccurrml,table_mlmodels)
+    dpids = [int(m.dpid) for m in models]
     
-    model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,dpid)
-
-
-        model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,-1)
+    models_dict = {}
+    for m in models:
+        models_dict[int(m.dpid)] = m
+    
+    pm = PredictionsManager.PredictionsManager(rpccurrml,model.model_id,model.dpid)
+    hv_curr_estimator = EstimatorTF.EstimatorTF(model)
+    ok = False
+    ae_extract = autoencoder_rpc.AE_DataManager()
+    ae_extract.set_time_window(predict_from, predict_to)
+    for currents, currents_timestamp in ae_extract.get_dataframe():
+        predicted_currents = hv_curr_estimator.predict_for_dataframe(currents)
+        for ii in len(currents):
+            index_dpid = model_output_dpids[ii]
+            if index_dpid in dpids:
+                ok = True
+                pm.dpid = index_dpid
+                pm.model_id = models_dict[index_dpid].model_id
+                pm.insert_record(currents_timestamp[ii],predicted_currents[ii],0,currents[ii])
+        pm.commit_records()
         
-        hv_curr_estimator = EstimatorTF.EstimatorTF(model)
-        
+    return ok       
