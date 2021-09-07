@@ -254,7 +254,9 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     extractor_pred_curr_table.set_dpid_col_name('dpid')
     
     mlinput = MLModelInput.ModelInput(mconf)
-    if mconf.mlclass == 'GLM_V4':
+    if mconf.mlclass == 'AUTOENC':
+        pass
+    elif mconf.mlclass == 'GLM_V4':
         extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.vmon,table_training.change_date])
     else:
         extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.change_date])
