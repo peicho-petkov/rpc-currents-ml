@@ -47,9 +47,10 @@ class AE_DataManager:
                 else:
                     array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
                     date_array = np.append(date_array,mysql_buffer_to_datetime_np_array([rec[0]]),axis=0)
+                #yield array, date_array
             if array is None:
                 continue
-            print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape} last date {date_array[-1]}")
+            print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape} date array shape {date_array.shape} last date {date_array[-1]}")
             yield array, date_array
             
         q = table_autoencoderData.get_data_for_timeperiod_query(start_date,self.to_datetime)
@@ -63,6 +64,7 @@ class AE_DataManager:
             else:
                 array = np.append(array,mysql_buffer_to_float_np_array([rec[1:]]),axis=0)
                 date_array = np.append(date_array,mysql_buffer_to_datetime_np_array([rec[0]]),axis=0)
+                #yield array, date_array
         if array is not None:
             print(f"yield {len(dataset)} array len {len(array)} array shape {array.shape}  last date {date_array[-1]}")
             yield array, date_array

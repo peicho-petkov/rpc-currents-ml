@@ -16,9 +16,10 @@ class EstimatorTF():
         if self.kerasmodel is None:
             return None, None
         self.prediction = self.kerasmodel.predict(dataarray)
-        print(self.prediction)
+        #print(self.prediction)
         # pred = self.prediction.as_data_frame().values
         # prediction and prediction error
         # return pred[:,0],pred[:,1]
-        n = len(self.prediction[:])
-        return self.prediction[:],[0.]*n
+        # n = len(self.prediction[:])
+        print(f"The shape of the predicted array is {self.prediction.shape}")
+        return self.prediction
