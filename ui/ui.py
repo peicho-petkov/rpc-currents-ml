@@ -271,6 +271,9 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     
     for dpid in dpids_to_plot_last:
         model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,dpid)
+        if type(model) == 'NoneType':
+            print("model with conf {mconf.modelconf_id} for dpid {dpid} not found")
+            continue
         pf = None
         if 'AUTOENC' in mconf.mlclass:
             extractor_pred_curr_table.set_model_id(model.model_id)
