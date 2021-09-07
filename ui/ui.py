@@ -14,7 +14,7 @@ import h2o
 from optparse import OptionParser
 from EstimatorModule import PredictionsManager, Estimator
 from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
-from db_tools import table_mlmodels, table_mlmodelsconf, table_training, rpccurrml, base as dbase
+from db_tools import table_mlmodels, table_mlmodelsconf, table_training, table_predicted_current, rpccurrml, base as dbase
 from datetime import datetime
 from matplotlib import pyplot as plt
 import pandas as pd
@@ -245,6 +245,14 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     extractor_table_training.set_time_widow(start_date_last,end_date_last)
     extractor_table_training.set_column_name_list([table_training.change_date,table_training.imon])
     extractor_table_training.set_FLAG(56)
+    
+    extractor_pred_curr_table = DataManager.Extractor_MySql(table_predicted_current.tablename, rpccurrml)
+    extractor_pred_curr_table.set_column_name_list(["predicted_for", "predicted_value", "measured_value"])
+    extractor_pred_curr_table.set_timestamp_col('predicted_for')
+    extractor_pred_curr_table.set_time_widow(start_date_last,end_date_last)
+    extractor_pred_curr_table.set_model_id_col_name()
+    extractor_pred_curr_table.set_dpid_col_name('dpid')
+    
     mlinput = MLModelInput.ModelInput(mconf)
     if mconf.mlclass == 'GLM_V4':
         extractor_table_training.set_column_name_list(mconf.input_cols.split(',')+mconf.output_cols.split(',')+[table_training.vmon,table_training.change_date])
@@ -258,30 +266,50 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     
     for dpid in dpids_to_plot_last:
         model = model_manager.get_by_modelconf_id_dpid(mconf.modelconf_id,dpid)
-        hv_curr_estimator = Estimator.Estimator(model)
-        extractor_table_training.set_DPID(dpid)
-        query = extractor_table_training.get_data_by_dpid_flag_query()
-        curdata = rpccurrml.fetchall_for_query_self(query)
-        if mconf.mlclass == 'GLM_V4':
-            incols, outcol, dataset = mlinput.get_input_for_dataset(curdata,[table_training.vmon,table_training.change_date])
+        pf = None
+        if 'AUTOENC' in mconf.mlclass:
+            extractor_pred_curr_table.set_model_id(model.model_id)
+            extractor_pred_curr_table.set_DPID(dpid)
+            query = extractor_pred_curr_table.get_data_by_model_id_query()
+            print(query)
+            pred_data = rpccurrml.fetchall_for_query_self(query)
+
+            if len(pred_data) == 0:
+                print("**************************************")
+                print("* ERROR: no prediction data found... *")
+                print("**************************************")
+                continue
+            time_format='%Y-%m-%d %H:%M:%S'
+            pf = pd.DataFrame( [[ij for ij in i] for i in pred_data] )
+            pf.rename(columns=[table_training.change_date,'predicted',table_training.imon], inplace=True)
+            pf[table_training.change_date] = pd.to_datetime(pf[table_training.change_date], format=time_format)
+            
         else:
-            incols, outcol, dataset = mlinput.get_input_for_dataset(curdata,[table_training.change_date])
+            hv_curr_estimator = Estimator.Estimator(model)
+            extractor_table_training.set_DPID(dpid)
+            query = extractor_table_training.get_data_by_dpid_flag_query()
+            curdata = rpccurrml.fetchall_for_query_self(query)
+            if mconf.mlclass == 'GLM_V4':
+                incols, outcol, dataset = mlinput.get_input_for_dataset(curdata,[table_training.vmon,table_training.change_date])
+            else:
+                incols, outcol, dataset = mlinput.get_input_for_dataset(curdata,[table_training.change_date])
 
-        pf = dataset.as_data_frame()
-        pf[table_training.change_date] = pd.to_datetime(pf[table_training.change_date].to_list(),unit='ms')
-        pf['predicted'], pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
+            pf = dataset.as_data_frame()
+            pf[table_training.change_date] = pd.to_datetime(pf[table_training.change_date].to_list(),unit='ms')
+            pf['predicted'], pred_err = hv_curr_estimator.predict_for_dataframe(dataset)
 
-        del hv_curr_estimator
+            del hv_curr_estimator
 
-        data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf[table_training.imon].values,name=f"{dpid} imon",connectgaps = False)]
-        data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf['predicted'].values, name=f"{dpid} predicted",line = dict(dash = 'dash'),connectgaps = False)]
-        
-        pf['diff_iom_predicted'] = pf[table_training.imon] - pf['predicted']
-        
-        data_diff_histo = data_diff_histo + [go.Histogram(x=pf['diff_iom_predicted'].values, name=f"{dpid} imon - predicted")]
-        
-        pf['diff_iom_predicted'] = pf['diff_iom_predicted'].rolling(100).mean()
-        data_diff = data_diff + [go.Scatter(x=pf[table_training.change_date].values, y=pf['diff_iom_predicted'].values, name=f"{dpid} imon - predicted",connectgaps = False)]
+        if pf is not None:
+            data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf[table_training.imon].values,name=f"{dpid} imon",connectgaps = False)]
+            data=data+[go.Scatter(x=pf[table_training.change_date].values, y=pf['predicted'].values, name=f"{dpid} predicted",line = dict(dash = 'dash'),connectgaps = False)]
+            
+            pf['diff_iom_predicted'] = pf[table_training.imon] - pf['predicted']
+            
+            data_diff_histo = data_diff_histo + [go.Histogram(x=pf['diff_iom_predicted'].values, name=f"{dpid} imon - predicted")]
+            
+            pf['diff_iom_predicted'] = pf['diff_iom_predicted'].rolling(100).mean()
+            data_diff = data_diff + [go.Scatter(x=pf[table_training.change_date].values, y=pf['diff_iom_predicted'].values, name=f"{dpid} imon - predicted",connectgaps = False)]
 
     fig = go.Figure(data=data)
     print(fig)
