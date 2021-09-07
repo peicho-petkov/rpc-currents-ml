@@ -254,7 +254,7 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     extractor_pred_curr_table.set_dpid_col_name('dpid')
     
     mlinput = None
-    if mconf.mlclass == 'AUTOENC':
+    if 'AUTOENC' in mconf.mlclass:
         pass
     else:
         mlinput = MLModelInput.ModelInput(mconf)
