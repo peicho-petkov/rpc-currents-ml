@@ -286,7 +286,7 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
                 continue
             time_format='%Y-%m-%d %H:%M:%S'
             pf = pd.DataFrame( [[ij for ij in i] for i in pred_data] )
-            pf.rename(columns=[table_training.change_date,'predicted',table_training.imon], inplace=True)
+            pf.rename(columns={0:table_training.change_date,1:'predicted',2:table_training.imon}, inplace=True)
             pf[table_training.change_date] = pd.to_datetime(pf[table_training.change_date], format=time_format)
             
         else:
