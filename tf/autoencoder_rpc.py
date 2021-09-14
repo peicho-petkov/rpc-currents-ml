@@ -72,13 +72,18 @@ class AE_DataManager:
 class RPCAutoencoder:
     def __init__(self, n_inputs):
         self.n_inputs = n_inputs
-        input_img = keras.Input(shape=(self.n_inputs,))
-        encoded = layers.Dense(512, activation='relu')(input_img)
-        encoded = layers.Dense(128, activation='relu')(encoded)
-        encoded = layers.Dense(64,  activation='relu')(encoded)
+        self.inner_layers_one_five = 512
+        self.inner_layers_two_four = 128
+        self.inner_central_layer = 64 
 
-        decoded = layers.Dense(128, activation='relu')(encoded)
-        decoded = layers.Dense(512, activation='relu')(decoded)
+        input_img = keras.Input(shape=(self.n_inputs,))
+
+        encoded = layers.Dense(self.inner_layers_one_five, activation='relu')(input_img)
+        encoded = layers.Dense(self.inner_layers_two_four, activation='relu')(encoded)
+        encoded = layers.Dense(self.inner_central_layer,  activation='relu')(encoded)
+
+        decoded = layers.Dense(self.inner_layers_two_four, activation='relu')(encoded)
+        decoded = layers.Dense(self.inner_layers_one_five, activation='relu')(decoded)
         
         decoded = layers.Dense(self.n_inputs, activation='relu')(decoded)
 
@@ -88,6 +93,15 @@ class RPCAutoencoder:
         self.autoencoder.compile(optimizer='adam', loss=loss_fn)
 
         self.autoencoder.summary()
+
+    def set_layers_one_and_five_size(self, size):
+        self.inner_layers_one_five = size
+
+    def set_layers_two_and_four_size(self, size):
+        self.inner_layers_two_four = size
+
+    def set_central_layer_size(self, size):
+        self.inner_central_layer = size
 
     def train(self,training_dataset,validation_dataset):
         # self.autoencoder.fit(training_dataset, training_dataset,
