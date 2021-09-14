@@ -16,7 +16,7 @@ if __name__ == '__main__':
                         default="", help="Select model by model configuration name")
     oparser.add_option("--dpid", action="store", type="int", dest="DPID",
                         default=-1, help="Select model by dpid")
-    oparser.add_option("--pred-start-date", action="store", type="string", dest="start_date",\
+    oparser.add_option("--pred-start-date", action="store", type="string", dest="start_date",
                         help="The beginning of the prediction period you want to plot [yyyy-mm-dd]")
     oparser.add_option("--pred-end-date", action="store", type="string", dest="finish_date", 
                         help="The end of the prediction period you want to plot [yyyy-mm-dd]") 
