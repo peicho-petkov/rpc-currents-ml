@@ -76,6 +76,7 @@ class RPCAutoencoder:
         self.inner_layers_two_four = 128
         self.inner_central_layer = 64 
 
+    def create_network(self):
         input_img = keras.Input(shape=(self.n_inputs,))
 
         encoded = layers.Dense(self.inner_layers_one_five, activation='relu')(input_img)
