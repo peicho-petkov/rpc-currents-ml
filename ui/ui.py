@@ -344,4 +344,4 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     return fig,fig_diff,fig_diff_histo
 
 if __name__ == "__main__":
-    app.run_server(debug=False,port=8050,host='rpccurdevml.cern.ch')
+    app.run_server(debug=False,port=8050,host='192.168.2.192')

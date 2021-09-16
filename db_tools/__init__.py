@@ -11,12 +11,12 @@ table_configuration = db_tables.ConfigurationTable()
 table_notifications = db_tables.NotificationsTable()
 table_dpidstates = db_tables.dpidStateTable()
 
-rpccurrml = mysql_dbConnector(host='rpccurdevml',user='ppetkov',password='cmsrpc')
+rpccurrml = mysql_dbConnector(host='localhost',user='cmsrpcdev',password='cmsrpc')
 rpccurrml.connect_to_db('RPCCURRML')
 rpccurrml.self_cursor_mode()
 
-omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
-omds.connect_to_db('cman_int2r')
+#omds = oracle_dbConnector(user='cms_rpc_test_r',password='rpcr20d3R')
+#omds.connect_to_db('cman_int2r')
 
 dpid_colnames = [  'dpid315',
   'dpid316',
