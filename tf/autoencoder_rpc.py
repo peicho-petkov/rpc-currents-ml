@@ -73,12 +73,12 @@ class RPCAutoencoder:
     def __init__(self, n_inputs):
         self.n_inputs = n_inputs
         input_img = keras.Input(shape=(self.n_inputs,))
-        encoded = layers.Dense(512, activation='relu')(input_img)
-        encoded = layers.Dense(128, activation='relu')(encoded)
-        encoded = layers.Dense(64,  activation='relu')(encoded)
+        encoded = layers.Dense(768, activation='relu')(input_img)
+        encoded = layers.Dense(192, activation='relu')(encoded)
+        encoded = layers.Dense(96,  activation='relu')(encoded)
 
-        decoded = layers.Dense(128, activation='relu')(encoded)
-        decoded = layers.Dense(512, activation='relu')(decoded)
+        decoded = layers.Dense(192, activation='relu')(encoded)
+        decoded = layers.Dense(768, activation='relu')(decoded)
         
         decoded = layers.Dense(self.n_inputs, activation='relu')(decoded)
 
