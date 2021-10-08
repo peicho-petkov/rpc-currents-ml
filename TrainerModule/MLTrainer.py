@@ -201,6 +201,18 @@ class MLTrainer:
         print(self.model_conf.input_cols)
         print(n_inputs)
         rpc_ae = RPCAutoencoder(n_inputs=n_inputs)
+
+        if self.model_conf.mlclass == 'AUTOENC_V1':
+            rpc_ae.set_layers_one_and_five_size(512)
+            rpc_ae.set_layers_two_and_four_size(128)
+            rpc_ae.set_central_layer_size(64)
+        if self.model_conf.mlclass == 'AUTOENC_V2':
+            rpc_ae.set_layers_one_and_five_size(768)
+            rpc_ae.set_layers_two_and_four_size(256)
+            rpc_ae.set_central_layer_size(64)
+
+        rpc_ae.create_network()
+
         ae_dm = AE_DataManager()
         
         ae_dm.set_time_window(self.model_conf.train_from,self.model_conf.train_to)

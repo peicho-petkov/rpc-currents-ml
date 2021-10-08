@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from db_tools import table_mlmodelsconf, table_predicted_current, table_mlmodels, table_training, table_configuration
+from db_tools import table_mlmodelsconf, table_predicted_current, table_mlmodels, table_training, table_configuration, rpccurrml
 from db_tools import base as dbase
 from TrainerModule import DataManager
 from TrainerModule import MLModelManager
@@ -17,9 +17,9 @@ if __name__ == "__main__":
     (options, args) = oparser.parse_args()
     modelconf_name = options.modelconf_name
     
-    rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
-    rpccurrml.connect_to_db("RPCCURRML")
-    rpccurrml.self_cursor_mode()
+    # rpccurrml = dbase.mysql_dbConnector(host="rpccurdevml", user="ppetkov", password="cmsrpc")
+    # rpccurrml.connect_to_db("RPCCURRML")
+    # rpccurrml.self_cursor_mode()
 
     # modelmanager = MLModelManager.MLModelsManager(rpccurrml, table_mlmodels)
     # model_conf_obj_and_ids = modelmanager.set_mlmodels_active_state(table_mlmodelsconf, modelconf_name)

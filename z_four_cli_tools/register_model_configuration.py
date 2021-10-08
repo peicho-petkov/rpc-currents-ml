@@ -18,7 +18,7 @@ if __name__ == '__main__':
     oparser.add_option("--test-to", action="store", type="string", dest="test_to",default='',
                        help="the end of the validation period [yyyy-mm-dd]")
     oparser.add_option("--mlclass", action="store", type="string", dest="mlclass",default='GLM_V2',
-                       help="accepts supported ml classes only: 'GLM_V1','GLM_V2','GLM_V3','GLM_V4','GLM_V5','GLM_V6','GLM_V7' and 'AUTOENC_V1'")
+                       help="accepts supported ml classes only: 'GLM_V1','GLM_V2','GLM_V3','GLM_V4','GLM_V5','GLM_V6','GLM_V7','AUTOENC_V1' and 'AUTOENC_V2'")
 
     (options, args) = oparser.parse_args()
     
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     if mconf.mlclass == 'GLM_V4':
         mconf.input_cols = ",".join([table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
-    elif mconf.mlclass == 'AUTOENC_V1':
+    elif mconf.mlclass == 'AUTOENC_V1' or mconf.mlclass == 'AUTOENC_V2':
         mconf.input_cols = ",".join(table_autoencoderData.dpids)
         mconf.output_cols = ",".join(table_autoencoderData.dpids)
     else:
