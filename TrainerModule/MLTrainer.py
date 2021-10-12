@@ -206,12 +206,19 @@ class MLTrainer:
             rpc_ae.set_layers_one_and_five_size(512)
             rpc_ae.set_layers_two_and_four_size(128)
             rpc_ae.set_central_layer_size(64)
+            rpc_ae.create_network()
         if self.model_conf.mlclass == 'AUTOENC_V2':
             rpc_ae.set_layers_one_and_five_size(768)
             rpc_ae.set_layers_two_and_four_size(256)
             rpc_ae.set_central_layer_size(64)
-
-        rpc_ae.create_network()
+            rpc_ae.create_network()
+        if self.model_conf.mlclass == 'AUTOENC_V3':
+            rpc_ae.set_layers_one_and_five_size(1024)
+            rpc_ae.set_layers_two_and_four_size(384)
+            rpc_ae.set_central_layer_size(128)
+            rpc_ae.create_network()  
+          
+#        rpc_ae.create_network()
 
         ae_dm = AE_DataManager()
         
