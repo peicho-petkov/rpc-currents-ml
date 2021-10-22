@@ -1,9 +1,9 @@
 import dash
-from dash_bootstrap_components._components.Spinner import Spinner
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
+from dash_bootstrap_components._components.Spinner import Spinner
 from datetime import date, datetime
 import plotly.express as px
 import plotly.graph_objects as go
@@ -33,6 +33,34 @@ server = app.server
 
 app.layout = dbc.Container(
     [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Markdown(
+                            """
+                            """
+                        )
+                    ],
+                    width=True,
+                ),
+            ],
+            align="end",
+        ),
+        html.Hr(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.H1(children="ML-based tool for RPC currents monitoring"),
+                width=9,
+                ),
+                dbc.Col(
+                    html.Img(src='/assets/lhcbeam.png', style={'height':'30%', 'width':'30%'}),
+                width=3,
+                ),
+            ],
+            align="center",
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -119,10 +147,10 @@ def change_mlconfname(confname):
     global old_mlconfname
     global old_options
 
-    confname_chaged = old_mlconfname != confname
+    confname_changed = old_mlconfname != confname
     old_mlconfname = confname
 
-    if confname_chaged:
+    if confname_changed:
         if confname is not None:
             mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
             mconf = mconf_manager.get_by_name(confname)

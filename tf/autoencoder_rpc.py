@@ -28,7 +28,7 @@ class AE_DataManager:
         self.from_datetime = from_datetime
         self.to_datetime = to_datetime
         
-    def get_dataframe(self,tdelta_days=2):
+    def get_dataframe(self,tdelta_days=10):
         if self.from_datetime is None or self.to_datetime is None:
             raise Exception("AE_DataManger: calling get_dataframe without setting the time_window. Call set_time_window before getting data.")
         start_date = self.from_datetime

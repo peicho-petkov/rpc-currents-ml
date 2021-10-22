@@ -1,7 +1,7 @@
 import h2o
 from . import MLModelInput
 from . import MLModelManager
-
+import numpy as np
 from tf.autoencoder_rpc import AE_DataManager,RPCAutoencoder
 from db_tools import table_autoencoderData
 
@@ -202,6 +202,7 @@ class MLTrainer:
         print(n_inputs)
         rpc_ae = RPCAutoencoder(n_inputs=n_inputs)
 
+
         if self.model_conf.mlclass == 'AUTOENC_V1':
             rpc_ae.set_layers_one_and_five_size(512)
             rpc_ae.set_layers_two_and_four_size(128)
@@ -223,10 +224,24 @@ class MLTrainer:
         ae_dm = AE_DataManager()
         
         ae_dm.set_time_window(self.model_conf.train_from,self.model_conf.train_to)
-        
-        for dataset,datedataset in ae_dm.get_dataframe():
-            rpc_ae.train(dataset,dataset)
-        
+ 
+        theData = None       
+
+        for dataset,datedataset in ae_dm.get_dataframe(): 
+            if theData is None:
+                theData = dataset
+                print(f"Shape of theData after initial append: {theData.shape}")
+            else:
+                theData = np.concatenate((theData, dataset)) 
+            print(f"The shape of theData at this point is: {theData.shape}")
+            print("Ten more days of data appended!")
+        #rpc_ae.train(dataset,dataset)
+
+        print("++++++++++++++++++++++++++++++++++++++")
+        print("+       NOW STARTING TO TRAIN         ")
+        print("++++++++++++++++++++++++++++++++++++++")
+        rpc_ae.train(theData, theData)
+
         rpc_ae.autoencoder.save(themodel.model_path)
 
         themodel.mse = 0
