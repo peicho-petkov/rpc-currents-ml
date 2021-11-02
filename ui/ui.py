@@ -1,9 +1,9 @@
 import dash
-from dash_bootstrap_components._components.Spinner import Spinner
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
+from dash_bootstrap_components._components.Spinner import Spinner
 from datetime import date, datetime
 import plotly.express as px
 import plotly.graph_objects as go
@@ -13,14 +13,13 @@ import RPCHVChannelModel
 import h2o
 from optparse import OptionParser
 from EstimatorModule import PredictionsManager, Estimator
-from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
-from db_tools import table_mlmodels, table_mlmodelsconf, table_training, table_predicted_current, rpccurrml, base as dbase
+from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput, MLModelConf
+from db_tools import table_mlmodels, table_mlmodelsconf, table_training, table_autoencoderData, table_predicted_current, rpccurrml, base as dbase
 from datetime import datetime
 from matplotlib import pyplot as plt
 import pandas as pd
 
-q = table_mlmodelsconf.get_select_modelconfnames_query()
-mlconfnames = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+mlclasses= ['GLM_V1','GLM_V2','GLM_V3','GLM_V4','GLM_V5','GLM_V6','GLM_V7','AUTOENC_V1','AUTOENC_V2','AUTOENC_V3']
 
 h2o.init()
 
@@ -31,8 +30,40 @@ app = dash.Dash(
 )
 server = app.server
 
-app.layout = dbc.Container(
+def serve_layout(): 
+    q = table_mlmodelsconf.get_select_modelconfnames_query()
+    mlconfnames = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+
+    return dbc.Container(
     [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Markdown(
+                            """
+                            """
+                        )
+                    ],
+                    width=True,
+                ),
+            ],
+            align="end",
+        ),
+        html.Hr(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.H1(children="ML-based tool for RPC currents monitoring"),
+                width=9,
+                ),
+                dbc.Col(
+                    html.Img(src='/assets/lhcbeam.png', style={'height':'30%', 'width':'30%'}),
+                width=3,
+                ),
+            ],
+            align="center",
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -61,6 +92,22 @@ app.layout = dbc.Container(
                             id="modelconfname_collapse",
                             is_open=True,
                         ),
+#                        dcc.ConfirmDialogProvider(
+#                            children=html.Button(
+#                                    "Delete Selected Configuration", 
+#                                    id="delete_conf_button", style={'background-color': 'red'}),
+#                            id='confirm_delete_dialog',
+#                            message='Are you sure you want to delete this Configuration?'
+#                        ),
+                        dcc.ConfirmDialog(
+                            id='confirm_delete_dialog',
+                            message='Are you sure you want to delete this Configuration?'
+                        ),
+                        html.Button(
+                                "Delete Selected Configuration", 
+                                id="delete_conf_button", style={'background-color': 'red'}),
+                        html.Div(id='output-provider'),
+                        html.Br(),
                         html.Br(),
                         dbc.Button(
                             "DPID", id="dpid_button", style={'background-color': 'darkblue'}
@@ -86,10 +133,76 @@ app.layout = dbc.Container(
                             id="time_period_collapse",
                             is_open=True,
                         ),
-                        html.Hr(),
+                        html.Br(),
                         dbc.Button(
                             "Plot", id="plot_button", style={'background-color': 'green'}
-                        )],
+                        ),
+                        html.Hr(),
+                        dcc.Markdown(
+                            "CREATE YOUR OWN MODEL CONFIGURATION"    
+                        ),
+                        dbc.Button(   
+                            "Enter Name for New Configuration (mm-yyyy-mm-yyyy-f56-mlclass-vx)", id="reg_button", style={'background-color': 'CadetBlue'}
+                        ),
+                        dbc.Collapse(
+                            dcc.Input(
+                                id='input_conf_name', value='', type='text'    
+                            ),
+                            id="reg_new_conf_name_collapse",
+                            is_open=True,
+                        ),
+                        html.Br(),
+                        dbc.Button(   
+                            "Choose model class", id="class_button", style={'background-color': 'CadetBlue'}
+                        ),
+                        dbc.Collapse(
+                            dcc.Dropdown( id='class_name',     
+                                options = [{"label": entry, "value": entry} for entry in mlclasses]),
+                            id="reg_new_model_class_collapse",
+                            is_open=True,
+                        ), 
+                        html.Br(),
+                        dbc.Button(
+                            "Training and Testing Period", id="train_period_button", style={'background-color': 'CadetBlue'}
+                        ),
+                        dbc.Collapse(
+                            dcc.DatePickerRange(
+                                id='train-period-start-end-date',
+                                min_date_allowed=date(2016, 1, 1),
+                                # max_date_allowed=date(2017, 9, 19),
+                                initial_visible_month=date(2018, 11, 30),
+                                # end_date=date(2017, 8, 25)
+                            ),
+                            id="train_period_collapse",
+                            is_open=True,
+                        ),
+                        html.Br(),
+                        dbc.Button(
+                            "Create Configuration", id="create_conf_button", style={'background-color': 'Green'}        
+                        ),
+                        html.Hr(),
+                        dcc.Markdown(
+                            "TRAIN YOUR MODELS"    
+                        ),
+                        dbc.Button("Select DPID for Training",
+                                    id="dpid_for_training_button", style={'background-color': 'Orchid'}
+                                    ),
+                        dbc.Collapse(
+                            dcc.Dropdown(
+                                id="dpids_for_training", multi=True, searchable=True,   
+                            ),        
+                            id="select_train_dpid_collapse",
+                            is_open=True,
+                        ),
+                        dbc.Button(
+                                "TRAIN", id="train_button", style={'background-color': 'Green'}    
+                                ),
+#                        dbc.Button(
+#                                "TRAIN ALL", id="trainall_button", style={'background-color': 'Green'}    
+#                                ),
+#                        html.Div(id='hidden-div', style={'display':'none'})
+                        html.Div(id='hidden-div')
+                        ],         
                     width=3,
                 ),
                 dbc.Col([
@@ -109,20 +222,85 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+app.layout = serve_layout
+
+
+n_clicks_last = 0
+@app.callback(
+    Output("input_conf_name","value"),
+    Output("modelconfname_id","options"),
+        [Input("create_conf_button","n_clicks")],
+        [State("input_conf_name","value")],
+        [State("class_name","value")],
+        [State('train-period-start-end-date','start_date')],
+        [State('train-period-start-end-date','end_date')],
+)
+def create_new_configuration(n_clicks, conf_name, mlclass, stdate, endate):
+    global n_clicks_last
+    global mlconfnames
+
+    if n_clicks is None:
+        n_clicks = 0
+
+    create_button_pressed = n_clicks > n_clicks_last
+    n_clicks_last = n_clicks
+
+    if not create_button_pressed:
+        return None
+
+    mconf = MLModelConf()
+    mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    
+    mconf.name = conf_name
+    mconf.mlclass = mlclass
+
+    mconf.output_cols = table_training.imon
+
+    if mconf.mlclass == 'GLM_V4':
+        mconf.input_cols = ",".join([table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+    elif mconf.mlclass == 'AUTOENC_V1' or mconf.mlclass == 'AUTOENC_V2' or mconf.mlclass == 'AUTOENC_V3':
+        mconf.input_cols = ",".join(table_autoencoderData.dpids)
+        mconf.output_cols = ",".join(table_autoencoderData.dpids)
+    else:
+        mconf.input_cols = ",".join([table_training.vmon,table_training.uxcP,table_training.uxcT,table_training.uxcRH,table_training.instant_lumi,table_training.integrated_lumi,table_training.hours_without_lumi])
+    
+    mconf.train_from = stdate
+    mconf.train_to = endate
+    
+    mconf.test_from = stdate
+    mconf.test_to = endate
+
+    mconf_id = mconf_manager.RegisterMLModelConf(mconf)
+
+    if mconf_id == -1:
+        print("modelconf already registered...")
+    elif mconf_id == -2:
+        print('modelconf registration failed...')
+    else:
+        print(f"The model configuration registered successfully with modelconf_id {mconf_id}")
+
+    q = table_mlmodelsconf.get_select_modelconfnames_query()
+    mlconfnames = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+    theoptions = [{"label" : entry, "value" : entry} for entry in mlconfnames ]
+    print(f"The retrieved confs are: {mlconfnames[:]}")
+    return "", theoptions
+
+
 old_mlconfname = None
 old_options = []
 @app.callback(
     Output('dpid_id','options'),
+    Output('dpids_for_training', 'options'),
     [Input('modelconfname_id','value')]
 )
 def change_mlconfname(confname):
     global old_mlconfname
     global old_options
 
-    confname_chaged = old_mlconfname != confname
+    confname_changed = old_mlconfname != confname
     old_mlconfname = confname
 
-    if confname_chaged:
+    if confname_changed:
         if confname is not None:
             mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
             mconf = mconf_manager.get_by_name(confname)
@@ -134,8 +312,37 @@ def change_mlconfname(confname):
         else:
             old_options = []
     print(old_options)
-    return old_options[:]
+    return old_options[:], old_options[:]
 
+@app.callback(
+    Output("train_period_collapse", "is_open"),
+    [Input("train_period_button", "n_clicks")],
+    [State("train_period_collapse", "is_open")],
+)
+def toggle_modelconfname_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("reg_new_model_class_collapse", "is_open"),
+    [Input("class_button", "n_clicks")],
+    [State("reg_new_model_class_collapse", "is_open")],
+)
+def toggle_modelconfname_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("reg_new_conf_name_collapse", "is_open"),
+    [Input("reg_button", "n_clicks")],
+    [State("reg_new_conf_name_collapse", "is_open")],
+)
+def toggle_modelconfname_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
 
 @app.callback(
     Output("modelconfname_collapse", "is_open"),
@@ -166,6 +373,201 @@ def toggle_modelconfname_collapse(n_clicks, is_open):
     if n_clicks:
         return not is_open
     return is_open
+
+@app.callback(
+    Output("select_train_dpid_collapse", "is_open"),
+    [Input("dpid_for_training_button", "n_clicks")],
+    [State("select_train_dpid_collapse", "is_open")],
+)
+def toggle_modelconfname_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+n_clicks_last = 0
+@app.callback(
+    Output("confirm_delete_dialog", "displayed"),
+    [Input("delete_conf_button","n_clicks")]
+)
+def display_confirm_window(n_clicks):
+    global n_clicks_last
+    if n_clicks is None:
+        n_clicks = 0
+    print(f"n_clicks has a value of {n_clicks}")
+
+    button_pressed = n_clicks > n_clicks_last
+    n_clicks_last = n_clicks
+
+    if button_pressed:
+        return True
+    return False
+
+submit_n_clicks_last = 0
+@app.callback(
+    Output("output-provider", "children"),
+    #Output("modelconfname_id", "options"),
+    [Input("confirm_delete_dialog","submit_n_clicks")],
+    [State("modelconfname_id", "value")]
+)
+def perform_action(submit_n_clicks, config_name):
+    #global mlconfs
+    global submit_n_clicks_last
+    if submit_n_clicks is None:
+        submit_n_clicks = 0
+    print(f"The value of submit_n_clicks is: {submit_n_clicks}")
+    
+    confirmation_given = submit_n_clicks > submit_n_clicks_last
+    submit_n_clicks_last = submit_n_clicks
+
+    if  confirmation_given:
+        #return 'It wasnt easy but hey {}'.format(submit_n_clicks)
+        query = table_mlmodelsconf.get_delete_conf_by_name_query(config_name)
+        print(query)
+        rpccurrml.execute_commit_query_self(query)
+        #q = table_mlmodelsconf.get_select_modelconfnames_query()                     #Wasn't able to automaticaly update the modelconf_name list before refreshing the page
+        #mlconfs = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+        #print(f"The retrieved modelconf_names are: {mlconfnames}")
+        #theoptions = [{"label" : entry, "value" : entry} for entry in mlconfnames ]
+        return f"The configuration {config_name} was deleted"  #, theoptions
+
+#THE FOLLOWING BLOCK WORKS ONLY IN DISPLAYING THE WARNING MESSAGE
+#@app.callback(
+#    Output("confirm_delete_dialog", "displayed"),
+#    Input("delete_conf_button", "n_clicks"),
+#)
+#def display_confirm_window_and_then_delete(n_clicks, cname):
+#    if n_clicks:
+#       return True
+#    return False
+
+#THE FOLLOWING LINE ALSO WORKS WHEN TESTED FOR DISPLAYING THE WARNING MESSAGE; CONTINUINING DEVELOPMENT IN NEXT CALLBACK
+#@app.callback(
+#    Output("output-provider", "children"),
+#    Input("confirm_delete_dialog", "n_clicks")
+#)
+#def display_confirm_window_and_then_delete(n_clicks):
+#    if n_clicks:
+#        return True
+#    return False
+
+#IT IS NOT CLEAR WHY THIS DOESN'T ENTER INSIDE THE FUNCTION AT ALL
+#@app.callback(
+#    Output("output-provider", "children"),
+#    Output("modelconfname_id", "options"),
+#        Input("confirm_delete_dialog", "n_clicks"),
+#        State("modelconfname_id", "value")
+#)
+#def display_confirm_window_and_then_delete(n_clicks, cname):
+#    print("Entering the Function ++++++++++++++++++++++++++++++++++++++++++++++")
+#    if n_clicks:
+#        query = table_mlmodelsconf.get_delete_conf_by_name_query(cname)
+#        print(query)
+#        rpccurrml.execute_commit_query_self(query)
+#        q = table_mlmodelsconf.get_select_modelconfnames_query()
+#        mlconfnames = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+#        theoptions = [{"label" : entry, "value" : entry} for entry in mlconfnames ]
+#        return "The configuration has been deleted!" #, theoptions
+#    else:
+#        return "Couldnt enter in the above condition"
+
+#@app.callback(
+#    Output("modelconfname_id", "options"),
+#        Input("confirm_delete_dialog", "n_clicks"),
+#        State("modelconfname_id", "value")
+#)
+#def delete_configuration(n_clicks, cname):
+#    if n_clicks:
+#        query = table_mlmodelsconf.get_delete_conf_by_name_query(cname)
+#        rpccurrml.execute_commit_query_self(query)
+#        q = table_mlmodelsconf.get_select_modelconfnames_query()
+#        mlconfnames = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+#        theoptions = [{"label" : entry, "value" : entry} for entry in mlconfnames ]
+#        return theoptions
+
+n_clicks_old = 0
+@app.callback(
+    Output('hidden-div', 'children'),
+    Input('train_button', 'n_clicks'),
+    State('modelconfname_id', 'value'),
+    State('dpids_for_training', 'value')
+)
+def perform_training_for_dpid(n_clicks, confname, dpid):
+    global n_clicks_old
+    if n_clicks is None:
+        n_clicks = 0
+    train_button_pressed = n_clicks > n_clicks_old
+    n_clicks_old = n_clicks
+
+    if train_button_pressed:
+        conf_name=confname
+        dpid = dpid[0]
+        flag = 56
+        mojopath="."
+        modelpath="."
+        print(f"conf_name {conf_name}")
+        print(f"dpid {dpid}")
+        print(f"flag {flag}")
+
+        RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
+
+        if "AUTOENC" in RPCHVChannelModel.mconf.mlclass:
+            model_ids,dpids = RPCHVChannelModel.train_and_register_autoencoder(True)
+            for kv in len(model_ids):
+                if model_ids[kv] < 0:
+                    print(f"a model configuration with name {conf_name} already registered for DPID {dpids[kv]}...")
+                else:
+                    print(f"An ML model with model_id {model_ids[kv]} with configuration name {conf_name} for DPID {dpids[kv]} was registered successfully...")
+        else:
+            h2o.init()
+            model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
+
+            if model_id < 0:
+                notification = f"a model configuration with name {conf_name} already registered for DPID {dpid}..."
+                print(f"a model configuration with name {conf_name} already registered for DPID {dpid}...")
+            else:
+                notification = f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully..." 
+                print(f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully...")
+        return notification
+#
+#n_clicks_old = 0
+#@app.callback(
+#    Output('hidden-div', 'children'),
+#    Input('trainall_button', 'n_clicks'),
+#    State('modelconfname_id', 'value')
+#)
+#def perform_training_for_dpid(n_clicks, confname):
+#    global n_clicks_old
+#    if n_clicks is None:
+#        n_clicks = 0
+#    train_button_pressed = n_clicks > n_clicks_old
+#    n_clicks_old = n_clicks
+#
+#    if train_button_pressed:
+#        modelconfmanager = MLModelManager.MLModelsConfManager(rpccurrml, table_mlmodelsconf)
+#        model_conf = modelconfmanager.get_by_name(confname)
+#
+#        train_start_date = model_conf.train_from
+#        train_end_date = model_conf.train_to
+#
+#        conf = Configuration(rpccurrml)
+#        mojopath = conf.GetParameter("mojopath")
+#        modelpath = conf.GetParameter("modelpath")
+#        flag = int(conf.GetParameter("flag"))
+#
+#        if "AUTOENC" in model_conf.mlclass:
+#            train_hv_channel_method.train(modelconf_name, -1, flag, mojopath, modelpath)
+#        else:
+#            query = table_training.get_get_all_dpids_query()
+#            dpids = rpccurrml.fetchall_for_query_self(query)
+#            dpids = [i[0] for i in dpids]
+#
+#            h2o.init()
+#
+#            for dpid in dpids:
+#                train_hv_channel_method.train(modelconf_name, dpid, flag, mojopath, modelpath)
+#        return ""
+
+
 
 n_clicks_last = 0
 start_date_last = date(1,1,1)

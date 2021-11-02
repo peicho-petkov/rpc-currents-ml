@@ -362,6 +362,11 @@ class MLModelsConf(dbTable):
         query=f"select {self.name} from {self.tablename} order by {self.last_update} desc"
         return query
 
+    def get_delete_conf_by_name_query(self, cname):
+        query=f"delete from {self.tablename} where {self.name} = '{cname}'"
+        return query
+
+
 class PredictedCurrentsTable(dbTable):
     def __init__(self, tablename='PredictedCurrent'):
         super().__init__(tablename)
