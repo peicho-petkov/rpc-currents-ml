@@ -28,6 +28,8 @@ from train import Train
 from plotpredictions import Plotpredictions
 from manageconfs import ManageConfs
 from predict import Predict
+from warningtab import Warningtab
+from abouttab import Aboutinfo
 
 mlclasses= ['GLM_V1','GLM_V2','GLM_V3','GLM_V4','GLM_V5','GLM_V6','GLM_V7','AUTOENC_V1','AUTOENC_V2','AUTOENC_V3']
 
@@ -112,6 +114,10 @@ def display_page(pathname):
         return Predict()
     elif pathname == '/manage_configurations':
         return ManageConfs()
+    elif pathname == '/warnings':
+        return Warningtab()
+    elif pathname == '/about':
+        return Aboutinfo()
     else:
         return Homepage()
     
@@ -396,7 +402,7 @@ n_clicks_old = 0
     State('modelconfname_id', 'value'),
     State('dpids_for_training', 'value')
 )
-def perform_training_for_dpid(n_clicks, confname, dpid):
+def perform_training_for_dpid(n_clicks, confname, dpids):
     global n_clicks_old
     if n_clicks is None:
         n_clicks = 0
@@ -404,34 +410,35 @@ def perform_training_for_dpid(n_clicks, confname, dpid):
     n_clicks_old = n_clicks
 
     if train_button_pressed:
-        conf_name=confname
-        dpid = dpid[0]
-        flag = 56
-        mojopath="."
-        modelpath="."
-        print(f"conf_name {conf_name}")
-        print(f"dpid {dpid}")
-        print(f"flag {flag}")
+        print(f"+++++++++++++++++++++++++++++{dpids}+++++++++++++++++++++++++++++++++++++++")
+        for dpid in dpids:
+            conf_name=confname
+            flag = 56
+            mojopath="."
+            modelpath="."
+            print(f"conf_name {conf_name}")
+            print(f"dpid {dpid}")
+            print(f"flag {flag}")
 
-        RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
+            RPCHVChannelModel.init(model_conf_name=conf_name,mojofiles_path=mojopath,mlmodels_path=modelpath)
 
-        if "AUTOENC" in RPCHVChannelModel.mconf.mlclass:
-            model_ids,dpids = RPCHVChannelModel.train_and_register_autoencoder(True)
-            for kv in len(model_ids):
-                if model_ids[kv] < 0:
-                    print(f"a model configuration with name {conf_name} already registered for DPID {dpids[kv]}...")
-                else:
-                    print(f"An ML model with model_id {model_ids[kv]} with configuration name {conf_name} for DPID {dpids[kv]} was registered successfully...")
-        else:
-            h2o.init()
-            model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
-
-            if model_id < 0:
-                notification = f"a model configuration with name {conf_name} already registered for DPID {dpid}..."
-                print(f"a model configuration with name {conf_name} already registered for DPID {dpid}...")
+            if "AUTOENC" in RPCHVChannelModel.mconf.mlclass:
+                model_ids,dpids = RPCHVChannelModel.train_and_register_autoencoder(True)
+                for kv in len(model_ids):
+                    if model_ids[kv] < 0:
+                        print(f"a model configuration with name {conf_name} already registered for DPID {dpids[kv]}...")
+                    else:
+                        print(f"An ML model with model_id {model_ids[kv]} with configuration name {conf_name} for DPID {dpids[kv]} was registered successfully...")
             else:
-                notification = f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully..." 
-                print(f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully...")
+                h2o.init()
+                model_id = RPCHVChannelModel.train_and_register_for_dpid(dpid,flag,True)
+
+                if model_id < 0:
+                    notification = f"a model configuration with name {conf_name} already registered for DPID {dpid}..."
+                    print(f"a model configuration with name {conf_name} already registered for DPID {dpid}...")
+                else:
+                    notification = f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully..." 
+                    print(f"An ML model with model_id {model_id} with configuration name {conf_name} for DPID {dpid} was registered successfully...")
         return notification
 #
 

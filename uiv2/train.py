@@ -58,7 +58,7 @@ body = dbc.Container([
                 id='interval2', interval = 1 * 1000,
                 n_intervals=0),
         dbc.Collapse(
-                html.Iframe(id='console-out', srcDoc='', style={'width':'100%', 'height':420}),
+            html.Iframe(id='console-out', srcDoc='', style={'width':'100%', 'height':420, 'scrolling':'yes', 'overflow':'scroll'}),
                 id='details_collapse', is_open=False),
         dbc.Button("Details", id='show_train_details', style={'background-color': 'Orchid'}),
         html.Div(id='hidden-div2', style={'display':'none'})

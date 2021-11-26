@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 def Navbar():
     navbar = dbc.NavbarSimple(
             children = [
-                dbc.NavItem(dbc.NavLink("Plot Predictions", href="/plot_predictions")),
+                dbc.NavItem(dbc.NavLink("Plot Predictions", href="/plot_predictions"), style={'border':'2px solid white', 'background-color': 'cornsilk'}),
 #                dbc.DropdownMenu(
 #                    nav=True,
 #                    in_navbar=True,
@@ -16,12 +16,16 @@ def Navbar():
 #                        dbc.DropdownMenuItem('Make Predictions')
 #                        ],
 #                    ),
-                dbc.NavItem(dbc.NavLink("Manage Model Configurations", href="/manage_configurations")),
-                dbc.NavItem(dbc.NavLink("Train Your Models", href="/train")),
-                dbc.NavItem(dbc.NavLink("Make Predictions", href="/predict"))
+                dbc.NavItem(dbc.NavLink("Manage Model Configurations", href="/manage_configurations"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
+                dbc.NavItem(dbc.NavLink("Train Models", href="/train"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
+                dbc.NavItem(dbc.NavLink("Make Predictions", href="/predict"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
+                dbc.NavItem(dbc.NavLink("Warnings and Errors", href="/warnings"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
+                dbc.NavItem(dbc.NavLink("About", href="/about"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
                 ],
             brand="Home",
             brand_href="/home",
             sticky="top",
+            style={'background-color':'blue', 'color':'cornsilk'}
+            #pills=True
             )
     return navbar

@@ -527,6 +527,29 @@ class NotificationsTable(dbTable):
         query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
         return query
 
+    def get_get_dpid_count_warnings_desc_query(self):
+        query=f"select {self.dpid}, count(*) as warncount from {self.tablename} where notification_type = 'WARNING' group by {self.dpid} order by warncount desc"
+        return query
+
+    def get_get_dpid_count_errors_desc_query(self):
+        query=f"select {self.dpid}, count(*) as warncount from {self.tablename} where notification_type = 'ERROR' group by {self.dpid} order by warncount desc"
+        return query
+
+    def get_retrieve_data_for_homepage_table_query(self):
+        query = f"""
+            select {self.dpid}, count(*) as total, 
+            sum(case when {self.notification_type} = 'WARNING' then 1 else 0 end) as warncount,
+            sum(case when {self.notification_type} = 'ERROR' then 1 else 0 end) as errcount,
+            max({self.flag_raised_time})
+            from {self.tablename}
+            group by {self.dpid} order by total desc
+            """
+        return query
+
+    def get_get_tabledata_query(self):
+        query=f"select * from {self.tablename}"
+        return query
+
 class dpidStateTable(dbTable):
     '''  A table where in each entry, a dpid (and the corresponding chamber/s) 
          is associated with a modelconf_name and a flag called state (1/0), 
