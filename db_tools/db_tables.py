@@ -238,7 +238,6 @@ class MLModels(dbTable):
         query = f"select * from {self.tablename} where {self.model_id} = '{model_id}'"
         return query
 
-
     def get_set_active(self, active):
         query = f"UPDATE {self.tablename} SET {self.active} = '{active}' "
         return query
@@ -282,6 +281,11 @@ class MLModels(dbTable):
     def get_get_dpids_by_modelconf_id_query(self, modelconf_id):
         query = f"select {self.dpid} from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
         return query
+    
+    def get_get_model_id_for_confname_and_dpid_query(self, confid, dpid):
+        query = f"select {self.model_id} from {self.tablename} where {self.modelconf_id} = '{confid}' and {self.dpid} = '{dpid}'"
+        return query
+
 class MLModelsConf(dbTable):
     def __init__(self, tablename='MLModelsConf'):
         super().__init__(tablename)
