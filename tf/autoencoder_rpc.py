@@ -28,7 +28,7 @@ class AE_DataManager:
         self.from_datetime = from_datetime
         self.to_datetime = to_datetime
         
-    def get_dataframe(self,tdelta_days=2):
+    def get_dataframe(self,tdelta_days=10):
         if self.from_datetime is None or self.to_datetime is None:
             raise Exception("AE_DataManger: calling get_dataframe without setting the time_window. Call set_time_window before getting data.")
         start_date = self.from_datetime
@@ -85,7 +85,6 @@ class RPCAutoencoder:
 
         decoded = layers.Dense(self.inner_layers_two_four, activation='relu')(encoded)
         decoded = layers.Dense(self.inner_layers_one_five, activation='relu')(decoded)
-        
         decoded = layers.Dense(self.n_inputs, activation='relu')(decoded)
 
         loss_fn = keras.losses.MeanSquaredError()
@@ -94,6 +93,27 @@ class RPCAutoencoder:
         self.autoencoder.compile(optimizer='adam', loss=loss_fn)
 
         self.autoencoder.summary()
+
+    # We now define a method that generates a network differing only in the activation function, in order to try to solve the dead neurons issue
+    def create_network_v3(self):
+        input_img = keras.Input(shape=(self.n_inputs,))
+
+        encoded = layers.Dense(self.inner_layers_one_five, activation='selu')(input_img)
+        encoded = layers.Dense(self.inner_layers_two_four, activation='selu')(encoded)
+        encoded = layers.Dense(self.inner_central_layer,  activation='selu')(encoded)
+
+        decoded = layers.Dense(self.inner_layers_two_four, activation='selu')(encoded)
+        decoded = layers.Dense(self.inner_layers_one_five, activation='selu')(decoded)
+
+        decoded = layers.Dense(self.n_inputs, activation='selu')(decoded)
+
+        loss_fn = keras.losses.MeanSquaredError()
+
+        self.autoencoder = keras.Model(input_img, decoded)
+        self.autoencoder.compile(optimizer='adam', loss=loss_fn)
+
+        self.autoencoder.summary()
+
 
     def set_layers_one_and_five_size(self, size):
         self.inner_layers_one_five = size

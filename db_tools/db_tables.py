@@ -238,7 +238,6 @@ class MLModels(dbTable):
         query = f"select * from {self.tablename} where {self.model_id} = '{model_id}'"
         return query
 
-
     def get_set_active(self, active):
         query = f"UPDATE {self.tablename} SET {self.active} = '{active}' "
         return query
@@ -282,6 +281,11 @@ class MLModels(dbTable):
     def get_get_dpids_by_modelconf_id_query(self, modelconf_id):
         query = f"select {self.dpid} from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
         return query
+    
+    def get_get_model_id_for_confname_and_dpid_query(self, confid, dpid):
+        query = f"select {self.model_id} from {self.tablename} where {self.modelconf_id} = '{confid}' and {self.dpid} = '{dpid}'"
+        return query
+
 class MLModelsConf(dbTable):
     def __init__(self, tablename='MLModelsConf'):
         super().__init__(tablename)
@@ -361,6 +365,11 @@ class MLModelsConf(dbTable):
     def get_select_modelconfnames_query(self):
         query=f"select {self.name} from {self.tablename} order by {self.last_update} desc"
         return query
+
+    def get_delete_conf_by_name_query(self, cname):
+        query=f"delete from {self.tablename} where {self.name} = '{cname}'"
+        return query
+
 
 class PredictedCurrentsTable(dbTable):
     def __init__(self, tablename='PredictedCurrent'):
@@ -516,6 +525,29 @@ class NotificationsTable(dbTable):
 
     def get_update_masked_col_query(self,masked,dpid,model_id):
         query=f"UPDATE {self.tablename} SET {self.masked}='{masked}' WHERE {self.dpid}='{dpid}' AND {self.model_id}='{model_id}'"
+        return query
+
+    def get_get_dpid_count_warnings_desc_query(self):
+        query=f"select {self.dpid}, count(*) as warncount from {self.tablename} where notification_type = 'WARNING' group by {self.dpid} order by warncount desc"
+        return query
+
+    def get_get_dpid_count_errors_desc_query(self):
+        query=f"select {self.dpid}, count(*) as warncount from {self.tablename} where notification_type = 'ERROR' group by {self.dpid} order by warncount desc"
+        return query
+
+    def get_retrieve_data_for_homepage_table_query(self):
+        query = f"""
+            select {self.dpid}, count(*) as total, 
+            sum(case when {self.notification_type} = 'WARNING' then 1 else 0 end) as warncount,
+            sum(case when {self.notification_type} = 'ERROR' then 1 else 0 end) as errcount,
+            max({self.flag_raised_time})
+            from {self.tablename}
+            group by {self.dpid} order by total desc
+            """
+        return query
+
+    def get_get_tabledata_query(self):
+        query=f"select * from {self.tablename}"
         return query
 
 class dpidStateTable(dbTable):
