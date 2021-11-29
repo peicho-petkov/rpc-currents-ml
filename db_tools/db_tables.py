@@ -117,7 +117,7 @@ class TrainingDataTable(dbTable):
         return query
     
     def get_for_dpid_the_record_before_query(self,dpid,at_date,colnames):
-        query = f"SELECT {','.join(colnames)} from {self.tablename} where {self.dpid} = {dpid} and {self.change_date} <= {at_date} desc limit 1"
+        query = f"SELECT {','.join(colnames)} from {self.tablename} where {self.dpid} = '{dpid}' and {self.change_date} <= '{at_date}' order by {self.change_date} desc limit 1"
         return query
 
 class LumiDataTable(dbTable):

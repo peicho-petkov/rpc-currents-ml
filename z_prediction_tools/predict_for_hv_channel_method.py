@@ -227,11 +227,12 @@ def predict_hybrid(glm_mconfname, autoenc_mconfname,flag, predict_from, predict_
         for ii in range(len(currents)):
             glm_predictions = []
             for dpid in autoenc_dpids:
-                at_datetime = currents_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                print(f"dpid is: {dpid}, current timestamp {currents_timestamp[ii]}")
+                at_datetime = currents_timestamp[ii].astype(datetime).strftime("%Y-%m-%d %H:%M:%S")
                 query = table_training.get_for_dpid_the_record_before_query(dpid,at_datetime,
-                                                                            [glm_mconf.input_cols.split(',')])
+                                                                            glm_mconf.input_cols.split(',')+[table_training.imon])
                 data = rpccurrml.fetchall_for_query_self(query)
-                input_for_dpid = glm_input.get_input_for_dataset(data)
+                incol, outcol, input_for_dpid = glm_input.get_input_for_dataset(data)
                 glm_prediction = -0.5
                 if dpid in glm_curr_estimator_dict:
                     glm_prediction,glm_predicion_err = glm_curr_estimator_dict[dpid].predict_for_dataframe(input_for_dpid)
@@ -245,7 +246,7 @@ def predict_hybrid(glm_mconfname, autoenc_mconfname,flag, predict_from, predict_
             for index_dpid in autoenc_dpids:
                 ok = True
                 pm.dpid = index_dpid
-                pm.model_id = autoenc_models_dict[index_dpid].model_id
+                pm.model_id = -autoenc_models_dict[index_dpid].model_id
                 kk = autoenc_index_dpid_dict[index_dpid]
                 pm.insert_record(currents_timestamp[ii],predicted_currents[ii, kk],0,currents[ii, kk])
             print("Before commit")
