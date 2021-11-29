@@ -278,3 +278,29 @@ class MLModelsManager:
         
         return ml_model    
 
+    def get_models_by_modelconf_id(self,modelconf_id):
+        query = self._mlmodelstab.get_get_model_ids_by_modelconf_id_query(modelconf_id)
+        resutls = self._connector.fetchall_for_query_self(query)
+
+        col_names = self._mlmodelstab.get_col_names()
+
+        ml_models = []
+
+        for res in resutls:
+
+            col_values = res[0]
+            
+            res_dict = dict(zip(col_names,col_values))
+            
+            ml_model = MLModel()
+            ml_model.model_id = res_dict[self._mlmodelstab.model_id]
+            ml_model.modelconf_id= res_dict[self._mlmodelstab.modelconf_id]
+            ml_model.dpid = res_dict[self._mlmodelstab.dpid]
+            ml_model.r2 = res_dict[self._mlmodelstab.r2]
+            ml_model.mse = res_dict[self._mlmodelstab.mse]
+            ml_model.model_path = res_dict[self._mlmodelstab.model_path]
+            ml_model.mojo_path = res_dict[self._mlmodelstab.mojo_path]
+        
+            ml_models.append(ml_model)
+        
+        return ml_models[:]
