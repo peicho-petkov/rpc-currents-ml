@@ -1,5 +1,5 @@
-from db_tools.db_tables import autoencoderData
-from db_tools import rpccurrml, table_training
+
+from db_tools import rpccurrml, table_training, table_HVDataAEStyle
 import pandas as pan
 
 myfile = pan.read_csv("/home/ppetkov/cms-rpc-data/glm-imp-training-2016-new-format.csv")
@@ -12,7 +12,6 @@ myfile3 = pan.read_csv("/home/ppetkov/cms-rpc-data/glm-imp-training-2018-new-for
 
 # print(timestamps)
 
-enctable = autoencoderData(tablename = "autoencoderData")
 i = 0
 
 timestamps = myfile.timestamp.to_list()
@@ -31,7 +30,7 @@ for tstamp in timestamps:
     vals = tuple([stamp] + vals)
     #vals = ",".join(map(str, vals))
     #print(vals)
-    query = enctable.get_fill_row_query(values = vals)
+    query = table_HVDataAEStyle.get_fill_row_query(values = vals)
     #print(query)
     rpccurrml.execute_commit_query_self(query)
     i = i + 1
@@ -58,7 +57,7 @@ for tstamp in timestamps:
     vals = tuple([stamp] + vals)
     #vals = ",".join(map(str, vals))
     #print(vals)
-    query = enctable.get_fill_row_query(values = vals)
+    query = table_HVDataAEStyle.get_fill_row_query(values = vals)
     #print(query)
     rpccurrml.execute_commit_query_self(query)
     i = i + 1
@@ -85,7 +84,7 @@ for tstamp in timestamps:
     vals = tuple([stamp] + vals)
     #vals = ",".join(map(str, vals))
     #print(vals)
-    query = enctable.get_fill_row_query(values = vals)
+    query = table_HVDataAEStyle.get_fill_row_query(values = vals)
     #print(query)
     rpccurrml.execute_commit_query_self(query)
     i = i + 1
