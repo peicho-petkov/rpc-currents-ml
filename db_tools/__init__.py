@@ -794,3 +794,4 @@ dpid_colnames = [  'dpid315',
   'dpid216707']
 
 table_autoencoderData = db_tables.autoencoderData(dpids=dpid_colnames)
+table_HVDataAEStyle = db_tables.autoencoderData(dpids=dpid_colnames,tablename="HVdataAEStyle")

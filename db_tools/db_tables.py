@@ -610,7 +610,7 @@ class autoencoderData(dbTable):
 
     def add_all_colls(self):
         for dpid in self.dpids:    
-            self.add_coll(f"{dpid}", "float not null default -42.0")
+            self.add_coll(f"{dpid}", "float not null default -0.5")
 
     def get_fill_row_query(self, values):
         query = f"INSERT INTO {self.tablename} VALUES {values}" 
