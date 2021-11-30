@@ -45,7 +45,10 @@ app = dash.Dash(
 )
 server = app.server
 
-def serve_layout(): 
+def serve_layout():
+    print("reconnecting to mariadb server")
+    rpccurrml._db.reconnect()
+    rpccurrml.self_cursor_mode() 
     q = table_mlmodelsconf.get_select_modelconfnames_query()
     mlconfnames = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
 
