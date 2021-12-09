@@ -115,6 +115,10 @@ class TrainingDataTable(dbTable):
     def get_latest_HoursWithoutLumi_query(self,dpid):
         query = f"SELECT {self.hours_without_lumi} from {self.tablename} where {self.dpid} = {dpid} order by {self.change_date} desc limit 1"
         return query
+    
+    def get_for_dpid_the_record_before_query(self,dpid,at_date,colnames):
+        query = f"SELECT {','.join(colnames)} from {self.tablename} where {self.dpid} = '{dpid}' and {self.change_date} <= '{at_date}' order by {self.change_date} desc limit 1"
+        return query
 
 class LumiDataTable(dbTable):
     def __init__(self, tablename='LUMI_DATA'):
@@ -280,6 +284,10 @@ class MLModels(dbTable):
 
     def get_get_dpids_by_modelconf_id_query(self, modelconf_id):
         query = f"select {self.dpid} from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
+        return query
+    
+    def get_get_model_ids_by_modelconf_id_query(self, modelconf_id):
+        query = f"select {self.model_id} from {self.tablename} where {self.modelconf_id} = '{modelconf_id}'"
         return query
     
     def get_get_model_id_for_confname_and_dpid_query(self, confid, dpid):
@@ -656,10 +664,10 @@ if __name__ == "__main__":
     print(table_dpidstate.get_insert_entry_query(315, "W+2_RB1_1in", "05-2016-07-2017-f56-v2", 1))
     print(table_dpidstate.get_get_state_for_dpid_and_conf_query(315, "05-2016-07-2017-f56-v2"))
 
-    print("\n++++ Creating autoencoderData Table ++++\n")
-    dpids = ["315", "316", "354", "380"]
-    table_autoencoder = autoencoderData(dpids=dpids)
-    print("The table  is called: ", table_autoencoder.tablename)
-    print("The create table query is: ")
-    print(table_autoencoder.get_myqsl_create_query())
+    # print("\n++++ Creating autoencoderData Table ++++\n")
+    # dpids = ["315", "316", "354", "380"]
+    # table_autoencoder = autoencoderData(dpids=dpids)
+    # print("The table  is called: ", table_autoencoder.tablename)
+    # print("The create table query is: ")
+    # print(table_autoencoder.get_myqsl_create_query())
     

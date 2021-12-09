@@ -2,10 +2,11 @@ import h2o
 from tf import autoencoder_rpc
 from EstimatorModule import PredictionsManager, Estimator, EstimatorTF
 from TrainerModule import MLModelManager, MLModelsConfManager, DataManager, MLModelInput
-from db_tools import table_mlmodels, table_mlmodelsconf, table_training
+from db_tools import table_mlmodels, table_mlmodelsconf, table_training, table_lumi, table_autoencoderData
 from db_tools import rpccurrml
 from db_tools import base as dbase
 from datetime import datetime
+import numpy as np
 
 def predict(model_id, flag, predict_from, predict_to):
 
@@ -149,6 +150,105 @@ def predict_autoencoder(models, flag, predict_from, predict_to):
 #                    pm.model_id = models_dict[index_dpid].model_id
 #                    #print(f"The values to be inserted are: timestamp {currents_timestamp[kk]}, predicted_current {predicted_currents[ii, kk]}, measured current {currents[ii, kk]} ")
 #                    pm.insert_record(currents_timestamp[kk],predicted_currents[ii, kk],0,currents[ii, kk])
+            print("Before commit")
+            pm.commit_records()
+            print("After commit")
+        
+    return ok       
+
+def predict_hybrid(glm_mconfname, autoenc_mconfname,flag, predict_from, predict_to):
+
+    if type(predict_from) is str:
+        predict_from = datetime.strptime(predict_from,'%Y-%m-%d %H:%M:%S')
+    if type(predict_to) is str:
+        predict_to = datetime.strptime(predict_to,'%Y-%m-%d %H:%M:%S')
+        
+    # if len(models) < 1:
+    #     return False
+
+    # model = models[0]
+
+    mconf_manager = MLModelsConfManager(rpccurrml,table_mlmodelsconf)
+    glm_mconf = mconf_manager.get_by_name(glm_mconfname)
+    autoenc_mconf = mconf_manager.get_by_name(autoenc_mconfname)
+    
+    models_manager = MLModelManager.MLModelsManager(rpccurrml,table_mlmodels)
+    
+    glm_models = models_manager.get_models_by_modelconf_id(glm_mconf.modelconf_id)
+    autoenc_models = models_manager.get_models_by_modelconf_id(autoenc_mconf.modelconf_id)
+    autoenc_model = autoenc_models[0]
+    
+    model_output_dpids = [int(x) for x in autoenc_mconf.output_cols.replace('dpid','').split(',')]
+
+    # print(f"Model output dpids length is: {len(model_output_dpids)}")
+    # print(f"+++++++++++++++++++++++++++++=+++++++++++++=+++++++++++")
+    
+    glm_dpids = [int(m.dpid) for m in glm_models]
+    
+    autoenc_dpids = [int(m.dpid) for m in autoenc_models]
+    
+    glm_models_dict = {}
+    for m in glm_models:
+        glm_models_dict[int(m.dpid)] = m
+
+    glm_index_dpid_dict = {}
+
+    for ii in range(len(glm_dpids)):
+        glm_index_dpid_dict[glm_dpids[ii]] = ii
+
+    autoenc_models_dict = {}
+    for m in autoenc_models:
+        autoenc_models_dict[int(m.dpid)] = m
+
+    autoenc_index_dpid_dict = {}
+
+    for ii in range(len(autoenc_dpids)):
+        autoenc_index_dpid_dict[autoenc_dpids[ii]] = ii
+
+
+    pm = PredictionsManager.PredictionsManager(rpccurrml,autoenc_model.model_id,autoenc_model.dpid)
+    
+    autoenc_curr_estimator = EstimatorTF.EstimatorTF(autoenc_model)
+    
+    glm_curr_estimator_dict = {}
+    
+    for glm_model in glm_models:
+        glm_curr_estimator_dict[glm_model.dpid] = Estimator.Estimator(glm_model)
+    
+    ok = False
+    ae_extract = autoencoder_rpc.AE_DataManager()
+    ae_extract.set_time_window(predict_from, predict_to)
+    
+    glm_input = MLModelInput.ModelInput(glm_mconf)
+    
+    for currents, currents_timestamp in ae_extract.get_dataframe():
+        print(f"The currents list length is: {len(currents)}")
+        glm_currents = []
+        for ii in range(len(currents)):
+            glm_predictions = []
+            for dpid in autoenc_dpids:
+                print(f"dpid is: {dpid}, current timestamp {currents_timestamp[ii]}")
+                at_datetime = currents_timestamp[ii].astype(datetime).strftime("%Y-%m-%d %H:%M:%S")
+                query = table_training.get_for_dpid_the_record_before_query(dpid,at_datetime,
+                                                                            glm_mconf.input_cols.split(',')+[table_training.imon])
+                data = rpccurrml.fetchall_for_query_self(query)
+                incol, outcol, input_for_dpid = glm_input.get_input_for_dataset(data)
+                glm_prediction = -0.5
+                if dpid in glm_curr_estimator_dict:
+                    glm_prediction,glm_predicion_err = glm_curr_estimator_dict[dpid].predict_for_dataframe(input_for_dpid)
+                glm_predictions.append(glm_prediction)     
+            glm_currents.append(glm_predictions)
+            
+        predicted_currents = autoenc_curr_estimator.predict_for_dataframe(np.array(glm_currents)) 
+               
+        for ii in range(len(predicted_currents)):
+            print(f"Inserting predictions for {currents_timestamp[ii]}")
+            for index_dpid in autoenc_dpids:
+                ok = True
+                pm.dpid = index_dpid
+                pm.model_id = -autoenc_models_dict[index_dpid].model_id
+                kk = autoenc_index_dpid_dict[index_dpid]
+                pm.insert_record(currents_timestamp[ii],predicted_currents[ii, kk],0,currents[ii, kk])
             print("Before commit")
             pm.commit_records()
             print("After commit")

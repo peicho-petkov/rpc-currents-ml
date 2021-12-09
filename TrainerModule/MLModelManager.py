@@ -278,3 +278,16 @@ class MLModelsManager:
         
         return ml_model    
 
+    def get_models_by_modelconf_id(self,modelconf_id):
+        query = self._mlmodelstab.get_get_model_ids_by_modelconf_id_query(modelconf_id)
+        results = self._connector.fetchall_for_query_self(query)
+
+        col_names = self._mlmodelstab.get_col_names()
+
+        ml_models = []
+
+        for res in results:
+            ml_model = self.get_by_model_id(res[0])
+            ml_models.append(ml_model)
+        
+        return ml_models[:]
