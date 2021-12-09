@@ -14,30 +14,30 @@ myfile3 = pan.read_csv("/home/ppetkov/cms-rpc-data/glm-imp-training-2018-new-for
 
 i = 0
 
-timestamps = myfile.timestamp.to_list()
+# timestamps = myfile.timestamp.to_list()
 
-print("++++++ STARTING TO LOAD 2016 DATA INTO THE DATABASE ++++++")
-for tstamp in timestamps:
-    df = myfile[myfile['timestamp'] == f'{tstamp}']
-    vals = df.values.tolist()
-    vals = vals[0]
-    vals.pop()
-    stamp = vals[0]
-    vals.pop(0)
-    vals = [str(i) for i in vals]
-    #print(vals)
-    #print(len(vals))
-    vals = tuple([stamp] + vals)
-    #vals = ",".join(map(str, vals))
-    #print(vals)
-    query = table_HVDataAEStyle.get_fill_row_query(values = vals)
-    #print(query)
-    rpccurrml.execute_commit_query_self(query)
-    i = i + 1
-    if ( i % 10000 == 0):
-        print(stamp)
-        print(f"Entry number {i} inserted")
-print("++++++ FINISHED LOADING 2016 DATA ++++++")
+# print("++++++ STARTING TO LOAD 2016 DATA INTO THE DATABASE ++++++")
+# for tstamp in timestamps:
+#     df = myfile[myfile['timestamp'] == f'{tstamp}']
+#     vals = df.values.tolist()
+#     vals = vals[0]
+#     vals.pop()
+#     stamp = vals[0]
+#     vals.pop(0)
+#     vals = [str(i) for i in vals]
+#     #print(vals)
+#     #print(len(vals))
+#     vals = tuple([stamp] + vals)
+#     #vals = ",".join(map(str, vals))
+#     #print(vals)
+#     query = table_HVDataAEStyle.get_fill_row_query(values = vals)
+#     #print(query)
+#     rpccurrml.execute_commit_query_self(query)
+#     i = i + 1
+#     if ( i % 10000 == 0):
+#         print(stamp)
+#         print(f"Entry number {i} inserted")
+# print("++++++ FINISHED LOADING 2016 DATA ++++++")
 
 
 timestamps = myfile2.timestamp.to_list()
@@ -68,7 +68,7 @@ print("++++++ FINISHED LOADING 2017 DATA ++++++")
 
 
 timestamps = myfile3.timestamp.to_list()
-
+i = 0
 print("++++++ STARTING TO LOAD 2018 DATA INTO THE DATABASE ++++++")
 for tstamp in timestamps:
     df = myfile3[myfile3['timestamp'] == f'{tstamp}']
