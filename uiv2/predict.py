@@ -2,8 +2,8 @@
 
 import dash
 import dash_bootstrap_components as dbc
-from dash import html
-from dash import dcc
+import dash_html_components as html
+import dash_core_components as dcc
 from navbar import Navbar
 from dash.dependencies import Input, Output, State
 from datetime import date, datetime
@@ -26,7 +26,11 @@ q = table_mlmodels.get_get_active_model_ids_and_dpids_query()
 midsdpids = rpccurrml.fetchall_for_query_self(q)
 
 q = table_mlmodels.get_get_active_modelconf_id_query()
+print("+++++++++++++++++++++++++++++++++")
+print(q)
 activeconf = rpccurrml.fetchall_for_query_self(q)[0][0]
+print("+++++++++++++++++++++++++++++++++")
+print(activeconf)
 
 q = table_mlmodelsconf.get_select_modelconfname_by_modelconfid_query(activeconf)
 actconfname = rpccurrml.fetchall_for_query_self(q)[0][0]

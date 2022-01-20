@@ -1,8 +1,8 @@
 #Authors: Elton Shumka, Peicho Petkov
 
 import dash
-from dash import dcc
-from dash import html
+import dash_core_components as dcc
+import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash_bootstrap_components._components.Spinner import Spinner
@@ -195,7 +195,7 @@ n_clicks_last = 0
 def create_new_configuration(n_clicks, conf_name, mlclass, stdate, endate):
     global n_clicks_last
     global mlconfnames
-
+ 
     if n_clicks is None:
         n_clicks = 0
 
@@ -493,7 +493,7 @@ def prediction_for_selected_models(n_clicks, predict_alternative, conf_name, mod
             q = table_mlmodels.get_get_model_id_for_confname_and_dpid_query(confid, dpid)
             model = rpccurrml.fetchall_for_query_self(q)[0][0]
             predict_for_hv_channel_method.predict(model, 56, sdate, edate)
-            mesg = f"The model is {model}"
+            mesg = f"The model o nwhich the prediction is based is {model}"
         return mesg
     elif predict_alternative == 'activemodels':
         perform_prediction(sdate, edate)
@@ -669,7 +669,7 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     # fig_diff.update_layout(barmode='stack')
 
     fig_diff.update_layout(title='<b>Model deviation running average</b>',
-                   yaxis_title='<b>IMON-prediciton [&mu;A]</b>')
+                   yaxis_title='<b>IMON-prediction [&mu;A]</b>')
     
     # fig_diff_histo.update_layout(barmode='stack')
 
@@ -678,4 +678,4 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
     return fig,fig_diff,fig_diff_histo
 
 if __name__ == "__main__":
-    app.run_server(debug=False,port=8050,host='192.168.2.192')
+    app.run_server(debug=False,port=8050,host='188.185.86.212')

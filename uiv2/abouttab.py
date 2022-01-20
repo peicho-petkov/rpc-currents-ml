@@ -1,10 +1,10 @@
 #Authors: Elton Shumka, Peicho Petkov
 
 import dash
-from dash import dash_table
+import dash_table
 import dash_bootstrap_components as dbc
-from dash import dcc
-from dash import html
+import dash_core_components as dcc
+import dash_html_components as html
 from navbar import Navbar
 from db_tools import table_notifications, rpccurrml
 import pandas as pd
@@ -29,7 +29,14 @@ body = dbc.Container(
     Two categories of models are implemented: Generalized Linear Models; using the h2o platform (www.h2o.ai), and Autoencoder Neural Networks; using TensorFlow (www.tensorflow.org).
     Both categories have shown good predictive capabilities. The predictive capabilities of the trained models are used to develop a live monitoring tool:
     the predictions are compared to the incoming data and if the differences exceed some predetermined values, this is interpreted as an indication of 
-    chamber misbehavior. To the right, the latest Warning and Errors are shown.
+    chamber misbehavior. 
+                                """
+                                , style={'text-align':'justify'}),
+                    html.H2("Code repository"),
+                    html.P(
+                        """\
+    The code for this user interface as well as the underlying modules and tools performing the database management, training of ML models, prediction and validation,
+    as well as plotting of results can be found at the following link: https://github.com/peicho-petkov/rpc-currents-ml/
                                 """
                                 , style={'text-align':'justify'}),
                 ],
