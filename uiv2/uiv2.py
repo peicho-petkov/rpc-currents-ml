@@ -30,6 +30,7 @@ from manageconfs import ManageConfs
 from predict import Predict
 from warningtab import Warningtab
 from abouttab import Aboutinfo
+from parameters import Configurationtab
 
 mlclasses= ['GLM_V1','GLM_V2','GLM_V3','GLM_V4','GLM_V5','GLM_V6','GLM_V7','AUTOENC_V1','AUTOENC_V2','AUTOENC_V3']
 
@@ -118,6 +119,8 @@ def display_page(pathname):
         return Warningtab()
     elif pathname == '/about':
         return Aboutinfo()
+    elif pathname == '/parameters':
+        return Configurationtab()
     else:
         return Homepage()
     

@@ -469,6 +469,10 @@ class ConfigurationTable(dbTable):
         query=f"SELECT {self.parameter_value},{self.parameter_value_type} from {self.tablename} WHERE {self.parameter_name}='{parameter_name}'"
         return query
     
+    def get_get_tabledata_query(self):
+        query=f"select * from {self.tablename}"
+        return query
+
 class NotificationsTable(dbTable):
     ''' Stores warnings and errors. 
         columns: rec_id, last_update, dpid, model_id, notification type (warning/error),

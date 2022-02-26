@@ -223,10 +223,12 @@ def predict_hybrid(glm_mconfname, autoenc_mconfname,flag, predict_from, predict_
     
     for currents, currents_timestamp in ae_extract.get_dataframe():
         print(f"The currents list length is: {len(currents)}")
+        print(f"The shapes of currents and currents_timestamp are respectively: {currents.shape} and {currents_timestamp.shape} ")
         glm_currents = []
-        for ii in range(len(currents)):
+        for ii in range(len(currents_timestamp)):
             glm_predictions = []
             for dpid in autoenc_dpids:
+                print(f"The counter ii has value: {ii}")
                 print(f"dpid is: {dpid}, current timestamp {currents_timestamp[ii]}")
                 at_datetime = currents_timestamp[ii].astype(datetime).strftime("%Y-%m-%d %H:%M:%S")
                 query = table_training.get_for_dpid_the_record_before_query(dpid,at_datetime,
@@ -239,8 +241,10 @@ def predict_hybrid(glm_mconfname, autoenc_mconfname,flag, predict_from, predict_
                 glm_predictions.append(glm_prediction)     
             glm_currents.append(glm_predictions)
             
-        predicted_currents = autoenc_curr_estimator.predict_for_dataframe(np.array(glm_currents)) 
-               
+        predicted_currents = autoenc_curr_estimator.predict_for_dataframe(np.asarray(glm_currents).astype(np.float32)) 
+        
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("ENTERING THE PREDICTION MANAGER LOOP WHERE WE COMMIT")
         for ii in range(len(predicted_currents)):
             print(f"Inserting predictions for {currents_timestamp[ii]}")
             for index_dpid in autoenc_dpids:

@@ -20,6 +20,7 @@ def Navbar():
                 dbc.NavItem(dbc.NavLink("Train Models", href="/train"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
                 dbc.NavItem(dbc.NavLink("Make Predictions", href="/predict"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
                 dbc.NavItem(dbc.NavLink("Warnings and Errors", href="/warnings"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
+                dbc.NavItem(dbc.NavLink("Parameters", href="/parameters"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
                 dbc.NavItem(dbc.NavLink("About", href="/about"), style={'border': '2px solid white', 'background-color': 'cornsilk'}),
                 ],
             brand="Home",
