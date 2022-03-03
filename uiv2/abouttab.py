@@ -29,7 +29,7 @@ body = dbc.Container(
     Two categories of models are implemented: Generalized Linear Models; using the h2o platform (www.h2o.ai), and Autoencoder Neural Networks; using TensorFlow (www.tensorflow.org).
     Both categories have shown good predictive capabilities. The predictive capabilities of the trained models are used to develop a live monitoring tool:
     the predictions are compared to the incoming data and if the differences exceed some predetermined values, this is interpreted as an indication of 
-    chamber misbehavior. To the right, the latest Warning and Errors are shown.
+    chamber misbehavior.
                                 """
                                 , style={'text-align':'justify'}),
                 ],

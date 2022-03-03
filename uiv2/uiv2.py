@@ -677,5 +677,51 @@ def plot_graph(n_clicks,modelconfname,dpids,start_date,end_date):
                    xaxis_title='<b>IMON-prediciton [&mu;A]</b>')
     return fig,fig_diff,fig_diff_histo
 
+# ++++++++++++++++++++++ The following callbacks belong to the Parameters tab ++++++++++++++++++++++++++++
+#The next two callbacks are combined together
+n_clicks_l = 0
+@app.callback(
+    Output("confirm-changes-dialog", "displayed"),
+    [Input("save_changes_button","n_clicks")],
+)
+def display_confirm_save_window(n_clicks):
+    global n_clicks_l
+    if n_clicks is None:
+        n_clicks = 0
+    print(f"n_clicks has a value of {n_clicks}")
+
+    button_pressed = n_clicks > n_clicks_l
+    n_clicks_l = n_clicks
+
+    if button_pressed:
+        return True
+    return False
+
+submit_n_clicks_l = 0
+@app.callback(
+    Output("output-provider-for-table", "children"),
+    [Input("confirm-changes-dialog","submit_n_clicks")]
+)
+def perform_action_after_save(submit_n_clicks):
+    global submit_n_clicks_l
+    if submit_n_clicks is None:
+        submit_n_clicks = 0
+    print(f"The value of submit_n_clicks is: {submit_n_clicks}")
+    
+    confirmation_given = submit_n_clicks > submit_n_clicks_l
+    submit_n_clicks_l = submit_n_clicks
+    return True
+#
+##        if  confirmation_given:
+#            #return 'It wasnt easy but hey {}'.format(submit_n_clicks)
+#            query = table_mlmodelsconf.get_delete_conf_by_name_query(config_name)
+#            print(query)
+#            rpccurrml.execute_commit_query_self(query)
+#            #q = table_mlmodelsconf.get_select_modelconfnames_query()                     #Wasn't able to automaticaly update the modelconf_name list before refreshing the page
+#            #mlconfs = [res[0] for res in rpccurrml.fetchall_for_query_self(q)]
+#            #print(f"The retrieved modelconf_names are: {mlconfnames}")
+#            #theoptions = [{"label" : entry, "value" : entry} for entry in mlconfnames ]
+#            return f"The configuration {config_name} was deleted"  #, theoptions
+
 if __name__ == "__main__":
-    app.run_server(debug=False,port=8050,host='192.168.2.192')
+    app.run_server(debug=True,port=8050,host='192.168.2.192')
